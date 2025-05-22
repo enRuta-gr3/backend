@@ -43,10 +43,7 @@ public class Usuario {
     
     @Column(name = "fecha_creacion")
     private Date fecha_creacion;
-    
-    @Column(name = "estado_descuento")
-    private boolean estado_descuento;
-    
+       
     @OneToMany(mappedBy = "id_buzon")
     private List<Buzon_notificacion> notificaciones;
     

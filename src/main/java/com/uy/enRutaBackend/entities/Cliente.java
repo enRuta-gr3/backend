@@ -15,18 +15,22 @@ public class Cliente extends Usuario {
 	@OneToMany(mappedBy = "id_pasaje")
     private List<Pasaje> pasajesComprados;
 	
-    @Column(name = "esEstudiante")
+    @Column(name = "es_estudiante")
     private boolean esEstudiante;
     
-    @Column(name = "esJubilado")
+    @Column(name = "es_jubilado")
     private boolean esJubilado;
+    
+    @Column(name = "estado_descuento")
+    private boolean estado_descuento;
 	
 	public Cliente() {}
 
-    public Cliente(String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean estado_descuento, boolean esEstudiante, boolean esJubilado) {
+    public Cliente(String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
     	super(ci, nombres, apellidos, email, contraseña, fecha_nacimiento, eliminado, ultimo_inicio_sesion, fecha_creacion);
     	this.esEstudiante = esEstudiante;
     	this.esJubilado = esJubilado;
+    	this.estado_descuento = estado_descuento;
     }
     
     

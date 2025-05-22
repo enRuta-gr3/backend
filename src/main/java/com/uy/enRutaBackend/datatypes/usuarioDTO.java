@@ -31,6 +31,10 @@ public class usuarioDTO {
     
     private Date fecha_creacion;
     
+    private boolean esEstudiante;
+    
+    private boolean esJubilado;
+    
     private boolean estado_descuento;
     
     private List<Buzon_notificacion> notificaciones;
@@ -38,7 +42,7 @@ public class usuarioDTO {
     
     public usuarioDTO() {}
     
-    public usuarioDTO(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean estado_descuento) {
+    public usuarioDTO(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
     	this.tipo_usuario = tipo_usuario;
     	this.ci = ci;
     	this.nombres = nombres;
@@ -48,7 +52,10 @@ public class usuarioDTO {
     	this.fecha_nacimiento = fecha_nacimiento;
     	this.eliminado = eliminado;
     	this.ultimo_inicio_sesion = ultimo_inicio_sesion;
-    	this.fecha_creacion = fecha_creacion;  	   	
+    	this.esEstudiante = esEstudiante;
+    	this.esJubilado = esJubilado;
+    	this.fecha_creacion = fecha_creacion;  	 
+    	
     	this.estado_descuento = estado_descuento;
 
     }
@@ -156,4 +163,20 @@ public class usuarioDTO {
     public void setNotificaciones(List<Buzon_notificacion> notificaciones) {
         this.notificaciones = notificaciones;
     }
+
+	public boolean isEsEstudiante() {
+		return esEstudiante;
+	}
+
+	public void setEsEstudiante(boolean esEstudiante) {
+		this.esEstudiante = esEstudiante;
+	}
+
+	public boolean isEsJubilado() {
+		return esJubilado;
+	}
+
+	public void setEsJubilado(boolean esJubilado) {
+		this.esJubilado = esJubilado;
+	}
 }

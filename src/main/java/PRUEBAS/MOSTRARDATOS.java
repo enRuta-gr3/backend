@@ -47,7 +47,7 @@ public class MOSTRARDATOS {
     }
 
     public void ejecutar() {
-        usuarioDTO c1 = new usuarioDTO("CLIENTE", "5.251.766-1", "Franco Rodrigo", "Pirotto Perez","francorro02@gmail.com", "123456", null, false, null, null, false);
+        usuarioDTO c1 = new usuarioDTO("CLIENTE", "5.251.766-1", "Franco Rodrigo", "Pirotto Perez","francorro02@gmail.com", "123456", null, false, null, null, false, false, false);
         servicioUsuario.registrarUsuario(c1);
 
         cargardatos(c1);
