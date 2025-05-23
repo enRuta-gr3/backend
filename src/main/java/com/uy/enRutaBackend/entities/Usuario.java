@@ -59,7 +59,7 @@ public class Usuario {
     	this.fecha_nacimiento = fecha_nacimiento;
     	this.eliminado = eliminado;
     	this.ultimo_inicio_sesion = ultimo_inicio_sesion;
-    	this.fecha_creacion = fecha_creacion;  	   	
+    	this.fecha_creacion = new Date();  	   	
 
     }
 

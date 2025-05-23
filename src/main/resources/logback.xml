@@ -1,0 +1,28 @@
+<configuration>
+	<property name="FILE_LOG_PATTERN"
+		value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<Pattern>${FILE_LOG_PATTERN}</Pattern>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+	<root level="INFO">
+		<appender-ref ref="console" />
+	</root>
+	<logger name="com.uy.enRutaBackend" level="INFO"
+		additivity="false">
+		<appender-ref ref="FILE" />
+	</logger>
+</configuration>

@@ -7,7 +7,7 @@ import java.util.UUID;
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 
 
-public class usuarioDTO {
+public class DtUsuario {
     
     private String tipo_usuario;
 
@@ -40,9 +40,9 @@ public class usuarioDTO {
     private List<Buzon_notificacion> notificaciones;
     
     
-    public usuarioDTO() {}
+    public DtUsuario() {}
     
-    public usuarioDTO(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
+    public DtUsuario(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
     	this.tipo_usuario = tipo_usuario;
     	this.ci = ci;
     	this.nombres = nombres;
@@ -54,7 +54,7 @@ public class usuarioDTO {
     	this.ultimo_inicio_sesion = ultimo_inicio_sesion;
     	this.esEstudiante = esEstudiante;
     	this.esJubilado = esJubilado;
-    	this.fecha_creacion = fecha_creacion;  	 
+    	this.fecha_creacion = new Date();  	 
     	
     	this.estado_descuento = estado_descuento;
 

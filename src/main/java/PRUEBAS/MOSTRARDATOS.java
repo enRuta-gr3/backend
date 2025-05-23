@@ -2,7 +2,7 @@ package PRUEBAS;
 
 import org.springframework.stereotype.Component;
 
-import com.uy.enRutaBackend.datatypes.usuarioDTO;
+import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.DisAsiento_Viaje;
 import com.uy.enRutaBackend.entities.EstadoViaje;
@@ -47,14 +47,19 @@ public class MOSTRARDATOS {
     }
 
     public void ejecutar() {
-        usuarioDTO c1 = new usuarioDTO("CLIENTE", "5.251.766-1", "Franco Rodrigo", "Pirotto Perez","francorro02@gmail.com", "123456", null, false, null, null, false, false, false);
-        servicioUsuario.registrarUsuario(c1);
+        DtUsuario c1 = new DtUsuario("CLIENTE", "5.251.766-1", "Franco Rodrigo", "Pirotto Perez","francorro02@gmail.com", "123456", null, false, null, null, false, false, false);
+        try {
+			servicioUsuario.registrarUsuario(c1);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         cargardatos(c1);
     }
 
 
-    public void cargardatos(usuarioDTO c1) {
+    public void cargardatos(DtUsuario c1) {
 
 
         // Registrar Localidades
