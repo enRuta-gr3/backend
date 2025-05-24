@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend.controllers;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,13 +39,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody DtUsuario request) {
         	
-       /* JSONObject result = serviceUsuario.login(request.getEmail(), request.getContraseña());
+       JSONObject result = usuarioController.login(request);
         if (result != null) {
             return ResponseEntity.ok(result.toString());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
-        }*/
-    	return null;
+        }
     }
 
 }

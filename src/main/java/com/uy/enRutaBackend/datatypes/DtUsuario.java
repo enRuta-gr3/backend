@@ -54,8 +54,7 @@ public class DtUsuario {
     	this.ultimo_inicio_sesion = ultimo_inicio_sesion;
     	this.esEstudiante = esEstudiante;
     	this.esJubilado = esJubilado;
-    	this.fecha_creacion = new Date();  	 
-    	
+    	this.fecha_creacion = fecha_creacion;    	
     	this.estado_descuento = estado_descuento;
 
     }

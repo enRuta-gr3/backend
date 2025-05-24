@@ -4,8 +4,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Setter;
 
+@Setter
 @Entity
 @Table(name = "Usuario")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -13,7 +23,7 @@ import jakarta.persistence.*;
 public class Usuario {
     
     @Id
-    @GeneratedValue
+    //@GeneratedValue
     @Column(name = "uuid_auth")
     private UUID uuidAuth;
     
@@ -59,7 +69,7 @@ public class Usuario {
     	this.fecha_nacimiento = fecha_nacimiento;
     	this.eliminado = eliminado;
     	this.ultimo_inicio_sesion = ultimo_inicio_sesion;
-    	this.fecha_creacion = new Date();  	   	
+    	this.fecha_creacion = fecha_creacion;  	   	
 
     }
 
