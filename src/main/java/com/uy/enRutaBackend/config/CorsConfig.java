@@ -13,7 +13,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("https://en-ruta.vercel.app", "https://backend-production-2812f.up.railway.app")
+                        .allowedOriginPatterns("https://en-ruta.vercel.app", "http://backend-production-2812f.up.railway.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("authorization", "x-client-info", "apikey", "content-type")
                         .allowCredentials(true);
