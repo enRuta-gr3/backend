@@ -1,9 +1,9 @@
 package com.uy.enRutaBackend.controllers;
 
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,12 +12,12 @@ import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 
-import jakarta.validation.Valid;
 import lombok.Getter;
 
 @RestController
 @Getter
 public class UsuarioController {
+	private static final Logger log = LoggerFactory.getLogger(UsuarioController.class);
 	private static final String OK_MESSAGE = "Operación realizada con éxito";
 	private static final String ERROR_MESSAGE = "Error al realizar la operación";
 	@Autowired
@@ -29,7 +29,7 @@ public class UsuarioController {
 			serviceUsuario.correrValidaciones(usuario);
 			if(usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && (usuario.getEmail() != null && !usuario.getEmail().isEmpty())) {
 				usuRegistro = serviceUsuario.registrarUsuario(usuario);
-				return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro.toString());
+				return new ResultadoOperacion(true, OK_MESSAGE, null, usuRegistro.toString());
 			} else {
 				return registrarUsuarioSinVerificacion(usuario, usuRegistro);
 			}
@@ -55,13 +55,18 @@ public class UsuarioController {
 		}
 	}	
 	
-	public JSONObject login(DtUsuario request) {
+	public ResultadoOperacion<?> iniciarSesion(DtUsuario request) {
 		JSONObject result = new JSONObject();
-			try {
-				result = serviceUsuario.login(request);
-			} catch (Exception e) {
-				result = new JSONObject("error");
-			}
-		return result;
+		try {
+			result = serviceUsuario.iniciarSesion(request);
+		} catch (Exception e) {
+			result = new JSONObject("error : " + e.getMessage());
+		}
+		log.info(result.toString());
+		if (result.has("access_token")) {
+			return new ResultadoOperacion(true, OK_MESSAGE, null, result.toString());
+		} else {
+			return new ResultadoOperacion(false, ERROR_MESSAGE, result.toString());
+		}
 	}
 }

@@ -222,7 +222,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		return null;
 	}
 
-	public JSONObject login(DtUsuario request) {
+	public JSONObject iniciarSesion(DtUsuario request) {
 		JSONObject json = new JSONObject();
 		if (request.getEmail() != null && repository.findByEmail(request.getEmail()) instanceof Cliente) {
 			try {
@@ -239,7 +239,7 @@ public class ServiceUsuario implements IServiceUsuario {
 			}
 		} else {
 			String tok = authenticate(request);
-			json = new JSONObject("{ \"toke\":" + tok + "}");
+			json = new JSONObject("{ \"access_token\":" + tok + "}");
 		}
 
 		return json;

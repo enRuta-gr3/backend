@@ -21,9 +21,9 @@ public class SpringSecurityConfig {
 	
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()) // Deshabilita CSRF si no lo necesitas
+		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().requestMatchers("/auth-controller/login").permitAll()
-						.requestMatchers("/api/auth/login").permitAll().requestMatchers("/api/auth/registrarUsuario").permitAll().anyRequest().authenticated() 
+						.requestMatchers("/api/auth/iniciarSesion").permitAll().requestMatchers("/api/auth/registrarUsuario").permitAll().anyRequest().authenticated() 
 				);
 		return http.build();
 	}

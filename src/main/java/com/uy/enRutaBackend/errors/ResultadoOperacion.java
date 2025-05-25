@@ -7,9 +7,10 @@ public class ResultadoOperacion<T> {
     private T data;
 
     // Constructores
-    public ResultadoOperacion(boolean success, String message, T data) {
+    public ResultadoOperacion(boolean success, String message, String errorCode, T data) {
         this.success = success;
         this.message = message;
+        this.errorCode = errorCode;
         this.data = data;
     }
 

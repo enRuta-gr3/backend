@@ -23,10 +23,11 @@ public class ServiceAsiento implements IServiceAsiento {
         }
 
         boolean isSaved = persistence.saveAsiento(asiento);
-        if (isSaved) {
-            return new ResultadoOperacion<>(true, "Asiento registrado correctamente", asiento);
-        } else {
-            return new ResultadoOperacion<>(false, "Error al registrar asiento", "ERROR_PERSISTENCIA");
-        }
+//        if (isSaved) {
+//            return new ResultadoOperacion<>(true, "Asiento registrado correctamente", asiento);
+//        } else {
+//            return new ResultadoOperacion<>(false, "Error al registrar asiento", "ERROR_PERSISTENCIA");
+//        }
+        return null;
     }
 }
