@@ -224,7 +224,7 @@ public class ServiceUsuario implements IServiceUsuario {
 
 	public JSONObject iniciarSesion(DtUsuario request) {
 		JSONObject json = new JSONObject();
-		if (request.getEmail() != null && repository.findByEmail(request.getEmail()) instanceof Cliente) {
+		if (request.getEmail().contains("@") && repository.findByEmail(request.getEmail()) instanceof Cliente) {
 			try {
 				HttpResponse<String> response = iniciarSesionSupabase(request.getEmail(), request.getContraseña());
 				if (response.statusCode() == 200) {
@@ -247,10 +247,10 @@ public class ServiceUsuario implements IServiceUsuario {
 
 	private String authenticate(DtUsuario request) {		
 		Usuario solicitante;
-		if(request.getEmail() != null)
+		if(request.getEmail() != null && request.getEmail().contains("@"))
 			solicitante = repository.findByEmail(request.getEmail());
 		else
-			solicitante = repository.findByCi(request.getCi());
+			solicitante = repository.findByCi(request.getEmail());
 		
 		if(solicitante == null || !passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
 			throw new RuntimeException("Credenciales inválidas");
