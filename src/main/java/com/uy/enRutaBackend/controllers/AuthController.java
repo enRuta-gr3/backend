@@ -25,7 +25,7 @@ public class AuthController {
 	public ResponseEntity<?> registrarUsuario(@RequestBody DtUsuario usuario) {
 		ResultadoOperacion res = usuarioController.registrarUsuario(usuario);
 		if(res.isSuccess()) {
-			return ResponseEntity.status(HttpStatus.CREATED).body(res.getMessage() + " " + res.getData());
+			return ResponseEntity.status(HttpStatus.CREATED).body(res.getData());
 		} else {
 			if(res.getMessage().contains("Error")) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res.getMessage());
@@ -40,7 +40,7 @@ public class AuthController {
         	
     	ResultadoOperacion res = usuarioController.iniciarSesion(request);
     	if(res.isSuccess()) {
-    		return ResponseEntity.status(HttpStatus.OK).body(res.getMessage() + " " + res.getData());
+    		return ResponseEntity.status(HttpStatus.OK).body(res.getData());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res.getMessage());
         }
