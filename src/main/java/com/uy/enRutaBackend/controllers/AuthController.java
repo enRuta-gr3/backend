@@ -28,9 +28,9 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.CREATED).body(res.getData());
 		} else {
 			if(res.getMessage().contains("Error")) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res.getData());
 			} else {
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(res.getMessage());
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(res.getData());
 			}
 		}
 	}
