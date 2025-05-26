@@ -45,7 +45,7 @@ public class UsuarioController {
 	private ResultadoOperacion<?> registrarUsuarioSinVerificacion(DtUsuario usuario, DtUsuario usuRegistro) {
 		try {
 			usuRegistro = serviceUsuario.registrarUsuarioSinVerificacion(usuario);
-			return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro.toString());
+			return new ResultadoOperacion(true, OK_MESSAGE, null, usuRegistro.toString());
 		} catch (Exception e){
 			if(e instanceof UsuarioExistenteException) {
 				return new ResultadoOperacion(false, e.getMessage(), usuRegistro.toString());
