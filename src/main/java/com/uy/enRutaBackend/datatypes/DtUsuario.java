@@ -9,7 +9,7 @@ import com.uy.enRutaBackend.entities.Buzon_notificacion;
 
 public class DtUsuario {
     
-    private String tipo_usuario;
+	private String tipo_usuario;
 
     private UUID uuidAuth;
     
@@ -59,6 +59,13 @@ public class DtUsuario {
 
     }
 
+    @Override
+	public String toString() {
+		return "DtUsuario [tipo_usuario=" + tipo_usuario + ", ci=" + ci + ", nombres=" + nombres + ", apellidos="
+				+ apellidos + ", email=" + email + ", fecha_nacimiento=" + fecha_nacimiento + ", fecha_creacion="
+				+ fecha_creacion + ", esEstudiante=" + esEstudiante + ", esJubilado=" + esJubilado + "]";
+	}
+    
     public UUID getUuidAuth() {
         return uuidAuth;
     }

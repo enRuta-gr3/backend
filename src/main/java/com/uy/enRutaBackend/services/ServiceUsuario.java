@@ -132,10 +132,14 @@ public class ServiceUsuario implements IServiceUsuario {
 	
 	private DtUsuario validarRespuesta(DtUsuario usuario, JSONObject respuestaJson)
 			throws UsuarioExistenteException, Exception {
-		if (respuestaJson.has("user")) {
-			JSONObject user = respuestaJson.getJSONObject("user");
-			Usuario registrado = repository.findById(UUID.fromString(user.getString("id"))).orElse(null);
-			return entityToDtAMostrar(registrado);
+		if (respuestaJson.has("user_metadata")) {
+			JSONObject user = respuestaJson.getJSONObject("user_metadata");
+			usuario.setUuidAuth(UUID.fromString(user.getString("sub")));
+			return usuario;
+//			JSONObject user = respuestaJson.getJSONObject("user");
+//			Usuario registrado = repository.findById(UUID.fromString(user.getString("id"))).orElse(null);
+//			Usuario registrado = repository.findById(UUID.fromString(user.getString("sub"))).orElse(null);
+//			return entityToDtAMostrar(registrado);
 			
 		} else if (respuestaJson.has("msg") && respuestaJson.getString("msg").contains("already registered")) {
 			UUID idExistente = buscarUUIDPorEmail(usuario.getEmail());
