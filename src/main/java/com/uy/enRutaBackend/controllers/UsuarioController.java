@@ -35,7 +35,7 @@ public class UsuarioController {
 			}
 		} catch (Exception e){
 			if(e instanceof UsuarioExistenteException) {
-				return new ResultadoOperacion(false, ERROR_MESSAGE, e.getMessage());
+				return new ResultadoOperacion(false, e.getMessage(), e.getMessage());
 			} else {
 				return new ResultadoOperacion(false, ERROR_MESSAGE, e.getMessage());
 			}		
@@ -48,7 +48,7 @@ public class UsuarioController {
 			return new ResultadoOperacion(true, OK_MESSAGE, null, usuRegistro.toString());
 		} catch (Exception e){
 			if(e instanceof UsuarioExistenteException) {
-				return new ResultadoOperacion(false, ERROR_MESSAGE, e.getMessage());
+				return new ResultadoOperacion(false, e.getMessage(), e.getMessage());
 			} else {
 				return new ResultadoOperacion(false, ERROR_MESSAGE, e.getMessage());
 			}		
