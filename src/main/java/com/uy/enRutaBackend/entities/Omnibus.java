@@ -18,7 +18,7 @@ public class Omnibus {
     private int capacidad;
     
     @Column(name = "nro_coche")
-    private int nro_coche;
+    private int nroCoche;
     
     @OneToOne
     private Localidad localidad_actual;
@@ -43,7 +43,7 @@ public class Omnibus {
 
     public Omnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, Localidad localidad_actual) {
         this.capacidad = capacidad;
-        this.nro_coche = nro_coche;
+        this.nroCoche = nro_coche;
         this.activo = activo;
         this.fecha_fin = fecha_fin;
         this.localidad_actual = localidad_actual;
@@ -66,11 +66,11 @@ public class Omnibus {
     }
 
     public int getNro_coche() {
-        return nro_coche;
+        return nroCoche;
     }
 
     public void setNro_coche(int nro_coche) {
-        this.nro_coche = nro_coche;
+        this.nroCoche = nro_coche;
     }
 
     public Localidad getLocalidad_actual() {

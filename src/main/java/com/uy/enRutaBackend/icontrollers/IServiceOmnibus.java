@@ -1,9 +1,13 @@
 package com.uy.enRutaBackend.icontrollers;
 
-import com.uy.enRutaBackend.entities.Omnibus;
+import java.util.List;
+
+import com.uy.enRutaBackend.datatypes.DtOmnibus;
+import com.uy.enRutaBackend.errors.ResultadoOperacion;
 
 public interface IServiceOmnibus {
 	
-    public void RegistrarOmnibus(Omnibus omnibus);
+	ResultadoOperacion<DtOmnibus> registrarOmnibus(DtOmnibus dto);
+	List<DtOmnibus> listarOmnibus();
 
 }
