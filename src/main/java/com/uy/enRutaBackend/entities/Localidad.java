@@ -15,6 +15,10 @@ public class Localidad {
     @Column(name = "nombre")
     private String nombre;
     
+    @ManyToOne
+    @JoinColumn(name = "id_departamento", nullable = false, columnDefinition = "INT DEFAULT 1")
+    private Departamento id_departamento;
+    
     @OneToMany(mappedBy = "id_viaje")
     private List<Viaje> viajes;    
         

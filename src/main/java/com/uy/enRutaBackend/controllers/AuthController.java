@@ -25,24 +25,29 @@ public class AuthController {
 	public ResponseEntity<?> registrarUsuario(@RequestBody DtUsuario usuario) {
 		ResultadoOperacion res = usuarioController.registrarUsuario(usuario);
 		if(res.isSuccess()) {
+			System.out.println("*REGISTRO* " + res.getMessage());
+			System.out.println("*REGISTRO* " + res.getData());
 			return ResponseEntity.status(HttpStatus.CREATED).body(res.getData());
 		} else {
 			if(res.getMessage().contains("Error")) {
+				System.out.println("*REGISTRO* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res.getErrorCode());
 			} else {
-				System.out.println(res.getMessage());
+				System.out.println("*REGISTRO* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(res.getMessage());
 			}
 		}
 	}
     
     @PostMapping("/iniciarSesion")
-    public ResponseEntity<?> login(@RequestBody DtUsuario request) {
-        	
+    public ResponseEntity<?> login(@RequestBody DtUsuario request) {        	
     	ResultadoOperacion res = usuarioController.iniciarSesion(request);
     	if(res.isSuccess()) {
+    		System.out.println("*LOGIN* " + res.getMessage());
     		return ResponseEntity.status(HttpStatus.OK).body(res.getData());
         } else {
+        	System.out.println("*LOGIN* " + res.getMessage());
+			System.out.println("*LOGIN* " + res.getData());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res.getMessage());
         }
     }

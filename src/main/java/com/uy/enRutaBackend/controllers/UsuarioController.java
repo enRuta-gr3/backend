@@ -17,7 +17,6 @@ import lombok.Getter;
 @RestController
 @Getter
 public class UsuarioController {
-	private static final Logger log = LoggerFactory.getLogger(UsuarioController.class);
 	private static final String OK_MESSAGE = "Operación realizada con éxito";
 	private static final String ERROR_MESSAGE = "Error al realizar la operación";
 	@Autowired
@@ -62,7 +61,6 @@ public class UsuarioController {
 		} catch (Exception e) {
 			result = new JSONObject("error : " + e.getMessage());
 		}
-		log.info(result.toString());
 		if (result.has("access_token")) {
 			return new ResultadoOperacion(true, OK_MESSAGE, null, result.toString());
 		} else {

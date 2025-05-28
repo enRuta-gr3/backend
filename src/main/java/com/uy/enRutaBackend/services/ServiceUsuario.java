@@ -89,13 +89,13 @@ public class ServiceUsuario implements IServiceUsuario {
 		try {
 			JSONObject body = completarData(usuario);
 
-			log.info("Json a enviar a Supabase: " + body.toString());
+			System.out.println("Json a enviar a Supabase: " + body.toString());
 
 			JSONObject respuestaJson = invocarSupabase(body);
 
 			return validarRespuesta(usuario, respuestaJson);
 		} catch (Exception e) {
-			log.info("❌ Error registrando usuario: " + e.getMessage());
+			System.out.println("ERROR registrando usuario: " + e.getMessage());
 			throw e;
 		}
 	}
@@ -124,8 +124,6 @@ public class ServiceUsuario implements IServiceUsuario {
 		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 		String responseBody = response.body();
 
-		log.info("Respuesta Supabase: " + responseBody);
-
 		JSONObject json = new JSONObject(responseBody);
 		return json;
 	}
@@ -145,8 +143,6 @@ public class ServiceUsuario implements IServiceUsuario {
 			UUID idExistente = buscarUUIDPorEmail(usuario.getEmail());
 			
 			if (idExistente != null) {
-				log.info("El usuario con email " + usuario.getEmail() + " ya existe.");
-				log.info("Su UUID es  " + idExistente);
 			}
 			throw new UsuarioExistenteException("El usuario con email " + usuario.getEmail() + " ya existe.");
 		} else {
@@ -192,7 +188,6 @@ public class ServiceUsuario implements IServiceUsuario {
 		if(usuario.getContraseña() == null || usuario.getContraseña().isEmpty())
 			usuario.setContraseña(usuario.getCi());
 		usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
-		log.info(usuario.getContraseña());
 	}
 	
 	@Transactional(readOnly = true)
