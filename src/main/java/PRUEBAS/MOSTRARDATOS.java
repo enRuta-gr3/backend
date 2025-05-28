@@ -106,9 +106,9 @@ public class MOSTRARDATOS {
                 Date.valueOf("2025-06-12"), Time.valueOf("20:00:00"),
                 3200.0, EstadoViaje.ABIERTO, bus1, loc3, loc4);
 
-        servicioViaje.RegistrarViaje(viaje1);
-        servicioViaje.RegistrarViaje(viaje2);
-        servicioViaje.RegistrarViaje(viaje3);
+//        servicioViaje.RegistrarViaje(viaje1);
+//        servicioViaje.RegistrarViaje(viaje2);
+//        servicioViaje.RegistrarViaje(viaje3);
     }
 
 

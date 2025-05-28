@@ -23,7 +23,10 @@ public class SpringSecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().requestMatchers("/auth-controller/login").permitAll().requestMatchers("/public/**").permitAll()
-						.requestMatchers("/api/auth/iniciarSesion").permitAll().requestMatchers("/api/auth/registrarUsuario").permitAll().anyRequest().authenticated() 
+						.requestMatchers("/api/auth/iniciarSesion").permitAll()
+						.requestMatchers("/api/auth/registrarUsuario").permitAll()
+						.requestMatchers("/api/viajes/listarViajes").permitAll()
+						.anyRequest().authenticated() 
 				);
 		return http.build();
 	}
