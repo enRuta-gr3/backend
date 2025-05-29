@@ -16,7 +16,7 @@ public class Localidad {
     private String nombre;
     
     @ManyToOne
-    @JoinColumn(name = "id_departamento", nullable = false, columnDefinition = "INT DEFAULT 1")
+    @JoinColumn(name = "id_departamento")
     private Departamento id_departamento;
     
     @OneToMany(mappedBy = "id_viaje")

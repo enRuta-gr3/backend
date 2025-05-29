@@ -3,18 +3,17 @@ package com.uy.enRutaBackend.errors;
 public class ResultadoOperacion<T> {
     private boolean success;
     private String message;
-    private String errorCode; // opcional, como enum más adelante
+    private ErrorCode errorCode;
     private T data;
 
     // Constructores
-    public ResultadoOperacion(boolean success, String message, String errorCode, T data) {
+    public ResultadoOperacion(boolean success, String message, T data) {
         this.success = success;
         this.message = message;
-        this.errorCode = errorCode;
         this.data = data;
     }
 
-    public ResultadoOperacion(boolean success, String message, String errorCode) {
+    public ResultadoOperacion(boolean success, String message, ErrorCode errorCode) {
         this.success = success;
         this.message = message;
         this.errorCode = errorCode;
@@ -24,7 +23,7 @@ public class ResultadoOperacion<T> {
         return success;
     }
 
-    public String getErrorCode() {
+    public ErrorCode getErrorCode() {
         return errorCode;
     }
 

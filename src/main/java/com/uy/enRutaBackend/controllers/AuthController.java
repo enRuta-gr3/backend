@@ -35,6 +35,7 @@ public class AuthController {
 			} else {
 				System.out.println("*REGISTRO* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(res.getMessage());
+				
 			}
 		}
 	}

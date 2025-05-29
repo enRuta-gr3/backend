@@ -18,11 +18,11 @@ public class ServiceAsiento implements IServiceAsiento {
 
     @Override
     public ResultadoOperacion<Asiento> RegistrarAsiento(Asiento asiento) {
-        if (asiento == null || asiento.getNumeroAsiento() <= 0) {
-            return new ResultadoOperacion<>(false, "Datos de asiento inválidos", "DATOS_INVALIDOS");
-        }
-
-        boolean isSaved = persistence.saveAsiento(asiento);
+//        if (asiento == null || asiento.getNumeroAsiento() <= 0) {
+//            return new ResultadoOperacion<>(false, "Datos de asiento inválidos", "DATOS_INVALIDOS");
+//        }
+//
+//        boolean isSaved = persistence.saveAsiento(asiento);
 //        if (isSaved) {
 //            return new ResultadoOperacion<>(true, "Asiento registrado correctamente", asiento);
 //        } else {
