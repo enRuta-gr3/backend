@@ -10,3 +10,9 @@
 01:53:02.083 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 2864 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
 01:53:02.085 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
 01:53:10.517 [main] INFO  c.u.e.EnRutaBackendApplication - Started EnRutaBackendApplication in 8.81 seconds (process running for 9.499)
+22:03:23.569 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 348 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+22:03:23.571 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+22:03:32.734 [main] INFO  c.u.e.EnRutaBackendApplication - Started EnRutaBackendApplication in 9.455 seconds (process running for 10.187)
+22:13:17.415 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 18732 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+22:13:17.416 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+22:13:25.812 [main] INFO  c.u.e.EnRutaBackendApplication - Started EnRutaBackendApplication in 8.699 seconds (process running for 9.37)

@@ -5,11 +5,15 @@ import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
+import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
+import com.uy.enRutaBackend.persistence.HistoricoEstadoRepository;
 import com.uy.enRutaBackend.persistence.LocalidadRepository;
 import com.uy.enRutaBackend.persistence.OmnibusRepository;
+import com.uy.enRutaBackend.persistence.ViajeRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +40,12 @@ public class ServiceOmnibus implements IServiceOmnibus{
     
     @Autowired
     private AsientoRepository asientoRepository;
+    
+    @Autowired
+    private ViajeRepository viajeRepository;
+
+    @Autowired
+    private HistoricoEstadoRepository historicoEstadoRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -102,51 +112,53 @@ public class ServiceOmnibus implements IServiceOmnibus{
             dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
         }
 
-        // Cargar todos los asientos desde el repositorio
-        /*List<Asiento> asientos = asientoRepository.findByOmnibusId(omnibus.getId_omnibus());
-        
+        // Asientos
+        List<Asiento> asientos = asientoRepository.findByOmnibus(omnibus);
         if (asientos != null && !asientos.isEmpty()) {
             List<DtAsiento> dtAsientos = asientos.stream()
-                .map(asiento -> new DtAsiento(
-                    asiento.getId_asiento(),
-                    asiento.getNumeroAsiento(),
+                .map(a -> new DtAsiento(
+                    a.getId_asiento(),
+                    a.getNumeroAsiento(),
                     omnibus.getId_omnibus()))
                 .toList();
             dto.setAsientos(dtAsientos);
         }
-        */
 
-        // Convertir viajes
-        if (omnibus.getViajes() != null && !omnibus.getViajes().isEmpty()) {
-            List<DtViaje> viajes = omnibus.getViajes().stream().map(v -> {
-                DtViaje dt = new DtViaje();
-                dt.setId_viaje(v.getId_viaje());
-                dt.setFecha_partida(v.getFecha_partida());
-                dt.setHora_partida(v.getHora_partida());
-                dt.setFecha_llegada(v.getFecha_llegada());
-                dt.setHora_llegada(v.getHora_llegada());
-                dt.setPrecio_viaje(v.getPrecio_viaje());
-                dt.setEstado(v.getEstado().toString());
-                dt.setId_localidad_origen(v.getLocalidadOrigen().getId_localidad());
-                dt.setId_localidad_destino(v.getLocalidadDestino().getId_localidad());
-                dt.setId_omnibus(v.getOmnibus().getId_omnibus());
-                return dt;
-            }).toList();
-            dto.setViajes(viajes);
+        // Viajes
+        List<Viaje> viajes = viajeRepository.findByOmnibus(omnibus);
+        if (viajes != null && !viajes.isEmpty()) {
+            List<DtViaje> dtViajes = viajes.stream()
+                .map(v -> {
+                    DtViaje dt = new DtViaje();
+                    dt.setId_viaje(v.getId_viaje());
+                    dt.setFecha_partida(v.getFecha_partida());
+                    dt.setHora_partida(v.getHora_partida());
+                    dt.setFecha_llegada(v.getFecha_llegada());
+                    dt.setHora_llegada(v.getHora_llegada());
+                    dt.setPrecio_viaje(v.getPrecio_viaje());
+                    dt.setEstado(v.getEstado().toString());
+                    dt.setId_localidad_origen(v.getLocalidadOrigen().getId_localidad());
+                    dt.setId_localidad_destino(v.getLocalidadDestino().getId_localidad());
+                    dt.setId_omnibus(v.getOmnibus().getId_omnibus());
+                    return dt;
+                }).toList();
+            dto.setViajes(dtViajes);
         }
 
-        // Convertir histórico de estados
-        if (omnibus.getHistorico_estado() != null && !omnibus.getHistorico_estado().isEmpty()) {
-            List<DtHistoricoEstado> historicos = omnibus.getHistorico_estado().stream().map(h -> {
-                DtHistoricoEstado dt = new DtHistoricoEstado();
-                dt.setId_his_estado(h.getId_his_estado());
-                dt.setFecha_inicio(h.getFecha_inicio());
-                dt.setFecha_fin(h.getFecha_fin());
-                dt.setActivo(h.isActivo());
-                dt.setId_omnibus(h.getOmnibus().getId_omnibus());
-                return dt;
-            }).toList();
-            dto.setHistorico_estado(historicos);
+        // Histórico de estados
+        List<Historico_estado> historicos = historicoEstadoRepository.findByOmnibus(omnibus);
+        if (historicos != null && !historicos.isEmpty()) {
+            List<DtHistoricoEstado> dtHistoricos = historicos.stream()
+                .map(h -> {
+                    DtHistoricoEstado dt = new DtHistoricoEstado();
+                    dt.setId_his_estado(h.getId_his_estado());
+                    dt.setFecha_inicio(h.getFecha_inicio());
+                    dt.setFecha_fin(h.getFecha_fin());
+                    dt.setActivo(h.isActivo());
+                    dt.setId_omnibus(h.getOmnibus().getId_omnibus());
+                    return dt;
+                }).toList();
+            dto.setHistorico_estado(dtHistoricos);
         }
         
         return dto;
