@@ -55,7 +55,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
             
             // Persistir omnibus
             Omnibus guardado = omnibusRepository.save(Omnibus);
-            DtOmnibus respuesta = entityToDto(guardado);
             
             // Crear los asientos del omnibus
             List<Asiento> asientos = new ArrayList<>();
@@ -67,7 +66,10 @@ public class ServiceOmnibus implements IServiceOmnibus{
             }
             asientoRepository.saveAll(asientos); // Persistís TODOS los asientos
             Omnibus.setAsientos(asientos);
-
+            
+            
+            
+            DtOmnibus respuesta = entityToDto(guardado);
             return new ResultadoOperacion<>(true, "Ómnibus registrado correctamente", respuesta);
         } catch (Exception e) {
             return new ResultadoOperacion<>(false, "Error al registrar ómnibus: " + e.getMessage(), null);
@@ -96,19 +98,26 @@ public class ServiceOmnibus implements IServiceOmnibus{
     private DtOmnibus entityToDto(Omnibus omnibus) {
         DtOmnibus dto = modelMapper.map(omnibus, DtOmnibus.class);
 
-        // Convertir asientos
-        if (omnibus.getAsientos() != null) {
-        	List<DtAsiento> asientos = omnibus.getAsientos().stream()
-                    .map(asiento -> new DtAsiento(
-                        asiento.getId_asiento(),
-                        asiento.getNumeroAsiento(),
-                        omnibus.getId_omnibus()))
-                    .toList();
-            dto.setAsientos(asientos);
+        if (omnibus.getLocalidad_actual() != null) {
+            dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
         }
+
+        // Cargar todos los asientos desde el repositorio
+        /*List<Asiento> asientos = asientoRepository.findByOmnibusId(omnibus.getId_omnibus());
         
+        if (asientos != null && !asientos.isEmpty()) {
+            List<DtAsiento> dtAsientos = asientos.stream()
+                .map(asiento -> new DtAsiento(
+                    asiento.getId_asiento(),
+                    asiento.getNumeroAsiento(),
+                    omnibus.getId_omnibus()))
+                .toList();
+            dto.setAsientos(dtAsientos);
+        }
+        */
+
         // Convertir viajes
-        if (omnibus.getViajes() != null) {
+        if (omnibus.getViajes() != null && !omnibus.getViajes().isEmpty()) {
             List<DtViaje> viajes = omnibus.getViajes().stream().map(v -> {
                 DtViaje dt = new DtViaje();
                 dt.setId_viaje(v.getId_viaje());
@@ -127,7 +136,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
         }
 
         // Convertir histórico de estados
-        if (omnibus.getHistorico_estado() != null) {
+        if (omnibus.getHistorico_estado() != null && !omnibus.getHistorico_estado().isEmpty()) {
             List<DtHistoricoEstado> historicos = omnibus.getHistorico_estado().stream().map(h -> {
                 DtHistoricoEstado dt = new DtHistoricoEstado();
                 dt.setId_his_estado(h.getId_his_estado());
@@ -139,10 +148,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
             }).toList();
             dto.setHistorico_estado(historicos);
         }
-
-        // Localidad actual solo por id (ya está en el DTO)
-        dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
-
+        
         return dto;
     }
 

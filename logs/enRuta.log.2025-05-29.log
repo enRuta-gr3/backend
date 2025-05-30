@@ -1,0 +1,12 @@
+00:12:37.227 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 20156 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+00:12:37.228 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+00:12:45.156 [main] INFO  c.u.e.EnRutaBackendApplication - Started EnRutaBackendApplication in 8.237 seconds (process running for 8.943)
+00:34:56.132 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 4220 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+00:34:56.135 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+00:39:07.034 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 10632 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+00:39:07.035 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+01:51:38.871 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 11016 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+01:51:38.874 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+01:53:02.083 [main] INFO  c.u.e.EnRutaBackendApplication - Starting EnRutaBackendApplication using Java 17.0.12 with PID 2864 (C:\Users\Matt\Documents\GitHub\backend\target\classes started by Matt in C:\Users\Matt\Documents\GitHub\backend)
+01:53:02.085 [main] INFO  c.u.e.EnRutaBackendApplication - No active profile set, falling back to 1 default profile: "default"
+01:53:10.517 [main] INFO  c.u.e.EnRutaBackendApplication - Started EnRutaBackendApplication in 8.81 seconds (process running for 9.499)

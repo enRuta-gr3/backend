@@ -20,7 +20,7 @@ public class Omnibus {
     @Column(name = "nro_coche")
     private int nroCoche;
     
-    @OneToOne
+    @ManyToOne
     private Localidad localidad_actual;
     
     @Column(name = "activo")

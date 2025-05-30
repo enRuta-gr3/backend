@@ -17,6 +17,12 @@ public class Localidad {
     
     @OneToMany(mappedBy = "id_viaje")
     private List<Viaje> viajes;    
+    
+    @OneToMany(mappedBy = "id_omnibus")
+    private List<Omnibus> Omnibus;
+    
+    @ManyToOne(optional = false)
+    private Departamento departamento;
         
     public Localidad() {}
     
@@ -40,4 +46,30 @@ public class Localidad {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+	public List<Viaje> getViajes() {
+		return viajes;
+	}
+
+	public void setViajes(List<Viaje> viajes) {
+		this.viajes = viajes;
+	}
+
+	public List<Omnibus> getOmnibus() {
+		return Omnibus;
+	}
+
+	public void setOmnibus(List<Omnibus> omnibus) {
+		Omnibus = omnibus;
+	}
+
+	public Departamento getDepartamento() {
+		return departamento;
+	}
+
+	public void setDepartamento(Departamento departamento) {
+		this.departamento = departamento;
+	}
+    
+    
 }
