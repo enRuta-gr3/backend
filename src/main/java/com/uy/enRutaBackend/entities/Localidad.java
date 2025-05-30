@@ -15,17 +15,26 @@ public class Localidad {
     @Column(name = "nombre")
     private String nombre;
     
-    @ManyToOne
-    @JoinColumn(name = "id_departamento")
-    private Departamento id_departamento;
-    
     @OneToMany(mappedBy = "id_viaje")
     private List<Viaje> viajes;    
+    
+    @OneToMany(mappedBy = "id_omnibus")
+    private List<Omnibus> Omnibus;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_departamento")
+    private Departamento departamento;
         
     public Localidad() {}
     
     public Localidad(String nombre) {
         this.nombre = nombre;
+        this.viajes = new ArrayList<>();
+    }
+    
+    public Localidad(String nombre, Departamento departamento) {
+        this.nombre = nombre;
+        this.departamento = departamento;
         this.viajes = new ArrayList<>();
     }
     
@@ -44,4 +53,29 @@ public class Localidad {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+	public List<Viaje> getViajes() {
+		return viajes;
+	}
+
+	public void setViajes(List<Viaje> viajes) {
+		this.viajes = viajes;
+	}
+
+	public List<Omnibus> getOmnibus() {
+		return Omnibus;
+	}
+
+	public void setOmnibus(List<Omnibus> omnibus) {
+		Omnibus = omnibus;
+	}
+
+	public Departamento getDepartamento() {
+		return departamento;
+	}
+
+	public void setDepartamento(Departamento departamento) {
+		this.departamento = departamento;
+	}
+       
 }

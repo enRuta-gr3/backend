@@ -1,5 +1,7 @@
 package com.uy.enRutaBackend.services;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,11 +9,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.uy.enRutaBackend.controllers.LocalidadController;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.entities.EstadoViaje;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
 import com.uy.enRutaBackend.entities.Viaje;
@@ -33,15 +35,13 @@ import lombok.Setter;
 public class ServiceViaje implements IServiceViaje {
 
 	private static final String OK_MESSAGE = "Operación realizada con éxito";
-	private final LocalidadController localidadController;
     private final ViajeRepository vRepository;
     private final DisAsientoViajeRepository disAsientosRepository;
     private final AsientoRepository asientoRepository;
     private final UtilsClass utils;
   
     @Autowired
-    public ServiceViaje(LocalidadController localidadController, ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, UtilsClass utils) {
-		this.localidadController = localidadController; 
+    public ServiceViaje(ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, UtilsClass utils) {
 		this.vRepository = vRepository;
 		this.disAsientosRepository = disAsientosRepository;
 		this.asientoRepository = asientoRepository;
@@ -58,7 +58,7 @@ public class ServiceViaje implements IServiceViaje {
 			if (creado != null) {
 				DtViaje creadoDt = entityToDt(creado);
 				System.out.println("Viaje registrado y persistido correctamente.");
-				return new ResultadoOperacion(true, OK_MESSAGE, creadoDt.toString());
+				return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
 			} else {
 				System.out.println("Error al registrar viaje.");
 				return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), ErrorCode.ERROR_DE_CREACION);
@@ -128,7 +128,6 @@ public class ServiceViaje implements IServiceViaje {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.typeMap(Omnibus.class, DtOmnibus.class)
 		.addMappings(mapper -> { 
-//			mapper.skip(DtOmnibus::setLocalidad_actual);
 			mapper.skip(DtOmnibus::setHistorico_estado);
 			mapper.skip(DtOmnibus::setActivo);
 			mapper.skip(DtOmnibus::setFecha_fin);
@@ -147,10 +146,29 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	private Viaje dtToEntity(DtViaje viajeDt) {
+		ModelMapper modelMapper = new ModelMapper();
 		//TODO implementar mapeo de dt a entidad
 		Viaje aCrear = new Viaje();
-//		aCrear.set
+		aCrear.setFecha_partida(Date.valueOf(viajeDt.getFecha_partida()));
+		aCrear.setFecha_llegada(Date.valueOf(viajeDt.getFecha_llegada()));
+		aCrear.setHora_partida(Time.valueOf(viajeDt.getHora_partida()));
+		aCrear.setHora_llegada(Time.valueOf(viajeDt.getHora_llegada()));
+		aCrear.setPrecio_viaje(viajeDt.getPrecio_viaje());
+		aCrear.setLocalidadOrigen(modelMapper.map(viajeDt.getLocalidadOrigen(), Localidad.class));
+		aCrear.setLocalidadDestino(modelMapper.map(viajeDt.getLocalidadDestino(), Localidad.class));
+		aCrear.setEstado(mapEstado(viajeDt.getEstado()));
+		aCrear.setOmnibus(modelMapper.map(viajeDt.getOmnibus(), Omnibus.class));
 		return aCrear;
+	}
+
+	private EstadoViaje mapEstado(String estado) {
+		switch(estado) {
+		case "ABIERTO":
+			return EstadoViaje.ABIERTO;
+		case "CERRADO":
+			return EstadoViaje.CERRADO;
+		}			
+		return null;
 	}
 	
 	

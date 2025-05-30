@@ -1,5 +1,10 @@
 package PRUEBAS;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.uy.enRutaBackend.datatypes.DtUsuario;
@@ -16,10 +21,6 @@ import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 import com.uy.enRutaBackend.icontrollers.IServicePasaje;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
-
-import java.sql.Date;
-import java.sql.Time;
-import java.util.*;
 
 @Component
 public class MOSTRARDATOS {
@@ -68,10 +69,10 @@ public class MOSTRARDATOS {
         Localidad loc3 = new Localidad("Santa Fe");
         Localidad loc4 = new Localidad("Mendoza");
 
-        servicioLocalidad.RegistrarLocalidad(loc1);
-        servicioLocalidad.RegistrarLocalidad(loc2);
-        servicioLocalidad.RegistrarLocalidad(loc3);
-        servicioLocalidad.RegistrarLocalidad(loc4);
+//        servicioLocalidad.RegistrarLocalidad(loc1);
+//        servicioLocalidad.RegistrarLocalidad(loc2);
+//        servicioLocalidad.RegistrarLocalidad(loc3);
+//        servicioLocalidad.RegistrarLocalidad(loc4);
 
         // Registrar Omnibus (con localidad_actual y fecha_fin)
         Omnibus bus1 = new Omnibus(40, 1001, true, Date.valueOf("2025-12-31"), loc1);

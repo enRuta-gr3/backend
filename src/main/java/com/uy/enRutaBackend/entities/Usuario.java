@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -55,6 +56,8 @@ public class Usuario {
     @OneToMany(mappedBy = "id_buzon")
     private List<Buzon_notificacion> notificaciones;
     
+    @OneToMany(mappedBy = "id_sesion", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Sesion> sesiones;
     
     public Usuario() {}
     

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.sql.Date;
 import java.util.List;
 
+import com.uy.enRutaBackend.datatypes.DtLocalidad;
+
 @Entity
 @Table(name = "Omnibus")
 public class Omnibus {
@@ -18,9 +20,9 @@ public class Omnibus {
     private int capacidad;
     
     @Column(name = "nro_coche")
-    private int nro_coche;
+    private int nroCoche;
     
-    @OneToOne
+    @ManyToOne
     private Localidad localidad_actual;
     
     @Column(name = "activo")
@@ -43,13 +45,17 @@ public class Omnibus {
 
     public Omnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, Localidad localidad_actual) {
         this.capacidad = capacidad;
-        this.nro_coche = nro_coche;
+        this.nroCoche = nro_coche;
         this.activo = activo;
         this.fecha_fin = fecha_fin;
         this.localidad_actual = localidad_actual;
     }
 
-    public int getId_omnibus() {
+    public Omnibus(int i, int j, boolean b, Date valueOf, DtLocalidad loc1) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getId_omnibus() {
         return id_omnibus;
     }
 
@@ -66,11 +72,11 @@ public class Omnibus {
     }
 
     public int getNro_coche() {
-        return nro_coche;
+        return nroCoche;
     }
 
     public void setNro_coche(int nro_coche) {
-        this.nro_coche = nro_coche;
+        this.nroCoche = nro_coche;
     }
 
     public Localidad getLocalidad_actual() {

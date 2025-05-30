@@ -27,14 +27,14 @@ public class AuthController {
 		if(res.isSuccess()) {
 			System.out.println("*REGISTRO* " + res.getMessage());
 			System.out.println("*REGISTRO* " + res.getData());
-			return ResponseEntity.status(HttpStatus.CREATED).body(res.getData());
+			return ResponseEntity.status(HttpStatus.CREATED).body(res);
 		} else {
 			if(res.getMessage().contains("Error")) {
 				System.out.println("*REGISTRO* " + res.getMessage());
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res.getErrorCode());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 			} else {
 				System.out.println("*REGISTRO* " + res.getMessage());
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(res.getMessage());
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
 				
 			}
 		}
@@ -45,11 +45,11 @@ public class AuthController {
     	ResultadoOperacion res = usuarioController.iniciarSesion(request);
     	if(res.isSuccess()) {
     		System.out.println("*LOGIN* " + res.getMessage());
-    		return ResponseEntity.status(HttpStatus.OK).body(res.getData());
+    		return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
         	System.out.println("*LOGIN* " + res.getMessage());
 			System.out.println("*LOGIN* " + res.getData());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }
 

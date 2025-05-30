@@ -18,7 +18,7 @@ public class Departamento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_departamento")
-	private int id_departamento;
+	private int idDepartamento;
     
     @Column(name = "nombre_departamento")
 	private String nombre;
@@ -36,11 +36,11 @@ public class Departamento {
     }
 
     public int getId_departamento() {
-        return id_departamento;
+        return idDepartamento;
     }
 
-    public void setId_departamento(int id_departamento) {
-        this.id_departamento = id_departamento;
+    public void setId_departamento(int idDepartamento) {
+        this.idDepartamento = idDepartamento;
     }
 
     public String getNombre() {

@@ -28,7 +28,7 @@ public class UsuarioController {
 			serviceUsuario.correrValidaciones(usuario);
 			if(usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && (usuario.getEmail() != null && !usuario.getEmail().isEmpty())) {
 				usuRegistro = serviceUsuario.registrarUsuario(usuario);
-				return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro.toString());
+				return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro);
 			} else {
 				return registrarUsuarioSinVerificacion(usuario, usuRegistro);
 			}
@@ -44,7 +44,7 @@ public class UsuarioController {
 	private ResultadoOperacion<?> registrarUsuarioSinVerificacion(DtUsuario usuario, DtUsuario usuRegistro) {
 		try {
 			usuRegistro = serviceUsuario.registrarUsuarioSinVerificacion(usuario);
-			return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro.toString());
+			return new ResultadoOperacion(true, OK_MESSAGE, usuRegistro);
 		} catch (Exception e){
 			if(e instanceof UsuarioExistenteException) {
 				return new ResultadoOperacion(false, e.getMessage(), e.getMessage());

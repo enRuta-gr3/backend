@@ -19,6 +19,11 @@ public class DtLocalidad {
 		this.departamento = departamento;
 	}
 
+	public DtLocalidad(String nombreLocalidad, DtDepartamento departamento) {
+		this.nombreLocalidad = nombreLocalidad;
+		this.departamento = departamento;
+	}
+	
 	@Override
 	public String toString() {
 		return "DtLocalidad [id_localidad=" + id_localidad + ", nombreLocalidad=" + nombreLocalidad + ", departamento="
