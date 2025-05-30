@@ -21,7 +21,8 @@ public class Localidad {
     @OneToMany(mappedBy = "id_omnibus")
     private List<Omnibus> Omnibus;
     
-    @ManyToOne(optional = false)
+    @ManyToOne
+    @JoinColumn(name = "id_departamento")
     private Departamento departamento;
         
     public Localidad() {}
