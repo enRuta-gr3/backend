@@ -78,8 +78,8 @@ public class MOSTRARDATOS {
         Omnibus bus1 = new Omnibus(40, 1001, true, Date.valueOf("2025-12-31"), loc1);
         Omnibus bus2 = new Omnibus(30, 1002, true, Date.valueOf("2025-11-30"), loc2);
 
-        servicioOmnibus.RegistrarOmnibus(bus1);
-        servicioOmnibus.RegistrarOmnibus(bus2);
+//        servicioOmnibus.RegistrarOmnibus(bus1);
+//        servicioOmnibus.RegistrarOmnibus(bus2);
 
      // Registrar Asientos
         for (int i = 1; i <= 5; i++) {

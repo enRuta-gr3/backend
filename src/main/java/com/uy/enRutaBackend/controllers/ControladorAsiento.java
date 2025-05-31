@@ -20,7 +20,7 @@ public class ControladorAsiento {
         this.serviceAsiento = serviceAsiento;
     }
 
-    @PostMapping("/registrar")
+   
     public ResponseEntity<?> registrarAsiento(@org.springframework.web.bind.annotation.RequestBody Asiento asiento) {
 //        ResultadoOperacion<Asiento> resultado = serviceAsiento.RegistrarAsiento(asiento);
 //

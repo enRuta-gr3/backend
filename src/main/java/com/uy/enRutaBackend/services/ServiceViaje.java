@@ -133,7 +133,7 @@ public class ServiceViaje implements IServiceViaje {
 			mapper.skip(DtOmnibus::setFecha_fin);
 			mapper.skip(DtOmnibus::setAsientos);
 			mapper.skip(DtOmnibus::setViajes);
-			mapper.skip(DtOmnibus::setId_omnibus);
+			//mapper.skip(DtOmnibus::setId_omnibus);
 		});
 		return modelMapper.map(omnibus, DtOmnibus.class);
 	}

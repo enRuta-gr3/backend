@@ -29,6 +29,8 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/localidades/listarLocalidades").permitAll()
 						.requestMatchers("/api/viajes/registrarViaje").permitAll()
 						.requestMatchers("/api/viajes/listarViajes").permitAll()
+						.requestMatchers("/api/omnibus/registrar").permitAll()
+						.requestMatchers("/api/omnibus/listar").permitAll()
 						.anyRequest().authenticated() 
 				);
 		return http.build();

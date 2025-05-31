@@ -1,33 +1,31 @@
 package com.uy.enRutaBackend.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
+import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.Historico_estado;
-import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
 import com.uy.enRutaBackend.entities.Viaje;
+import com.uy.enRutaBackend.errors.ErrorCode;
+import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
 import com.uy.enRutaBackend.persistence.HistoricoEstadoRepository;
 import com.uy.enRutaBackend.persistence.LocalidadRepository;
 import com.uy.enRutaBackend.persistence.OmnibusRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
-
-import org.springframework.transaction.annotation.Transactional;
-
-
-import com.uy.enRutaBackend.errors.ResultadoOperacion;
-import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.uy.enRutaBackend.utils.UtilsClass;
 
 @Service
 public class ServiceOmnibus implements IServiceOmnibus{
@@ -46,6 +44,9 @@ public class ServiceOmnibus implements IServiceOmnibus{
 
     @Autowired
     private HistoricoEstadoRepository historicoEstadoRepository;
+    
+    @Autowired
+    private UtilsClass utils;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -56,7 +57,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
         	boolean existe = omnibusRepository.existsByNroCoche(dtOmnibus.getNro_coche());
            
         	if (existe) {
-                return new ResultadoOperacion<>(false, "Numero de coche ya existente.", "400");
+                return new ResultadoOperacion<>(false, ErrorCode.YA_EXISTE.getMsg(), ErrorCode.YA_EXISTE);
             }
             
             // Convertir DTO a entidad y setear localidad
@@ -82,7 +83,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
             DtOmnibus respuesta = entityToDto(guardado);
             return new ResultadoOperacion<>(true, "Ómnibus registrado correctamente", respuesta);
         } catch (Exception e) {
-            return new ResultadoOperacion<>(false, "Error al registrar ómnibus: " + e.getMessage(), null);
+            return new ResultadoOperacion<>(false, "Error al registrar ómnibus: " + e.getMessage(), ErrorCode.ERROR_DE_CREACION);
         }
     }
 
@@ -131,16 +132,16 @@ public class ServiceOmnibus implements IServiceOmnibus{
                 .map(v -> {
                     DtViaje dt = new DtViaje();
                     dt.setId_viaje(v.getId_viaje());
-                    dt.setFecha_partida(v.getFecha_partida());
-                    dt.setHora_partida(v.getHora_partida());
-                    dt.setFecha_llegada(v.getFecha_llegada());
-                    dt.setHora_llegada(v.getHora_llegada());
+                    dt.setFecha_partida(utils.dateToString(v.getFecha_partida()));
+                    dt.setHora_partida(utils.timeToString(v.getHora_partida()));
+                    dt.setFecha_llegada(utils.dateToString(v.getFecha_llegada()));
+                    dt.setHora_llegada(utils.timeToString(v.getHora_llegada()));
                     dt.setPrecio_viaje(v.getPrecio_viaje());
                     dt.setEstado(v.getEstado().toString());
-                    dt.setId_localidad_origen(v.getLocalidadOrigen().getId_localidad());
-                    dt.setId_localidad_destino(v.getLocalidadDestino().getId_localidad());
-                    dt.setId_omnibus(v.getOmnibus().getId_omnibus());
-                    return dt;
+                    dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
+                    dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
+                    dt.setOmnibus(modelMapper.map(v.getOmnibus(), DtOmnibus.class));
+                    return dt; 
                 }).toList();
             dto.setViajes(dtViajes);
         }
@@ -165,43 +166,3 @@ public class ServiceOmnibus implements IServiceOmnibus{
     }
 
 }
-
-
-/*
-package com.uy.enRutaBackend.services;
-
-import com.uy.enRutaBackend.entities.Omnibus;
-import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
-import com.uy.enRutaBackend.persistence.persistence;
-
-import org.springframework.stereotype.Service;
-
-@Service
-public class ServiceOmnibus implements IServiceOmnibus {
-	
-	
-    private final persistence persistence;
-
-    // Inyección de la dependencia Persistence
-    public ServiceOmnibus(persistence persistence) {
-        this.persistence = persistence;
-    }
-
-    @Override
-    public void RegistrarOmnibus(Omnibus omnibus) {
-        if (omnibus != null && omnibus.getCapacidad() > 0) {
-            boolean isSaved = persistence.saveOmnibus(omnibus);
-            if (isSaved) {
-                System.out.println("✅ Omnibus registrado y persistido correctamente.");
-            } else {
-                System.out.println("❌ Error al registrar omnibus.");
-            }
-        } else {
-            System.out.println("❌ Datos de omnibus inválidos.");
-        }
-    }
-    
-	
-	
-}
-	*/
