@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
-import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
@@ -131,16 +130,16 @@ public class ServiceOmnibus implements IServiceOmnibus{
             List<DtViaje> dtViajes = viajes.stream()
                 .map(v -> {
                     DtViaje dt = new DtViaje();
-                    dt.setId_viaje(v.getId_viaje());
+                    //dt.setId_viaje(v.getId_viaje());
                     dt.setFecha_partida(utils.dateToString(v.getFecha_partida()));
                     dt.setHora_partida(utils.timeToString(v.getHora_partida()));
                     dt.setFecha_llegada(utils.dateToString(v.getFecha_llegada()));
                     dt.setHora_llegada(utils.timeToString(v.getHora_llegada()));
                     dt.setPrecio_viaje(v.getPrecio_viaje());
                     dt.setEstado(v.getEstado().toString());
-                    dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
-                    dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
-                    dt.setOmnibus(modelMapper.map(v.getOmnibus(), DtOmnibus.class));
+                    //dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
+                    //dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
+                   // dt.setOmnibus(modelMapper.map(v.getOmnibus(), DtOmnibus.class));
                     return dt; 
                 }).toList();
             dto.setViajes(dtViajes);

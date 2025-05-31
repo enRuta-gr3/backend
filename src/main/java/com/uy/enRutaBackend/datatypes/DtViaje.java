@@ -25,7 +25,7 @@ public class DtViaje {
 	
 	public DtViaje(int id_viaje, String fecha_partida, String hora_partida, String fecha_llegada, String hora_llegada,
 			double precio_viaje, String estado, DtLocalidad localidadOrigen, DtLocalidad localidadDestino,
-			DtOmnibus omnibus, int asientosDisponibles) {
+			DtOmnibus omnibus) {
 		this.id_viaje = id_viaje;
 		this.fecha_partida = fecha_partida;
 		this.hora_partida = hora_partida;
@@ -36,7 +36,7 @@ public class DtViaje {
 		this.localidadOrigen = localidadOrigen;
 		this.localidadDestino = localidadDestino;
 		this.omnibus = omnibus;
-		this.asientosDisponibles = asientosDisponibles;
+		this.asientosDisponibles = omnibus.getCapacidad();
 	}
 	
 	public DtViaje(String fecha_partida, String hora_partida, String fecha_llegada, String hora_llegada,
