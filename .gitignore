@@ -4,3 +4,8 @@ target/classes/logback.xml
 target/classes/META-INF/maven/com.uy/enRuta-backend/pom.properties
 src/main/java/PRUEBAS/MOSTRARDATOS.java
 *.class
+target/classes/com/uy/enRutaBackend/datatypes/DtAsiento.class
+target/classes/com/uy/enRutaBackend/datatypes/DtHistoricoEstado.class
+target/classes/com/uy/enRutaBackend/datatypes/DtOmnibus.class
+target/classes/com/uy/enRutaBackend/datatypes/DtViaje.class
+target/classes/META-INF/maven/com.uy/enRuta-backend/pom.properties

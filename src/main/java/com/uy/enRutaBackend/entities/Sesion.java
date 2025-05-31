@@ -28,13 +28,13 @@ public class Sesion {
 	private Usuario usuario;
 	
 	@Column(name = "token")
-	private String access_token;
+	private String accessToken;
 	
 	@Column(name = "fecha_inicio_sesion")
 	private Date fechaInicioSesion;
 	
 	@Column(name = "activo")
-	private boolean estado;
+	private boolean activo;
 	
 	@Column(name = "vigencia")
 	private int vigencia;

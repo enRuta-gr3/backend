@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.uy.enRutaBackend.datatypes.DtSesion;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Cliente;
@@ -26,6 +27,7 @@ import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
+import com.uy.enRutaBackend.icontrollers.IServiceSesion;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
@@ -46,15 +48,15 @@ public class ServiceUsuario implements IServiceUsuario {
 	private final ModelMapper modelMapper;
     private PasswordEncoder passwordEncoder;
     private final JwtManager jwtManager;
-
-
+    private final IServiceSesion sesionService;
 
 	@Autowired
-	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager) {
+	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtManager = jwtManager;
+		this.sesionService = sesionService;
 	}
 	
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -266,15 +268,10 @@ public class ServiceUsuario implements IServiceUsuario {
 					json = new JSONObject(response.body());
 					Usuario solicitante = repository.findByEmail(request.getEmail());
 					String tok = json.getString("access_token");
+					DtSesion sesion = sesionService.crearSesion(entityToDtRegistroLogin(solicitante), tok);
 					
-					JSONObject dtUsuJson = dtUsuJson(entityToDtRegistroLogin(solicitante));
-					
-					 JSONObject jsonRes = new JSONObject();
-					 jsonRes.put("access_token", tok);
-					 jsonRes.put("DtUsuario", dtUsuJson);
-					
-					log.info(jsonRes.toString());
-					return new ResultadoOperacion(true, "Usuario logueado correctamente", jsonRes);
+					log.info(sesion.toString());
+					return new ResultadoOperacion(true, "Usuario logueado correctamente", sesion);
 				} else {
 					log.error("Error en login: " + json);
 					return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), json);
@@ -284,38 +281,34 @@ public class ServiceUsuario implements IServiceUsuario {
 				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e);
 			}
 		} else {
-			json = authenticate(request);
-			if(json.has("error") && json.getString("error").contains("Credenciales inválidas"))
-				return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(), "Usuario o contraseña incorrectos");
-			else
-				return new ResultadoOperacion(true, "Usuario logueado correctamente", json);
+			DtSesion sesion;
+			try {
+				sesion = authenticate(request);
+				if(sesion.getAccess_token() == null || sesion.getAccess_token().isEmpty())
+					return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(), "Usuario o contraseña incorrectos");
+				else
+					return new ResultadoOperacion(true, "Usuario logueado correctamente", sesion);
+			} catch (Exception e) {
+				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e.getMessage());
+			}
 		}
-		
 	}
 
-	private JSONObject authenticate(DtUsuario request) {		
+	private DtSesion authenticate(DtUsuario request) throws Exception {		
 		Usuario solicitante;
+		DtSesion sesion = new DtSesion();
 		if(request.getEmail() != null && request.getEmail().contains("@"))
 			solicitante = repository.findByEmail(request.getEmail());
 		else
 			solicitante = repository.findByCi(request.getEmail());
 		
-		if(solicitante == null || !passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
-			JSONObject json = new JSONObject("{ \"error\":\"Credenciales inválidas\" }");
-		} else {
+		if(solicitante != null || passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {	
 			String tok = jwtManager.generateToken(solicitante);
-			 JSONObject dtUsuJson = dtUsuJson(entityToDtRegistroLogin(solicitante));
-			
-			 JSONObject jsonRes = new JSONObject();
-			 jsonRes.put("access_token", tok);
-			 jsonRes.put("DtUsuario", dtUsuJson);
-					 
-					 //new JSONObject("{ \"access_token\":" + tok + "}");
-			 
-			// JSONObject jsontokf = jsontok.append("dtUsuario", entityToDtRegistroLogin(solicitante));
-			 return jsonRes;
+			sesion = sesionService.crearSesion(entityToDtRegistroLogin(solicitante), tok);		
+			log.info(sesion.toString());
 		}
-		return null;
+			
+		return sesion;		
 	}
 
 	
@@ -331,7 +324,6 @@ public class ServiceUsuario implements IServiceUsuario {
 		return dtUsuJson;
 	}
 
-	//" \"dtUsuario\":" + entityToDtRegistroLogin(solicitante)
 	private DtUsuario entityToDtRegistroLogin(Usuario solicitante) {
 		return new DtUsuario(definirTipoUsuario(solicitante), solicitante.getCi(), 
 				solicitante.getNombres(), solicitante.getApellidos(), solicitante.getEmail());
@@ -384,7 +376,5 @@ public class ServiceUsuario implements IServiceUsuario {
 			return modelMapper.map(usuario, Vendedor.class);
 		return modelMapper.map(usuario, Usuario.class);
 	}
-
-	
 
 }
