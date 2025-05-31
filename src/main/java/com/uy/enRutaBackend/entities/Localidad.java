@@ -77,5 +77,4 @@ public class Localidad {
 	public void setDepartamento(Departamento departamento) {
 		this.departamento = departamento;
 	}
-       
 }

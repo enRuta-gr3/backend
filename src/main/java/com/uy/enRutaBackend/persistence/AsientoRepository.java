@@ -10,7 +10,5 @@ import com.uy.enRutaBackend.entities.Omnibus;
 
 @Repository
 public interface AsientoRepository extends CrudRepository<Asiento, Integer>{
-
 	List<Asiento> findByOmnibus(Omnibus omnibus);
-
 }

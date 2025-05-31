@@ -63,5 +63,4 @@ public class DtViaje {
 				+ precio_viaje + ", estado=" + estado + ", localidadOrigen=" + localidadOrigen.toString() + ", localidadDestino="
 				+ localidadDestino.toString() + ", omnibus=" + omnibus.toString() + ", asientosDisponibles=" + asientosDisponibles + "]";
 	}
-	
 }
