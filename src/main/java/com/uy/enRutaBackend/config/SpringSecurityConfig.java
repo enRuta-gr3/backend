@@ -26,6 +26,7 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/auth/iniciarSesion").permitAll()
 						.requestMatchers("/api/auth/registrarUsuario").permitAll()
 						.requestMatchers("/api/localidades/registrarLocalidad").permitAll()
+						.requestMatchers("/api/localidades/listarLocalidades").permitAll()
 						.requestMatchers("/api/viajes/registrarViaje").permitAll()
 						.requestMatchers("/api/viajes/listarViajes").permitAll()
 						.anyRequest().authenticated() 

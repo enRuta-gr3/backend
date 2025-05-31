@@ -31,7 +31,7 @@ public class ViajeController {
 	@PostMapping("/registrarViaje")
 	@Operation(summary = "Dar de alta un viaje.", description = "Permite crear un viaje.")
 	public ResponseEntity<?> registrarViaje(@RequestBody DtViaje viaje) {
-		ResultadoOperacion res = serviceViaje.RegistrarViaje(viaje);
+		ResultadoOperacion<?> res = serviceViaje.RegistrarViaje(viaje);
 		if(res.isSuccess()) {
 			System.out.println("*VIAJES* " + res.getMessage());
 			System.out.println("*VIAJES* " + res.getData());
@@ -50,7 +50,7 @@ public class ViajeController {
 	@GetMapping("/listarViajes")
 	@Operation(summary = "Lista los viajes existentes.", description = "Permite listar todos los viajes dados de alta en el sistema.")
 	public ResponseEntity<?> listarViajes() throws NoExistenViajesException {
-		ResultadoOperacion res = serviceViaje.listarViajes();
+		ResultadoOperacion<?> res = serviceViaje.listarViajes();
 		if (res != null && res.isSuccess()) {
 			System.out.println("*VIAJES* " + res.getMessage());
 			System.out.println("*VIAJES* " + res.getData());

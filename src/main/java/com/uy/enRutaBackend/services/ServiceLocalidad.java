@@ -1,11 +1,16 @@
 package com.uy.enRutaBackend.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
+import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Localidad;
+import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceLocalidad;
@@ -15,6 +20,7 @@ import com.uy.enRutaBackend.persistence.LocalidadRepository;
 public class ServiceLocalidad implements IServiceLocalidad {
 
     private final LocalidadRepository repository;
+    private static final String OK_MESSAGE = "Operación realizada con éxito";
 
     @Autowired
     public ServiceLocalidad(LocalidadRepository repository) {
@@ -46,6 +52,21 @@ public class ServiceLocalidad implements IServiceLocalidad {
 		} else {
 			System.out.println("Datos de localidad inválidos.");
 			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
+	
+	@Override
+	public ResultadoOperacion<?> listarLocalidades() {
+		List<DtLocalidad> listLocalidadesDt = new ArrayList<DtLocalidad>();
+		List<Localidad> localidades = (List<Localidad>) repository.findAll();
+		for(Localidad localidad : localidades) {
+			DtLocalidad localidadDt = entityToDt(localidad);
+			listLocalidadesDt.add(localidadDt);
+		}
+		if(listLocalidadesDt.size() > 0) {
+			return new ResultadoOperacion(true, OK_MESSAGE, listLocalidadesDt);			
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
 		}
 	}
 

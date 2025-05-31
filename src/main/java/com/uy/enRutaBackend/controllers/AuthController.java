@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
+import com.uy.enRutaBackend.services.ServiceUsuario;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -18,12 +20,12 @@ import io.swagger.v3.oas.annotations.Operation;
 public class AuthController {
 
     @Autowired
-    private UsuarioController usuarioController ;
+    private IServiceUsuario serviceUsuario ;
 
     @PostMapping("/registrarUsuario")
     @Operation(summary = "Registrar Usuario", description = "Permite registrar un usuario")
-	public ResponseEntity<?> registrarUsuario(@RequestBody DtUsuario usuario) {
-		ResultadoOperacion res = usuarioController.registrarUsuario(usuario);
+	public ResponseEntity<?> registrarUsuario(@RequestBody DtUsuario usuario) throws Exception {
+		ResultadoOperacion<?> res = serviceUsuario.registrarUsuario(usuario);
 		if(res.isSuccess()) {
 			System.out.println("*REGISTRO* " + res.getMessage());
 			System.out.println("*REGISTRO* " + res.getData());
@@ -42,7 +44,7 @@ public class AuthController {
     
     @PostMapping("/iniciarSesion")
     public ResponseEntity<?> login(@RequestBody DtUsuario request) {        	
-    	ResultadoOperacion res = usuarioController.iniciarSesion(request);
+    	ResultadoOperacion<?> res = serviceUsuario.iniciarSesion(request);
     	if(res.isSuccess()) {
     		System.out.println("*LOGIN* " + res.getMessage());
     		return ResponseEntity.status(HttpStatus.OK).body(res);

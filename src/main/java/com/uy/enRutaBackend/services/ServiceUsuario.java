@@ -23,6 +23,8 @@ import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.entities.Vendedor;
+import com.uy.enRutaBackend.errors.ErrorCode;
+import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
@@ -84,8 +86,40 @@ public class ServiceUsuario implements IServiceUsuario {
 		else
 			return false;
 	}
+	
+	public ResultadoOperacion<?> registrarUsuario(DtUsuario usuario) {
+		DtUsuario usuRegistro = new DtUsuario();
+		try {
+			correrValidaciones(usuario);
+			if(usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && (usuario.getEmail() != null && !usuario.getEmail().isEmpty())) {
+				usuRegistro = registrarUsuarioSupabase(usuario);
+				return new ResultadoOperacion(true, "Operación realizada con éxito", usuRegistro);
+			} else {
+				return registrarSinVerificacion(usuario, usuRegistro);
+			}
+		} catch (Exception e){
+			if(e instanceof UsuarioExistenteException) {
+				return new ResultadoOperacion(false, ErrorCode.YA_EXISTE.getMsg(), e.getMessage());
+			} else {
+				return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), e.getMessage());
+			}		
+		}
+    }
 
-	public DtUsuario registrarUsuario(DtUsuario usuario) throws Exception {
+	private ResultadoOperacion<?> registrarSinVerificacion(DtUsuario usuario, DtUsuario usuRegistro) {
+		try {
+			usuRegistro = registrarUsuarioSinVerificacion(usuario);
+			return new ResultadoOperacion(true, "Operación realizada con éxito", usuRegistro);
+		} catch (Exception e){
+			if(e instanceof UsuarioExistenteException) {
+				return new ResultadoOperacion(false, ErrorCode.YA_EXISTE.getMsg(), e.getMessage());
+			} else {
+				return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), e.getMessage());
+			}		
+		}
+	}
+
+	private DtUsuario registrarUsuarioSupabase(DtUsuario usuario) throws Exception {
 		try {
 			JSONObject body = completarData(usuario);
 
@@ -141,10 +175,11 @@ public class ServiceUsuario implements IServiceUsuario {
 			
 		} else if (respuestaJson.has("msg") && respuestaJson.getString("msg").contains("already registered")) {
 			UUID idExistente = buscarUUIDPorEmail(usuario.getEmail());
-			
 			if (idExistente != null) {
+				throw new UsuarioExistenteException("El usuario con email " + usuario.getEmail() + " ya existe.");
+			} else {
+				throw new Exception(respuestaJson.getString("msg"));
 			}
-			throw new UsuarioExistenteException("El usuario con email " + usuario.getEmail() + " ya existe.");
 		} else {
 			throw new Exception(respuestaJson.getString("msg"));
 		}
@@ -166,7 +201,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		Usuario usuarioCrear = dtToEntity(usuario);
 
 		repository.save(usuarioCrear);
-		return entityToDtAMostrar(usuarioCrear);
+		return entityToDtRegistroLogin(usuarioCrear);
 	}
 
 	private void verificarDescuento(DtUsuario usuario) {
@@ -221,30 +256,44 @@ public class ServiceUsuario implements IServiceUsuario {
 		return null;
 	}
 
-	public JSONObject iniciarSesion(DtUsuario request) {
+	public ResultadoOperacion<?> iniciarSesion(DtUsuario request) {
 		JSONObject json = new JSONObject();
+		
 		if (request.getEmail().contains("@") && repository.findByEmail(request.getEmail()) instanceof Cliente) {
 			try {
 				HttpResponse<String> response = iniciarSesionSupabase(request.getEmail(), request.getContraseña());
 				if (response.statusCode() == 200) {
 					json = new JSONObject(response.body());
-					log.info(json.toString());
+					Usuario solicitante = repository.findByEmail(request.getEmail());
+					String tok = json.getString("access_token");
+					
+					JSONObject dtUsuJson = dtUsuJson(entityToDtRegistroLogin(solicitante));
+					
+					 JSONObject jsonRes = new JSONObject();
+					 jsonRes.put("access_token", tok);
+					 jsonRes.put("DtUsuario", dtUsuJson);
+					
+					log.info(jsonRes.toString());
+					return new ResultadoOperacion(true, "Usuario logueado correctamente", jsonRes);
 				} else {
-					log.error("Error en login: " + json.toString());
+					log.error("Error en login: " + json);
+					return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), json);
 				}
-
 			} catch (Exception e) {
 				log.error("Error en login: " + e.getMessage());
+				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e);
 			}
 		} else {
-			String tok = authenticate(request);
-			json = new JSONObject("{ \"access_token\":" + tok + "}");
+			json = authenticate(request);
+			if(json.has("error") && json.getString("error").contains("Credenciales inválidas"))
+				return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(), "Usuario o contraseña incorrectos");
+			else
+				return new ResultadoOperacion(true, "Usuario logueado correctamente", json);
 		}
-
-		return json;
+		
 	}
 
-	private String authenticate(DtUsuario request) {		
+	private JSONObject authenticate(DtUsuario request) {		
 		Usuario solicitante;
 		if(request.getEmail() != null && request.getEmail().contains("@"))
 			solicitante = repository.findByEmail(request.getEmail());
@@ -252,9 +301,52 @@ public class ServiceUsuario implements IServiceUsuario {
 			solicitante = repository.findByCi(request.getEmail());
 		
 		if(solicitante == null || !passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
-			throw new RuntimeException("Credenciales inválidas");
+			JSONObject json = new JSONObject("{ \"error\":\"Credenciales inválidas\" }");
+		} else {
+			String tok = jwtManager.generateToken(solicitante);
+			 JSONObject dtUsuJson = dtUsuJson(entityToDtRegistroLogin(solicitante));
+			
+			 JSONObject jsonRes = new JSONObject();
+			 jsonRes.put("access_token", tok);
+			 jsonRes.put("DtUsuario", dtUsuJson);
+					 
+					 //new JSONObject("{ \"access_token\":" + tok + "}");
+			 
+			// JSONObject jsontokf = jsontok.append("dtUsuario", entityToDtRegistroLogin(solicitante));
+			 return jsonRes;
 		}
-		return jwtManager.generateToken(solicitante);
+		return null;
+	}
+
+	
+	
+	private JSONObject dtUsuJson(DtUsuario dtUsu) {
+		JSONObject dtUsuJson = new JSONObject();
+		dtUsuJson.put("tipo_usuario", dtUsu.getTipo_usuario());
+		dtUsuJson.put("nombres", dtUsu.getNombres());
+		dtUsuJson.put("apellidos", dtUsu.getApellidos());
+		dtUsuJson.put("ci", dtUsu.getCi());
+		dtUsuJson.put("email", dtUsu.getEmail());
+
+		return dtUsuJson;
+	}
+
+	//" \"dtUsuario\":" + entityToDtRegistroLogin(solicitante)
+	private DtUsuario entityToDtRegistroLogin(Usuario solicitante) {
+		return new DtUsuario(definirTipoUsuario(solicitante), solicitante.getCi(), 
+				solicitante.getNombres(), solicitante.getApellidos(), solicitante.getEmail());
+	}
+
+	private String definirTipoUsuario(Usuario solicitante) {
+		String tipo = new String();
+		if(solicitante instanceof Cliente)
+			tipo = "CLIENTE";
+		 else if(solicitante instanceof Administrador)
+			 tipo = "ADMINISTRADOR";
+		 else if(solicitante instanceof Vendedor)
+			 tipo = "VENDEDOR";
+		return tipo;
+		
 	}
 
 	private HttpResponse<String> iniciarSesionSupabase(String email, String password)

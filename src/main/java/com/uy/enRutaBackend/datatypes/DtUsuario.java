@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtUsuario {
     
 	private String tipo_usuario;
@@ -41,6 +43,14 @@ public class DtUsuario {
     
     
     public DtUsuario() {}
+    
+    public DtUsuario(String tipo_usuario, String ci, String nombres, String apellidos, String email) {
+    	this.tipo_usuario = tipo_usuario;
+    	this.ci = ci;
+    	this.nombres = nombres;
+    	this.apellidos = apellidos;
+    	this.email = email;
+    }
     
     public DtUsuario(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
     	this.tipo_usuario = tipo_usuario;

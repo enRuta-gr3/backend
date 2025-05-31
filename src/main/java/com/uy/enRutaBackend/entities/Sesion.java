@@ -28,7 +28,7 @@ public class Sesion {
 	private Usuario usuario;
 	
 	@Column(name = "token")
-	private String token;
+	private String access_token;
 	
 	@Column(name = "fecha_inicio_sesion")
 	private Date fechaInicioSesion;

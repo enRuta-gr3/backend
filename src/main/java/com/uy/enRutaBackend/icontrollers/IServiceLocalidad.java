@@ -8,4 +8,6 @@ public interface IServiceLocalidad {
 	
 	public ResultadoOperacion<?> RegistrarLocalidad(DtLocalidad localidadDt);
 
+	public ResultadoOperacion<?> listarLocalidades();
+
 }
