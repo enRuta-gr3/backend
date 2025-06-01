@@ -1,4 +1,4 @@
-package com.uy.enRutaBackend.services;
+package com.uy.enRutaBackend.icontrollers;
 
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;

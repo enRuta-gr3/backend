@@ -88,7 +88,7 @@ public class MOSTRARDATOS {
             Omnibus omnibusAsignado = i <= 3 ? bus1 : bus2;
 
             Asiento asiento = new Asiento(i, omnibusAsignado, pasajes, disAsientoViajes);
-            servicioAsiento.RegistrarAsiento(asiento);
+//            servicioAsiento.RegistrarAsiento(asiento);
         }
 
         // Registrar Viajes (ajustados al nuevo constructor)

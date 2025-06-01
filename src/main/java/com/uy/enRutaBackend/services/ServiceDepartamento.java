@@ -11,6 +11,7 @@ import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.entities.Departamento;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceDepartamento;
 import com.uy.enRutaBackend.persistence.DepartamentoRepository;
 
 @Service

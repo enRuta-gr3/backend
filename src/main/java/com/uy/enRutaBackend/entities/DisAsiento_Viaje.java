@@ -10,8 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "DisAsiento_Viaje")
 public class DisAsiento_Viaje {
 	
@@ -31,21 +35,7 @@ public class DisAsiento_Viaje {
 	@Enumerated(EnumType.STRING)
 	private EstadoAsiento estado;
 	
-	
-	public Asiento getAsiento() {
-	    return asiento;
-	}
-
-	public void setAsiento(Asiento asiento) {
-	    this.asiento = asiento;
-	}
-
-	public Viaje getViaje() {
-	    return viaje;
-	}
-
-	public void setViaje(Viaje viaje) {
-	    this.viaje = viaje;
-	}
+	@Column(nullable = true)
+	private String idBloqueo;
 
 }

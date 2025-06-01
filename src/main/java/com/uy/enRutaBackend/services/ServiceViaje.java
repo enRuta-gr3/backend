@@ -13,6 +13,8 @@ import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.entities.DisAsiento_Viaje;
+import com.uy.enRutaBackend.entities.EstadoAsiento;
 import com.uy.enRutaBackend.entities.EstadoViaje;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
@@ -23,6 +25,7 @@ import com.uy.enRutaBackend.exceptions.NoExistenViajesException;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
 import com.uy.enRutaBackend.persistence.DisAsientoViajeRepository;
+import com.uy.enRutaBackend.persistence.OmnibusRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
 import com.uy.enRutaBackend.utils.UtilsClass;
 
@@ -38,13 +41,15 @@ public class ServiceViaje implements IServiceViaje {
     private final ViajeRepository vRepository;
     private final DisAsientoViajeRepository disAsientosRepository;
     private final AsientoRepository asientoRepository;
+    private final OmnibusRepository omnibusRepository;
     private final UtilsClass utils;
   
     @Autowired
-    public ServiceViaje(ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, UtilsClass utils) {
+    public ServiceViaje(ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, OmnibusRepository omnibusRepository, UtilsClass utils) {
 		this.vRepository = vRepository;
 		this.disAsientosRepository = disAsientosRepository;
 		this.asientoRepository = asientoRepository;
+		this.omnibusRepository = omnibusRepository;
 		this.utils = utils;
 	}
 
@@ -57,6 +62,7 @@ public class ServiceViaje implements IServiceViaje {
 			Viaje creado = vRepository.save(aCrear);		
 			if (creado != null) {
 				DtViaje creadoDt = entityToDt(creado);
+				cargarTablaControlDisponibilidad(creado);
 				System.out.println("Viaje registrado y persistido correctamente.");
 				return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
 			} else {
@@ -69,6 +75,17 @@ public class ServiceViaje implements IServiceViaje {
 		}
     }
 	
+	private void cargarTablaControlDisponibilidad(Viaje viaje) {
+		Omnibus omnibus = (omnibusRepository.findById(viaje.getOmnibus().getId_omnibus())).get();
+		for(Asiento asiento : asientoRepository.findByOmnibus(omnibus)) {
+			DisAsiento_Viaje disponibilidad = new DisAsiento_Viaje();
+			disponibilidad.setAsiento(asiento);
+			disponibilidad.setViaje(viaje);
+			disponibilidad.setEstado(EstadoAsiento.LIBRE);
+			disAsientosRepository.save(disponibilidad);
+		}
+	}
+
 	private ResultadoOperacion<?> validarInicioFin() {
 		// TODO Auto-generated method stub
 		return null;
@@ -113,15 +130,7 @@ public class ServiceViaje implements IServiceViaje {
 	}
 	
 	private int calcularAsientos(Viaje viaje) {
-		int ocupados = 0;
-		int capacidad = viaje.getOmnibus().getCapacidad();
-		List<Asiento> asientos = asientoRepository.findByOmnibus(viaje.getOmnibus());
-		for(Asiento asiento : asientos) {
-			if(disAsientosRepository.findByAsientoAndViaje(asiento, viaje) != null) {
-				ocupados = ocupados + 1;				
-			}
-		}
-		return capacidad - ocupados;
+		return disAsientosRepository.countByViajeAndEstado(viaje, EstadoAsiento.LIBRE);
 	}
 
 	private DtOmnibus getDtOmnibus(Omnibus omnibus) {
@@ -131,9 +140,8 @@ public class ServiceViaje implements IServiceViaje {
 			mapper.skip(DtOmnibus::setHistorico_estado);
 			mapper.skip(DtOmnibus::setActivo);
 			mapper.skip(DtOmnibus::setFecha_fin);
-			mapper.skip(DtOmnibus::setAsientos);
 			mapper.skip(DtOmnibus::setViajes);
-			//mapper.skip(DtOmnibus::setId_omnibus);
+			mapper.skip(DtOmnibus::setId_omnibus);
 		});
 		return modelMapper.map(omnibus, DtOmnibus.class);
 	}
@@ -147,7 +155,6 @@ public class ServiceViaje implements IServiceViaje {
 
 	private Viaje dtToEntity(DtViaje viajeDt) {
 		ModelMapper modelMapper = new ModelMapper();
-		//TODO implementar mapeo de dt a entidad
 		Viaje aCrear = new Viaje();
 		aCrear.setFecha_partida(Date.valueOf(viajeDt.getFecha_partida()));
 		aCrear.setFecha_llegada(Date.valueOf(viajeDt.getFecha_llegada()));

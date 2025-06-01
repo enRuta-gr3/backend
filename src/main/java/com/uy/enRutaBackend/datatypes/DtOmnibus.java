@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtOmnibus {
 
+	private int id_omnibus;
     private int capacidad;
     private int nro_coche;
     private boolean activo;
@@ -20,7 +21,22 @@ public class DtOmnibus {
 
     public DtOmnibus() {}
 
-    public DtOmnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, int id_localidad_actual,
+    public DtOmnibus(int id_omnibus, int capacidad, int nro_coche, boolean activo, Date fecha_fin,
+			int id_localidad_actual, List<DtAsiento> asientos, List<DtViaje> viajes,
+			List<DtHistoricoEstado> historico_estado) {
+		super();
+		this.id_omnibus = id_omnibus;
+		this.capacidad = capacidad;
+		this.nro_coche = nro_coche;
+		this.activo = activo;
+		this.fecha_fin = fecha_fin;
+		this.id_localidad_actual = id_localidad_actual;
+		this.asientos = asientos;
+		this.viajes = viajes;
+		this.historico_estado = historico_estado;
+	}
+
+	public DtOmnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, int id_localidad_actual,
                      List<DtAsiento> asientos, List<DtViaje> viajes, List<DtHistoricoEstado> historico_estado) {
         this.capacidad = capacidad;
         this.nro_coche = nro_coche;
@@ -95,4 +111,12 @@ public class DtOmnibus {
     public void setHistorico_estado(List<DtHistoricoEstado> historico_estado) {
         this.historico_estado = historico_estado;
     }
+
+	public int getId_omnibus() {
+		return id_omnibus;
+	}
+
+	public void setId_omnibus(int id_omnibus) {
+		this.id_omnibus = id_omnibus;
+	}
 }

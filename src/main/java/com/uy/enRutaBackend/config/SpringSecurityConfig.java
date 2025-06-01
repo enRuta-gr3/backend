@@ -32,6 +32,8 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/viajes/listarViajes").permitAll()
 						.requestMatchers("/api/omnibus/registrar").permitAll()
 						.requestMatchers("/api/omnibus/listar").permitAll()
+						.requestMatchers("/api/asientos/listarAsientos").permitAll()
+						.requestMatchers("/api/asientos/bloquearAsientos").permitAll()
 						.anyRequest().authenticated() 
 				);
 		return http.build();

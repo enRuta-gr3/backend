@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
-import com.uy.enRutaBackend.services.IServiceDepartamento;
+import com.uy.enRutaBackend.icontrollers.IServiceDepartamento;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -24,19 +24,19 @@ public class DepartamentoController {
 	}
 	
 	@GetMapping("/listarDepartamentos")
-	@Operation(summary = "Lista las departamentos.", description = "Permite listar todos los departamentos.")
+	@Operation(summary = "Lista los departamentos.", description = "Permite listar todos los departamentos.")
 	public ResponseEntity<?> listarDepartamentos() {
 		ResultadoOperacion<DtDepartamento> res = serviceDepto.listarDepartamentos();
 		if (res != null && res.isSuccess()) {
-			System.out.println("*DEPARTAMENTOS - Crear* " + res.getMessage());
-			System.out.println("*DEPARTAMENTOS* " + res.getData());
+			System.out.println("*DEPARTAMENTOS - listar* " + res.getMessage());
+			System.out.println("*DEPARTAMENTOS - listar* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
 				System.out.println("*DEPARTAMENTOS - listar* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
 			} else {
-				System.out.println("*DEPARTAMENTOS* " + res.getMessage());
+				System.out.println("*DEPARTAMENTOS - listar* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 			}
 		}

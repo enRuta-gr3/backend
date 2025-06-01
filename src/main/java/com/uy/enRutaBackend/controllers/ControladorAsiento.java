@@ -6,12 +6,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.datatypes.DtViaje;
+import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceAsiento;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
-//@RequestMapping("/api/asientos")
+@RequestMapping("/api/asientos")
 public class ControladorAsiento {
 
     private final IServiceAsiento serviceAsiento;
@@ -20,20 +23,22 @@ public class ControladorAsiento {
         this.serviceAsiento = serviceAsiento;
     }
 
-   
-    public ResponseEntity<?> registrarAsiento(@org.springframework.web.bind.annotation.RequestBody Asiento asiento) {
-//        ResultadoOperacion<Asiento> resultado = serviceAsiento.RegistrarAsiento(asiento);
-//
-//        if (resultado.isSuccess()) {
-//            return ResponseEntity.ok(resultado);
-//        } else {
-//            HttpStatus status = switch (resultado.getErrorCode()) {
-//                case "DATOS_INVALIDOS" -> HttpStatus.BAD_REQUEST;
-//                case "ERROR_PERSISTENCIA" -> HttpStatus.INTERNAL_SERVER_ERROR;
-//                default -> HttpStatus.BAD_REQUEST;
-//            };
-//            return ResponseEntity.status(status).body(resultado);
-//        }
-    	return null;
+    @PostMapping("/listarAsientos")
+    @Operation(summary = "Lista los asientos de un ómnibus asociado a un viaje.")
+    public ResponseEntity<?> listarAsientos(DtViaje viaje) {
+    	ResultadoOperacion<?> res = serviceAsiento.listarAsientosDeOmnibus(viaje);
+    	if (res != null && res.isSuccess()) {
+			System.out.println("*ASIENTOS - listar por omnibus* " + res.getMessage());
+			System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
+			return ResponseEntity.ok(res);
+		} else {
+			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
+				System.out.println("*ASIENTOS - listar por omnibus* " + res.getMessage());
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
+			} else {
+				System.out.println("*ASIENTOS - listar por omnibus* " + res.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+			}
+		}
     }
 }
