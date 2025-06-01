@@ -25,6 +25,7 @@ public class SpringSecurityConfig {
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().requestMatchers("/auth-controller/login").permitAll().requestMatchers("/public/**").permitAll()
 						.requestMatchers("/api/auth/iniciarSesion").permitAll()
 						.requestMatchers("/api/auth/registrarUsuario").permitAll()
+						.requestMatchers("/api/departamentos/listarDepartamentos").permitAll()
 						.requestMatchers("/api/localidades/registrarLocalidad").permitAll()
 						.requestMatchers("/api/localidades/listarLocalidades").permitAll()
 						.requestMatchers("/api/viajes/registrarViaje").permitAll()
