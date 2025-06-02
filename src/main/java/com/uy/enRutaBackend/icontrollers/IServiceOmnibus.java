@@ -8,6 +8,6 @@ import com.uy.enRutaBackend.errors.ResultadoOperacion;
 public interface IServiceOmnibus {
 	
 	ResultadoOperacion<DtOmnibus> registrarOmnibus(DtOmnibus dto);
-	List<DtOmnibus> listarOmnibus();
+	ResultadoOperacion<List<DtOmnibus>> listarOmnibus();
 
 }

@@ -86,13 +86,24 @@ public class ServiceOmnibus implements IServiceOmnibus{
         }
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public List<DtOmnibus> listarOmnibus() {
-        List<Omnibus> lista = (List<Omnibus>) omnibusRepository.findAll();
+    public ResultadoOperacion<List<DtOmnibus>> listarOmnibus() {
+        try {
+            List<Omnibus> lista = (List<Omnibus>) omnibusRepository.findAll();
 
-        return lista.stream()
+            if (lista.isEmpty()) {
+                return new ResultadoOperacion<>(false, "No hay ómnibus registrados", ErrorCode.LISTA_VACIA);
+            }
+
+            List<DtOmnibus> dtLista = lista.stream()
                     .map(this::entityToDto)
                     .toList();
+
+            return new ResultadoOperacion<>(true, "Ómnibus listados correctamente", dtLista);
+        } catch (Exception e) {
+            return new ResultadoOperacion<>(false, "Error al listar ómnibus: " + e.getMessage(), ErrorCode.ERROR_LISTADO);
+        }
     }
     
     private Omnibus dtoToEntity(DtOmnibus dto) {

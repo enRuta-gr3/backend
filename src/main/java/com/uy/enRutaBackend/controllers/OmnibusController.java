@@ -1,6 +1,7 @@
 package com.uy.enRutaBackend.controllers;
 
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
+import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 
@@ -30,8 +31,17 @@ public class OmnibusController {
     }
     
     @GetMapping("/listar")
-    public ResponseEntity<List<DtOmnibus>> listarOmnibus() {
-        List<DtOmnibus> omnibus = omnibusService.listarOmnibus();
-        return ResponseEntity.ok(omnibus);
+    public ResponseEntity<ResultadoOperacion<List<DtOmnibus>>> listarOmnibus() {
+        ResultadoOperacion<List<DtOmnibus>> resultado = omnibusService.listarOmnibus();
+
+        if (!resultado.isSuccess()) {
+            if (resultado.getErrorCode() == ErrorCode.LISTA_VACIA) {
+                return ResponseEntity.status(204).body(resultado); // 204 No Content
+            } else {
+                return ResponseEntity.status(500).body(resultado); // 500 Error interno
+            }
+        }
+
+        return ResponseEntity.ok(resultado); // 200 OK
     }
 }
