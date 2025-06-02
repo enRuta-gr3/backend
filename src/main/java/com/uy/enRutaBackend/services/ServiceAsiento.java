@@ -85,10 +85,8 @@ public class ServiceAsiento implements IServiceAsiento {
     			
     			return new ResultadoOperacion(true, "Asientos bloqueados correctamente", aMostrar);    			
     		} else {
-    			procesarAsientosLibres(paraCambiar, asientosOcupados);
-    			//tomar los asientos libres de paraCambiar en una nueva lista
-    			//ir a cambiar el estado de los q esta en la nueva lista
-    			//agregar en aMostrar, los de la nueva lista y los de ocupados.
+    			procesarAsientosLibres(paraCambiar, asientosOcupados, aMostrar);
+    			
     			return new ResultadoOperacion(false, "Algunos asientos están ocupados.", aMostrar);
     		}
     	} catch (Exception e) {
@@ -97,19 +95,24 @@ public class ServiceAsiento implements IServiceAsiento {
     }
 
 
-	private void procesarAsientosLibres(List<DtDisAsiento> paraCambiar, List<DtDisAsiento> asientosOcupados) {
-		// TODO Auto-generated method stub
+	private void procesarAsientosLibres(List<DtDisAsiento> paraCambiar, List<DtDisAsiento> asientosOcupados, List<DtDisAsiento> aMostrar) {
+		List<DtDisAsiento> aProcesar = paraCambiar.stream().filter(e -> !asientosOcupados.contains(e)).collect(Collectors.toList());
+		cambiarEstadoAsientos(aProcesar, EstadoAsiento.OCUPADO);
+		
+		aMostrar.addAll(aProcesar);
+		aMostrar.addAll(asientosOcupados);
 		
 	}
 
 	private List<DtDisAsiento> asientosOcupados(List<DtDisAsiento> paraCambiar) {
 		List<DtDisAsiento> ocupadosDt = new ArrayList<DtDisAsiento>();
 		Viaje viaje = (viajeRepository.findById(paraCambiar.get(0).getViaje().getId_viaje())).get();
-		List<DisAsiento_Viaje> ocupados = asientoViajeRepository.findByViaje(viaje);
+		List<DisAsiento_Viaje> ocupados = asientoViajeRepository.findByViajeAndEstado(viaje, EstadoAsiento.OCUPADO);
 		if(ocupados != null && !ocupados.isEmpty()) {
 			for(DisAsiento_Viaje ocupado : ocupados) {
 				for(DtDisAsiento solicitado : paraCambiar) {
-					if(ocupado.getId_disAsiento() == solicitado.getId_disAsiento()) {
+					if(ocupado.getId_disAsiento() == solicitado.getId_disAsiento() 
+							&& ocupado.getIdBloqueo() != solicitado.getIdBloqueo()) {
 						solicitado.setEstado(EstadoAsiento.OCUPADO);
 						solicitado.setIdBloqueo(null);
 						ocupadosDt.add(solicitado);
