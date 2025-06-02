@@ -17,4 +17,5 @@ public interface DisAsientoViajeRepository extends CrudRepository<DisAsiento_Via
 	Object findByAsientoAndViaje(Asiento asiento, Viaje viaje);
 	int countByViajeAndEstado(Viaje viaje, EstadoAsiento libre);
 	List<DisAsiento_Viaje> findByViajeAndIdBloqueo(Viaje viaje, String idBloqueo);
+	List<DisAsiento_Viaje> findByViaje(Viaje viaje);
 }

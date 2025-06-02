@@ -74,17 +74,51 @@ public class ServiceAsiento implements IServiceAsiento {
     @Override
     public ResultadoOperacion<?> cambiarEstadoDisponibilidad(List<DtDisAsiento> paraCambiar) {
     	try {
-    		validarDesbloquearBloqueado(paraCambiar);
-    		
-    		cambiarEstadoAsientos(paraCambiar, EstadoAsiento.OCUPADO);
-    		
-    		List<DtDisAsiento> aMostrar = setearNuevoEstado(paraCambiar, EstadoAsiento.OCUPADO);
-    		
-    		return new ResultadoOperacion(true, "Asientos bloqueados correctamente", aMostrar);
+    		List<DtDisAsiento> asientosOcupados = asientosOcupados(paraCambiar);
+    		List<DtDisAsiento> aMostrar = new ArrayList<DtDisAsiento>();
+    		if(asientosOcupados == null || asientosOcupados.size() == 0) {
+    			validarDesbloquearBloqueado(paraCambiar);
+    			
+    			cambiarEstadoAsientos(paraCambiar, EstadoAsiento.OCUPADO);
+    			
+    			aMostrar = setearNuevoEstado(paraCambiar, EstadoAsiento.OCUPADO);
+    			
+    			return new ResultadoOperacion(true, "Asientos bloqueados correctamente", aMostrar);    			
+    		} else {
+    			procesarAsientosLibres(paraCambiar, asientosOcupados);
+    			//tomar los asientos libres de paraCambiar en una nueva lista
+    			//ir a cambiar el estado de los q esta en la nueva lista
+    			//agregar en aMostrar, los de la nueva lista y los de ocupados.
+    			return new ResultadoOperacion(false, "Algunos asientos están ocupados.", aMostrar);
+    		}
     	} catch (Exception e) {
 			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e.getLocalizedMessage());
 		} 
     }
+
+
+	private void procesarAsientosLibres(List<DtDisAsiento> paraCambiar, List<DtDisAsiento> asientosOcupados) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private List<DtDisAsiento> asientosOcupados(List<DtDisAsiento> paraCambiar) {
+		List<DtDisAsiento> ocupadosDt = new ArrayList<DtDisAsiento>();
+		Viaje viaje = (viajeRepository.findById(paraCambiar.get(0).getViaje().getId_viaje())).get();
+		List<DisAsiento_Viaje> ocupados = asientoViajeRepository.findByViaje(viaje);
+		if(ocupados != null && !ocupados.isEmpty()) {
+			for(DisAsiento_Viaje ocupado : ocupados) {
+				for(DtDisAsiento solicitado : paraCambiar) {
+					if(ocupado.getId_disAsiento() == solicitado.getId_disAsiento()) {
+						solicitado.setEstado(EstadoAsiento.OCUPADO);
+						solicitado.setIdBloqueo(null);
+						ocupadosDt.add(solicitado);
+					}
+				}
+			}
+		}
+		return ocupadosDt;
+	}
 
 	private List<DtDisAsiento> setearNuevoEstado(List<DtDisAsiento> paraCambiar, EstadoAsiento estado) {
 		List<DtDisAsiento> aMostrar = new ArrayList<DtDisAsiento>();
@@ -96,7 +130,6 @@ public class ServiceAsiento implements IServiceAsiento {
 	}
 
 	private void validarDesbloquearBloqueado(List<DtDisAsiento> paraCambiar) {
-//		List<DtDisAsiento> aDesbloquear = new ArrayList<DtDisAsiento>();
 		Viaje viaje = (viajeRepository.findById(paraCambiar.get(0).getViaje().getId_viaje())).get();
 		List<DisAsiento_Viaje> bloqueadosParaElCliente = asientoViajeRepository.findByViajeAndIdBloqueo(viaje,
 				paraCambiar.get(0).getIdBloqueo());
@@ -122,6 +155,8 @@ public class ServiceAsiento implements IServiceAsiento {
 			aCambiar.setEstado(estado);
 			if(estado.equals(EstadoAsiento.LIBRE)) {
 				aCambiar.setIdBloqueo(null);
+			} else {
+				aCambiar.setIdBloqueo(asiento.getIdBloqueo());
 			}
 			asientoViajeRepository.save(aCambiar);
 		}		

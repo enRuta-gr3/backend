@@ -44,8 +44,9 @@ public class DtUsuario {
     
     public DtUsuario() {}
     
-    public DtUsuario(String tipo_usuario, String ci, String nombres, String apellidos, String email) {
+    public DtUsuario(String tipo_usuario, UUID uuidAuth, String ci, String nombres, String apellidos, String email) {
     	this.tipo_usuario = tipo_usuario;
+    	this.uuidAuth = uuidAuth;
     	this.ci = ci;
     	this.nombres = nombres;
     	this.apellidos = apellidos;

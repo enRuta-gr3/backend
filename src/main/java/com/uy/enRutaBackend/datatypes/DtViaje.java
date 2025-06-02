@@ -22,23 +22,7 @@ public class DtViaje {
 	private int asientosDisponibles;
 	
 	public DtViaje() {}
-	
-	public DtViaje(int id_viaje, String fecha_partida, String hora_partida, String fecha_llegada, String hora_llegada,
-			double precio_viaje, String estado, DtLocalidad localidadOrigen, DtLocalidad localidadDestino,
-			DtOmnibus omnibus) {
-		this.id_viaje = id_viaje;
-		this.fecha_partida = fecha_partida;
-		this.hora_partida = hora_partida;
-		this.fecha_llegada = fecha_llegada;
-		this.hora_llegada = hora_llegada;
-		this.precio_viaje = precio_viaje;
-		this.estado = estado;
-		this.localidadOrigen = localidadOrigen;
-		this.localidadDestino = localidadDestino;
-		this.omnibus = omnibus;
-		this.asientosDisponibles = omnibus.getCapacidad();
-	}
-	
+		
 	public DtViaje(String fecha_partida, String hora_partida, String fecha_llegada, String hora_llegada,
 			double precio_viaje, String estado, DtLocalidad localidadOrigen, DtLocalidad localidadDestino,
 			DtOmnibus omnibus) {
@@ -54,6 +38,21 @@ public class DtViaje {
 		this.asientosDisponibles = omnibus.getCapacidad();
 	}
 
+	public DtViaje(int id_viaje, String fecha_partida, String hora_partida, String fecha_llegada, String hora_llegada,
+			double precio_viaje, String estado, DtLocalidad localidadOrigen, DtLocalidad localidadDestino,
+			DtOmnibus omnibus) {
+		this.id_viaje = id_viaje;
+		this.fecha_partida = fecha_partida;
+		this.hora_partida = hora_partida;
+		this.fecha_llegada = fecha_llegada;
+		this.hora_llegada = hora_llegada;
+		this.precio_viaje = precio_viaje;
+		this.estado = estado;
+		this.localidadOrigen = localidadOrigen;
+		this.localidadDestino = localidadDestino;
+		this.omnibus = omnibus;
+		this.asientosDisponibles = omnibus.getCapacidad();
+	}
 
 
 	@Override

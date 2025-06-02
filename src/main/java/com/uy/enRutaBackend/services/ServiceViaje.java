@@ -112,8 +112,6 @@ public class ServiceViaje implements IServiceViaje {
 	}
 	
 	private DtViaje entityToDt(Viaje viaje) {
-		ModelMapper modelMapper = new ModelMapper();
-		
 		DtViaje viajeDt = new DtViaje();
 		viajeDt.setId_viaje(viaje.getId_viaje());
 		viajeDt.setFecha_partida(utils.dateToString(viaje.getFecha_partida()));

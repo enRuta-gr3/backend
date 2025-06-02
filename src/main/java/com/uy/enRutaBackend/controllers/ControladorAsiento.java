@@ -29,7 +29,7 @@ public class ControladorAsiento {
 
     @PostMapping("/listarAsientos")
     @Operation(summary = "Lista los asientos de un ómnibus asociado a un viaje.")
-    public ResponseEntity<?> listarAsientos(DtViaje viaje) {
+    public ResponseEntity<?> listarAsientos(@RequestBody DtViaje viaje) {
     	ResultadoOperacion<?> res = serviceAsiento.listarAsientosDeOmnibus(viaje);
     	if (res != null && res.isSuccess()) {
 			System.out.println("*ASIENTOS - listar por omnibus* " + res.getMessage());
