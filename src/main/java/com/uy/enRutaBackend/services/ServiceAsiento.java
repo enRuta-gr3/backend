@@ -1,6 +1,8 @@
 package com.uy.enRutaBackend.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -74,17 +76,55 @@ public class ServiceAsiento implements IServiceAsiento {
     @Override
     public ResultadoOperacion<?> cambiarEstadoDisponibilidad(List<DtDisAsiento> paraCambiar) {
     	try {
-    		validarDesbloquearBloqueado(paraCambiar);
-    		
-    		cambiarEstadoAsientos(paraCambiar, EstadoAsiento.OCUPADO);
-    		
-    		List<DtDisAsiento> aMostrar = setearNuevoEstado(paraCambiar, EstadoAsiento.OCUPADO);
-    		
-    		return new ResultadoOperacion(true, "Asientos bloqueados correctamente", aMostrar);
+    		List<DtDisAsiento> asientosOcupados = asientosOcupados(paraCambiar);
+    		List<DtDisAsiento> aMostrar = new ArrayList<DtDisAsiento>();
+    		if(asientosOcupados == null || asientosOcupados.size() == 0) {
+    			validarDesbloquearBloqueado(paraCambiar);
+    			
+    			cambiarEstadoAsientos(paraCambiar, EstadoAsiento.BLOQUEADO);
+    			
+    			aMostrar = setearNuevoEstado(paraCambiar, EstadoAsiento.BLOQUEADO);
+    			
+    			return new ResultadoOperacion(true, "Asientos bloqueados correctamente", aMostrar);    			
+    		} else {
+    			procesarAsientosLibres(paraCambiar, asientosOcupados, aMostrar);
+    			
+    			return new ResultadoOperacion(false, "Algunos asientos están ocupados.", aMostrar);
+    		}
     	} catch (Exception e) {
 			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e.getLocalizedMessage());
 		} 
     }
+
+
+	private void procesarAsientosLibres(List<DtDisAsiento> paraCambiar, List<DtDisAsiento> asientosOcupados, List<DtDisAsiento> aMostrar) {
+		List<DtDisAsiento> aProcesar = paraCambiar.stream().filter(e -> !asientosOcupados.contains(e)).collect(Collectors.toList());
+		cambiarEstadoAsientos(aProcesar, EstadoAsiento.BLOQUEADO);
+		
+		aMostrar.addAll(aProcesar);
+		aMostrar.addAll(asientosOcupados);
+		
+	}
+
+	private List<DtDisAsiento> asientosOcupados(List<DtDisAsiento> paraCambiar) {
+		List<DtDisAsiento> ocupadosDt = new ArrayList<DtDisAsiento>();
+		Viaje viaje = (viajeRepository.findById(paraCambiar.get(0).getViaje().getId_viaje())).get();
+		List<EstadoAsiento> estados = Arrays.asList(EstadoAsiento.OCUPADO, EstadoAsiento.BLOQUEADO);
+		List<DisAsiento_Viaje> ocupados = asientoViajeRepository.findByViajeAndEstadoIn(viaje, estados);	
+		if(ocupados != null && !ocupados.isEmpty()) {
+			for(DisAsiento_Viaje ocupado : ocupados) {
+				for(DtDisAsiento solicitado : paraCambiar) {
+					if(ocupado.getId_disAsiento() == solicitado.getId_disAsiento() 
+							&& ocupado.getIdBloqueo() != solicitado.getIdBloqueo()) {
+						solicitado.setEstado(ocupado.getEstado());
+						solicitado.setIdBloqueo(null);
+						ocupadosDt.add(solicitado);
+					}
+				}
+			}
+		}
+		return ocupadosDt;
+	}
 
 	private List<DtDisAsiento> setearNuevoEstado(List<DtDisAsiento> paraCambiar, EstadoAsiento estado) {
 		List<DtDisAsiento> aMostrar = new ArrayList<DtDisAsiento>();
@@ -96,10 +136,9 @@ public class ServiceAsiento implements IServiceAsiento {
 	}
 
 	private void validarDesbloquearBloqueado(List<DtDisAsiento> paraCambiar) {
-//		List<DtDisAsiento> aDesbloquear = new ArrayList<DtDisAsiento>();
 		Viaje viaje = (viajeRepository.findById(paraCambiar.get(0).getViaje().getId_viaje())).get();
-		List<DisAsiento_Viaje> bloqueadosParaElCliente = asientoViajeRepository.findByViajeAndIdBloqueo(viaje,
-				paraCambiar.get(0).getIdBloqueo());
+		List<DisAsiento_Viaje> bloqueadosParaElCliente = asientoViajeRepository.findByViajeAndIdBloqueoAndEstado(viaje,
+				paraCambiar.get(0).getIdBloqueo(), EstadoAsiento.BLOQUEADO);
 		if (bloqueadosParaElCliente != null && !bloqueadosParaElCliente.isEmpty()) {
 			List<DtDisAsiento> bloqueadosDt = new ArrayList<DtDisAsiento>();
 			for (DisAsiento_Viaje dispEnBaseLista : bloqueadosParaElCliente) {
@@ -122,6 +161,9 @@ public class ServiceAsiento implements IServiceAsiento {
 			aCambiar.setEstado(estado);
 			if(estado.equals(EstadoAsiento.LIBRE)) {
 				aCambiar.setIdBloqueo(null);
+			} else if (estado.equals(EstadoAsiento.BLOQUEADO)){
+				aCambiar.setIdBloqueo(asiento.getIdBloqueo());
+				aCambiar.setFechaBloqueo(new Date());
 			}
 			asientoViajeRepository.save(aCambiar);
 		}		

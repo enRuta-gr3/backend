@@ -1,5 +1,7 @@
 package com.uy.enRutaBackend.entities;
 
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,12 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
 @Table(name = "DisAsiento_Viaje")
 public class DisAsiento_Viaje {
 	
@@ -37,6 +35,9 @@ public class DisAsiento_Viaje {
 	
 	@Column(nullable = true)
 	private String idBloqueo;
+	
+	@Column(nullable = true)
+	private Date fechaBloqueo;
 
 	public int getId_disAsiento() {
 		return id_disAsiento;
@@ -78,4 +79,11 @@ public class DisAsiento_Viaje {
 		this.idBloqueo = idBloqueo;
 	}
 
+	public Date getFechaBloqueo() {
+		return fechaBloqueo;
+	}
+
+	public void setFechaBloqueo(Date fechaBloqueo) {
+		this.fechaBloqueo = fechaBloqueo;
+	}
 }

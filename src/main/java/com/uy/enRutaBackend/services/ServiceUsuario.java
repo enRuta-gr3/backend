@@ -294,7 +294,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		}
 	}
 
-	private DtSesion authenticate(DtUsuario request) throws Exception {		
+	private DtSesion authenticate(DtUsuario request) throws Exception {
 		Usuario solicitante;
 		DtSesion sesion = new DtSesion();
 		if(request.getEmail() != null && request.getEmail().contains("@"))
@@ -308,24 +308,11 @@ public class ServiceUsuario implements IServiceUsuario {
 			log.info(sesion.toString());
 		}
 			
-		return sesion;		
-	}
-
-	
-	
-	private JSONObject dtUsuJson(DtUsuario dtUsu) {
-		JSONObject dtUsuJson = new JSONObject();
-		dtUsuJson.put("tipo_usuario", dtUsu.getTipo_usuario());
-		dtUsuJson.put("nombres", dtUsu.getNombres());
-		dtUsuJson.put("apellidos", dtUsu.getApellidos());
-		dtUsuJson.put("ci", dtUsu.getCi());
-		dtUsuJson.put("email", dtUsu.getEmail());
-
-		return dtUsuJson;
+		return sesion;
 	}
 
 	private DtUsuario entityToDtRegistroLogin(Usuario solicitante) {
-		return new DtUsuario(definirTipoUsuario(solicitante), solicitante.getCi(), 
+		return new DtUsuario(definirTipoUsuario(solicitante), solicitante.getUuidAuth(), solicitante.getCi(), 
 				solicitante.getNombres(), solicitante.getApellidos(), solicitante.getEmail());
 	}
 

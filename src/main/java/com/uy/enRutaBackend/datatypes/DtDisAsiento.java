@@ -1,13 +1,10 @@
 package com.uy.enRutaBackend.datatypes;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uy.enRutaBackend.entities.EstadoAsiento;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtDisAsiento {	
 	private int id_disAsiento;
@@ -15,6 +12,7 @@ public class DtDisAsiento {
 	private DtViaje viaje;
 	private EstadoAsiento estado;
 	private String idBloqueo;
+	private Date fechaBloqueo;
 	
 	public DtDisAsiento() {}
 	
@@ -73,6 +71,11 @@ public class DtDisAsiento {
 		this.idBloqueo = idBloqueo;
 	}
 
-	
-	
+	public Date getFechaBloqueo() {
+		return fechaBloqueo;
+	}
+
+	public void setFechaBloqueo(Date fechaBloqueo) {
+		this.fechaBloqueo = fechaBloqueo;
+	}	
 }
