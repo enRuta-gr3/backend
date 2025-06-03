@@ -25,7 +25,7 @@ public class Descuento {
     private String tipo;
 
     @Column(name = "porcentaje_descuento", nullable = false)
-    private int porcentaje_descuento;
+    private double porcentaje_descuento;
     
     @OneToMany(mappedBy = "id_venta")
     private List<Venta_Compra> venta_compra;
@@ -48,11 +48,11 @@ public class Descuento {
         this.tipo = tipo;
     }
 
-    public int getPorcentaje_descuento() {
+    public double getPorcentaje_descuento() {
         return porcentaje_descuento;
     }
 
-    public void setPorcentaje_descuento(int porcentaje_descuento) {
+    public void setPorcentaje_descuento(double porcentaje_descuento) {
         this.porcentaje_descuento = porcentaje_descuento;
     }
     

@@ -19,7 +19,47 @@ import lombok.Setter;
 @Table(name = "DisAsiento_Viaje")
 public class DisAsiento_Viaje {
 	
-    @Id
+    public int getId_disAsiento() {
+		return id_disAsiento;
+	}
+
+	public void setId_disAsiento(int id_disAsiento) {
+		this.id_disAsiento = id_disAsiento;
+	}
+
+	public Asiento getAsiento() {
+		return asiento;
+	}
+
+	public void setAsiento(Asiento asiento) {
+		this.asiento = asiento;
+	}
+
+	public Viaje getViaje() {
+		return viaje;
+	}
+
+	public void setViaje(Viaje viaje) {
+		this.viaje = viaje;
+	}
+
+	public EstadoAsiento getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoAsiento estado) {
+		this.estado = estado;
+	}
+
+	public String getIdBloqueo() {
+		return idBloqueo;
+	}
+
+	public void setIdBloqueo(String idBloqueo) {
+		this.idBloqueo = idBloqueo;
+	}
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_disAsiento")
 	private int id_disAsiento;

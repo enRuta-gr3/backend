@@ -9,5 +9,7 @@ import com.uy.enRutaBackend.entities.Cliente;
 
 @Repository
 public interface ClienteRepository extends CrudRepository<Cliente, UUID>{
+	
+	Cliente findByUuidAuth(UUID uuidAuth);
 
 }
