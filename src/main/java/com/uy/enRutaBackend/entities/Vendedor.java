@@ -17,13 +17,15 @@ public class Vendedor extends Usuario {
     public Vendedor(String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion) {
     	super(ci, nombres, apellidos, email, contraseña, fecha_nacimiento, eliminado, ultimo_inicio_sesion, fecha_creacion);
     }
-    
-    public List<Venta_Compra> getVentas() {
-        return ventas;
-    }
 
-    public void setVentas(List<Venta_Compra> ventas) {
-        this.ventas = ventas;
-    }
+	public List<Venta_Compra> getVentas() {
+		return ventas;
+	}
+
+	public void setVentas(List<Venta_Compra> ventas) {
+		this.ventas = ventas;
+	}
+    
+
 }
 

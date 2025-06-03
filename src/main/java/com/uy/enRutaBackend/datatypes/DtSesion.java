@@ -3,7 +3,6 @@ package com.uy.enRutaBackend.datatypes;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.uy.enRutaBackend.entities.Usuario;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -68,6 +67,5 @@ public class DtSesion {
 	public void setVigencia(int vigencia) {
 		this.vigencia = vigencia;
 	}
-
 
 }

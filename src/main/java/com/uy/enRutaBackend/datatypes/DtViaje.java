@@ -4,11 +4,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtViaje {
+
+
+
 	private int id_viaje;
 	private String fecha_partida;
 	private String hora_partida;
 	private String fecha_llegada;
 	private String hora_llegada;
+	private int cantidad; /*Usado para el calculo de costos indica la cantidad de asientos vendidos en una venta para un viaje */
 	private double precio_viaje;
 	private String estado;
 	private DtLocalidad localidadOrigen;
@@ -98,6 +102,14 @@ public class DtViaje {
 		this.hora_llegada = hora_llegada;
 	}
 
+	public int getCantidad() {
+		return cantidad;
+	}
+
+	public void setCantidad(int cantidad) {
+		this.cantidad = cantidad;
+	}
+
 	public double getPrecio_viaje() {
 		return precio_viaje;
 	}
@@ -146,3 +158,5 @@ public class DtViaje {
 		this.asientosDisponibles = asientosDisponibles;
 	}
 }
+
+
