@@ -32,30 +32,48 @@ public class Cliente extends Usuario {
     	this.esJubilado = esJubilado;
     	this.estado_descuento = estado_descuento;
     }
+
+	public List<Venta_Compra> getCompras() {
+		return compras;
+	}
+
+	public void setCompras(List<Venta_Compra> compras) {
+		this.compras = compras;
+	}
+
+	public List<Pasaje> getPasajesComprados() {
+		return pasajesComprados;
+	}
+
+	public void setPasajesComprados(List<Pasaje> pasajesComprados) {
+		this.pasajesComprados = pasajesComprados;
+	}
+
+	public boolean isEsEstudiante() {
+		return esEstudiante;
+	}
+
+	public void setEsEstudiante(boolean esEstudiante) {
+		this.esEstudiante = esEstudiante;
+	}
+
+	public boolean isEsJubilado() {
+		return esJubilado;
+	}
+
+	public void setEsJubilado(boolean esJubilado) {
+		this.esJubilado = esJubilado;
+	}
+
+	public boolean isEstado_descuento() {
+		return estado_descuento;
+	}
+
+	public void setEstado_descuento(boolean estado_descuento) {
+		this.estado_descuento = estado_descuento;
+	}
     
     
-    public List<Pasaje> getPasajesComprados() {
-        return pasajesComprados;
-    }
 
-    public void setPasajesComprados(List<Pasaje> pasajesComprados) {
-        this.pasajesComprados = pasajesComprados;
-    }
-
-    public boolean isEsEstudiante() {
-        return esEstudiante;
-    }
-
-    public void setEsEstudiante(boolean esEstudiante) {
-        this.esEstudiante = esEstudiante;
-    }
-
-    public boolean isEsJubilado() {
-        return esJubilado;
-    }
-
-    public void setEsJubilado(boolean esJubilado) {
-        this.esJubilado = esJubilado;
-    }
 
 }

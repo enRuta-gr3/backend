@@ -86,5 +86,4 @@ public class Sesion {
 	public void setVigencia(int vigencia) {
 		this.vigencia = vigencia;
 	}
-
 }

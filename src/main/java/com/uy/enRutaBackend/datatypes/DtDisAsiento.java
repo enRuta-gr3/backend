@@ -70,12 +70,12 @@ public class DtDisAsiento {
 	public void setIdBloqueo(String idBloqueo) {
 		this.idBloqueo = idBloqueo;
 	}
-
+	
 	public Date getFechaBloqueo() {
 		return fechaBloqueo;
 	}
 
 	public void setFechaBloqueo(Date fechaBloqueo) {
 		this.fechaBloqueo = fechaBloqueo;
-	}	
+	}
 }

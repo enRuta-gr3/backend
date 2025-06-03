@@ -46,5 +46,62 @@ public class Venta_Compra {
     @OneToMany
     @JoinColumn(name = "pasaje")
     private List<Pasaje> pasajes;
+
+	public int getId_venta() {
+		return id_venta;
+	}
+
+	public void setId_venta(int id_venta) {
+		this.id_venta = id_venta;
+	}
+
+	public Vendedor getVendedor() {
+		return vendedor;
+	}
+
+	public void setVendedor(Vendedor vendedor) {
+		this.vendedor = vendedor;
+	}
+
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
+
+	public EstadoVenta getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoVenta estado) {
+		this.estado = estado;
+	}
+
+	public Descuento getDescuento() {
+		return descuento;
+	}
+
+	public void setDescuento(Descuento descuento) {
+		this.descuento = descuento;
+	}
+
+	public Pago getPago() {
+		return pago;
+	}
+
+	public void setPago(Pago pago) {
+		this.pago = pago;
+	}
+
+	public List<Pasaje> getPasajes() {
+		return pasajes;
+	}
+
+	public void setPasajes(List<Pasaje> pasajes) {
+		this.pasajes = pasajes;
+	}
+    
     
 }
