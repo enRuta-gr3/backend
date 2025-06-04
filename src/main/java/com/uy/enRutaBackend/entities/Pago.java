@@ -22,7 +22,7 @@ public class Pago {
 	private int id_pago;
 	
     @Column(name = "monto")
-	private int monto;
+	private double monto;
 	
     @Enumerated(EnumType.STRING)
 	private EstadoTransaccion estado_trx;
@@ -45,11 +45,11 @@ public class Pago {
         this.id_pago = id_pago;
     }
 
-    public int getMonto() {
+    public double getMonto() {
         return monto;
     }
 
-    public void setMonto(int monto) {
+    public void setMonto(double monto) {
         this.monto = monto;
     }
 
@@ -68,5 +68,13 @@ public class Pago {
     public void setVenta_compra(Venta_Compra venta_compra) {
         this.venta_compra = venta_compra;
     }
+
+	public Medio_de_Pago getMedio_de_pago() {
+		return medio_de_pago;
+	}
+
+	public void setMedio_de_pago(Medio_de_Pago medio_de_pago) {
+		this.medio_de_pago = medio_de_pago;
+	}
 }
 

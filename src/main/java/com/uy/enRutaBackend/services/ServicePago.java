@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtMedio_de_Pago;
+import com.uy.enRutaBackend.datatypes.DtMercadoPago;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.Medio_de_Pago;
+import com.uy.enRutaBackend.entities.Pago;
 import com.uy.enRutaBackend.entities.Vendedor;
+import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServicePago;
@@ -27,14 +31,28 @@ public class ServicePago implements IServicePago {
 	private final VendedorRepository vendedorRepository;
 	private final ClienteRepository clienteRepository;
 	
+	@Value("${mercado.pago.properties.access.token}")
+	private String mpAccessToken;
+	@Value("${mercado.pago.properties.id}")
+	private String mpId;
+	@Value("${mercado.pago.properties.title}")
+	private String mpTitle;
+	@Value("${mercado.pago.properties.description}")
+	private String mpDescription;
+	@Value("${mercado.pago.properties.category_id}")
+	private String mpCategoryId;
+	@Value("${mercado.pago.properties.currency_id}")
+	private String mpCurrencyId;
+	
 	@Autowired
 	public ServicePago(PagoRepository pagoRepository, MedioDePagoRepository mpRepository,
-			VendedorRepository vendedorRepository, ClienteRepository clienteRepository) {
+			VendedorRepository vendedorRepository, ClienteRepository clienteRepository/*, IServiceVenta_Compra serviceVenta*/) {
 		super();
 		this.pagoRepository = pagoRepository;
 		this.mpRepository = mpRepository;
 		this.vendedorRepository = vendedorRepository;
 		this.clienteRepository = clienteRepository;
+		//this.serviceVenta = serviceVenta;
 	}
 
 	@Override
@@ -59,7 +77,7 @@ public class ServicePago implements IServicePago {
 		}		
 		return new ResultadoOperacion(true, "Medios de pago disponibles.", mps);
 	}
-
+	
 	private List<DtMedio_de_Pago> mediosDePagoMostrador(List<DtMedio_de_Pago> mps) {
 		List<Medio_de_Pago> mpsEntity = (List<Medio_de_Pago>) mpRepository.findAll();
 		for(Medio_de_Pago mpEntity : mpsEntity) {
@@ -70,14 +88,12 @@ public class ServicePago implements IServicePago {
 		return mps;
 	}
 
-
 	private DtMedio_de_Pago entityToDt(Medio_de_Pago mpEntity) {
 		DtMedio_de_Pago dtMp = new DtMedio_de_Pago();
 		dtMp.setId_medio_de_pago(mpEntity.getId_medio_de_pago());
 		dtMp.setNombre(mpEntity.getNombre());
 		return dtMp;
 	}
-
 
 	private List<DtMedio_de_Pago> mediosDePagoOnline(List<DtMedio_de_Pago> mps) {
 		List<Medio_de_Pago> mpsEntity = (List<Medio_de_Pago>) mpRepository.findAll();
@@ -88,4 +104,39 @@ public class ServicePago implements IServicePago {
 		}
 		return mps;
 	}
+	
+	@Override
+	public Pago crearPago(double monto, int mpId) {
+		Medio_de_Pago mp = mpRepository.findById(mpId).get();
+		Pago pago = new Pago();
+		pago.setMonto(monto);
+		pago.setMedio_de_pago(mp);
+		return pagoRepository.save(pago);
+	}
+
+	@Override
+	public ResultadoOperacion<?> solicitarParametrosMercadoPago(DtVenta_Compra compra, Venta_Compra venta) {		
+		try {
+			DtMercadoPago mercPago = new DtMercadoPago();
+			mercPago.setAccess_token(mpAccessToken);
+			mercPago.setCategory_id(mpCategoryId);
+			mercPago.setCurrency_id(mpCurrencyId);
+			mercPago.setDescription(mpDescription);
+			mercPago.setQuantity(1);
+			mercPago.setTitle(mpTitle);
+			mercPago.setUnit_price(venta.getPago().getMonto());
+			mercPago.setId_venta(venta.getId_venta());
+			if(mercPago != null) {	
+				return new ResultadoOperacion(true, "Datos obtenidos correctamente", mercPago);
+			} else {
+				return new ResultadoOperacion(false, ErrorCode.DATOS_INSUFICIENTES.getMsg(), ErrorCode.DATOS_INSUFICIENTES);
+			}
+		} catch(Exception e) {
+			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
+		}
+		
+	}
+
+	
+
 }

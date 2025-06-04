@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtViaje {
 
-
-
 	private int id_viaje;
 	private String fecha_partida;
 	private String hora_partida;

@@ -90,25 +90,43 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 	
 	public ResultadoOperacion<?> registrarUsuario(DtUsuario usuario) {
-		DtUsuario usuRegistro = new DtUsuario();
-		try {
-			correrValidaciones(usuario);
-			if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") &&
-				    ((usuario.getEmail() != null && !usuario.getEmail().isEmpty()) ||
-				     (usuario.getCi() != null && !usuario.getCi().isEmpty()))){
-				usuRegistro = registrarUsuarioSupabase(usuario);
-				return new ResultadoOperacion(true, "Operación realizada con éxito", usuRegistro);
-			} else {
-				return registrarSinVerificacion(usuario, usuRegistro);
-			}
-		} catch (Exception e){
-			if(e instanceof UsuarioExistenteException) {
-				return new ResultadoOperacion(false, ErrorCode.YA_EXISTE.getMsg(), e.getMessage());
-			} else {
-				return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), e.getMessage());
-			}		
-		}
-    }
+	    DtUsuario usuRegistro = new DtUsuario();
+	    try {
+	        correrValidaciones(usuario);
+	        System.out.println("✅ Validaciones pasaron");
+
+	        System.out.println("📥 Email: '" + usuario.getEmail() + "'");
+	        System.out.println("📥 CI: '" + usuario.getCi() + "'");
+
+	        boolean emailVacio = (usuario.getEmail() == null || usuario.getEmail().trim().length() == 0);
+	        boolean ciVacio = (usuario.getCi() == null || usuario.getCi().trim().length() == 0);
+
+	        System.out.println("📋 Email Vacio: " + emailVacio);
+	        System.out.println("📋 CI Vacio: " + ciVacio);
+
+	        if (emailVacio && ciVacio) {
+	            System.out.println("❌ Registro rechazado: sin email ni cédula");
+	            return new ResultadoOperacion<>(false, "Debe proporcionar al menos una cédula o un correo electrónico.", ErrorCode.DATOS_INSUFICIENTES.name());
+	        }
+
+	        if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && !emailVacio) {
+	            usuRegistro = registrarUsuarioSupabase(usuario);
+	        } else {
+	            usuRegistro = registrarUsuarioSinVerificacion(usuario);
+	        }
+
+	        return new ResultadoOperacion<>(true, "Operación realizada con éxito", usuRegistro);
+
+	    } catch (Exception e) {
+	        if (e instanceof UsuarioExistenteException) {
+	            return new ResultadoOperacion<>(false, ErrorCode.YA_EXISTE.getMsg(), e.getMessage());
+	        } else {
+	            return new ResultadoOperacion<>(false, ErrorCode.ERROR_DE_CREACION.getMsg(), e.getMessage());
+	        }
+	    }
+	}
+
+
 
 	private ResultadoOperacion<?> registrarSinVerificacion(DtUsuario usuario, DtUsuario usuRegistro) {
 		try {

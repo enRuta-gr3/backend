@@ -29,5 +29,4 @@ public class DtVentaCompraResponse {
 	public void setTipoDescuento(String tipoDescuento) {
 		this.tipoDescuento = tipoDescuento;
 	}
-
 }

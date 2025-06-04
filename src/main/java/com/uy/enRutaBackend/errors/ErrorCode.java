@@ -6,7 +6,8 @@ public enum ErrorCode {
 	CREDENCIALES_INVALIDAS("Usuario o contraseña incorrecto"),
 	YA_EXISTE("Ya existe un objeto con esos datos."),
 	REQUEST_INVALIDO("Error en la operación."),
-	ERROR_LISTADO("Error al obtener el listado")
+	ERROR_LISTADO("Error al obtener el listado"),
+	DATOS_INSUFICIENTES("Faltan datos para procesar la solicitud.")
 	;
 	private final String msg;
 

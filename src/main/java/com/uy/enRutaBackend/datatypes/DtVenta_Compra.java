@@ -21,6 +21,29 @@ public class DtVenta_Compra {
     private DtPago pago;
     
     private List<DtPasaje> pasajes;
+    
+    public DtVenta_Compra() {}
+    
+	public DtVenta_Compra(int id_venta, DtVendedor vendedor, DtCliente cliente, EstadoVenta estado,
+			DtDescuento descuento, DtPago pago, List<DtPasaje> pasajes) {
+		this.id_venta = id_venta;
+		this.vendedor = vendedor;
+		this.cliente = cliente;
+		this.estado = estado;
+		this.descuento = descuento;
+		this.pago = pago;
+		this.pasajes = pasajes;
+	}
+	
+	public DtVenta_Compra(DtVendedor vendedor, DtCliente cliente, EstadoVenta estado,
+			DtDescuento descuento, DtPago pago, List<DtPasaje> pasajes) {
+		this.vendedor = vendedor;
+		this.cliente = cliente;
+		this.estado = estado;
+		this.descuento = descuento;
+		this.pago = pago;
+		this.pasajes = pasajes;
+	}
 
 	public int getId_venta() {
 		return id_venta;

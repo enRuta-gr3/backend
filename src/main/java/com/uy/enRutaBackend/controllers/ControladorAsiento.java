@@ -49,12 +49,14 @@ public class ControladorAsiento {
     @PostMapping("/cambiarEstado")
     @Operation(summary = "Marca asientos como ocupados cuando son seleccionados")
     public ResponseEntity<?> cambiarEstadoAsientos(@RequestBody List<DtDisAsiento> asientos) {
-    	System.out.println("*HOLA* ");
     	ResultadoOperacion<?> res = serviceAsiento.cambiarEstadoDisponibilidad(asientos);
     	if (res != null && res.isSuccess()) {
 			System.out.println("*ASIENTOS - bloquear/desbloquear* " + res.getMessage());
 			System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
 			return ResponseEntity.ok(res);
+		} else if(res.getErrorCode().equals("Algunos asientos están ocupados.")){
+			System.out.println("*ASIENTOS - bloquear/desbloquear* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(res);
 		} else {
 			System.out.println("*ASIENTOS - bloquear/desbloquear* " + res.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);

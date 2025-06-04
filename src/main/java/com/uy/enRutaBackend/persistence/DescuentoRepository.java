@@ -7,4 +7,6 @@ import com.uy.enRutaBackend.entities.Descuento;
 
 @Repository
 public interface DescuentoRepository extends CrudRepository<Descuento, Integer>{
+
+	Descuento findByTipo(String tipoDescuento);
 }
