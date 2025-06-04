@@ -93,7 +93,9 @@ public class ServiceUsuario implements IServiceUsuario {
 		DtUsuario usuRegistro = new DtUsuario();
 		try {
 			correrValidaciones(usuario);
-			if(usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && (usuario.getEmail() != null && !usuario.getEmail().isEmpty())) {
+			if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") &&
+				    ((usuario.getEmail() != null && !usuario.getEmail().isEmpty()) ||
+				     (usuario.getCi() != null && !usuario.getCi().isEmpty()))){
 				usuRegistro = registrarUsuarioSupabase(usuario);
 				return new ResultadoOperacion(true, "Operación realizada con éxito", usuRegistro);
 			} else {
@@ -302,7 +304,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		else
 			solicitante = repository.findByCi(request.getEmail());
 		
-		if(solicitante != null || passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {	
+		if(solicitante != null && passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {	
 			String tok = jwtManager.generateToken(solicitante);
 			sesion = sesionService.crearSesion(entityToDtRegistroLogin(solicitante), tok);		
 			log.info(sesion.toString());

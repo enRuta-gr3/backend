@@ -161,6 +161,7 @@ public class ServiceAsiento implements IServiceAsiento {
 			aCambiar.setEstado(estado);
 			if(estado.equals(EstadoAsiento.LIBRE)) {
 				aCambiar.setIdBloqueo(null);
+				aCambiar.setFechaBloqueo(null);
 			} else if (estado.equals(EstadoAsiento.BLOQUEADO)){
 				aCambiar.setIdBloqueo(asiento.getIdBloqueo());
 				aCambiar.setFechaBloqueo(new Date());

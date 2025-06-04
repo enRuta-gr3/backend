@@ -46,4 +46,12 @@ public class DtPago {
     public void setVenta_compra(DtVenta_Compra venta_compra) {
         this.venta_compra = venta_compra;
     }
+
+	public DtMedio_de_Pago getMedio_de_pago() {
+		return medio_de_pago;
+	}
+
+	public void setMedio_de_pago(DtMedio_de_Pago medio_de_pago) {
+		this.medio_de_pago = medio_de_pago;
+	}
 }

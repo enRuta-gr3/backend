@@ -10,14 +10,16 @@ import org.springframework.context.annotation.ComponentScan;
 import PRUEBAS.MOSTRARDATOS;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.uy.enRutaBackend"}) 
+@ComponentScan(basePackages = {"com.uy.enRutaBackend"})
 public class EnRutaBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(EnRutaBackendApplication.class, args);
     }
 
-//    @Bean
-//    public CommandLineRunner run(MOSTRARDATOS mostrardatos) {
-//        return args -> mostrardatos.ejecutar();
-//    }
+  /*
+   @Bean
+   public CommandLineRunner run(MOSTRARDATOS mostrardatos) {
+        return args -> mostrardatos.ejecutar();
+    }
+  */
 }

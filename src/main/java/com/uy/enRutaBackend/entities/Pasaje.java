@@ -1,5 +1,7 @@
 package com.uy.enRutaBackend.entities;
 
+import java.util.Optional;
+
 import jakarta.persistence.*;
 
 
@@ -28,6 +30,14 @@ public class Pasaje {
     private Venta_Compra venta_compra;
     
     public Pasaje() {}
+    
+    public Pasaje(double precio, Viaje viaje, Asiento asiento, Venta_Compra venta_compra) {
+        this.precio = precio;
+        this.viaje = viaje;
+        this.asiento = asiento;
+        this.venta_compra = venta_compra;
+    }
+
     
     
     public int getId_pasaje() {
