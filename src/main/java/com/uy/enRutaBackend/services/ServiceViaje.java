@@ -146,8 +146,6 @@ public class ServiceViaje implements IServiceViaje {
 
 	private DtLocalidad getDtLocalidad(Localidad localidad) {
 		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.typeMap(Localidad.class, DtLocalidad.class)
-		.addMappings(mapper -> mapper.skip(DtLocalidad::setId_localidad));
 		return modelMapper.map(localidad, DtLocalidad.class);
 	}
 
