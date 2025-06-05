@@ -11,6 +11,7 @@ import com.uy.enRutaBackend.datatypes.DtMedio_de_Pago;
 import com.uy.enRutaBackend.datatypes.DtMercadoPago;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.EstadoTransaccion;
 import com.uy.enRutaBackend.entities.Medio_de_Pago;
 import com.uy.enRutaBackend.entities.Pago;
 import com.uy.enRutaBackend.entities.Vendedor;
@@ -52,7 +53,6 @@ public class ServicePago implements IServicePago {
 		this.mpRepository = mpRepository;
 		this.vendedorRepository = vendedorRepository;
 		this.clienteRepository = clienteRepository;
-		//this.serviceVenta = serviceVenta;
 	}
 
 	@Override
