@@ -60,4 +60,9 @@ public class PagoController {
 		}
 	}
 	
+	@PostMapping("/confirmarEstadoPago")
+	@Operation(summary = "Confirma el estado del pago, de la venta y retorna los pasajes")
+	public ResponseEntity<?> confirmarEstadoPago(@RequestBody DtVenta_Compra compra) {
+		
+	}
 }
