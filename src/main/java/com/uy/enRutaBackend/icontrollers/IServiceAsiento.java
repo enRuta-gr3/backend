@@ -9,4 +9,5 @@ import com.uy.enRutaBackend.errors.ResultadoOperacion;
 public interface IServiceAsiento {	
 	ResultadoOperacion<?> listarAsientosDeOmnibus(DtViaje viaje);
 	ResultadoOperacion<?> cambiarEstadoDisponibilidad(List<DtDisAsiento> asientos);
+	void desbloquearPorTiempo();
 }

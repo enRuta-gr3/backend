@@ -1,5 +1,8 @@
 package com.uy.enRutaBackend.services;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtAsiento;
@@ -35,6 +39,8 @@ public class ServiceAsiento implements IServiceAsiento {
     private final ViajeRepository viajeRepository;
     private final DisAsientoViajeRepository asientoViajeRepository;
     private final ModelMapper mapper;
+    @Value("${minutos.control.desbloqueo}")
+    private int controlDesbloqueo;
 
     @Autowired
     public ServiceAsiento(AsientoRepository asientoRepository, ViajeRepository viajeRepository, DisAsientoViajeRepository asientoViajeRepository, ModelMapper mapper) {
@@ -191,6 +197,33 @@ public class ServiceAsiento implements IServiceAsiento {
 		asientoDt.setNumero_asiento(asiento.getNumeroAsiento());
 		asientoDt.setId_omnibus(asiento.getOmnibus().getId_omnibus());
 		return asientoDt;
+	}
+
+	@Override
+	public void desbloquearPorTiempo() {
+		List<DisAsiento_Viaje> asientosBloqueados = asientoViajeRepository.findByEstado(EstadoAsiento.BLOQUEADO);
+		for(DisAsiento_Viaje asientoBloqueado : asientosBloqueados) {
+			if(pasaronCincoMinutos(asientoBloqueado.getFechaBloqueo())) {
+				asientoBloqueado.setEstado(EstadoAsiento.LIBRE);
+				asientoBloqueado.setFechaBloqueo(null);
+				asientoBloqueado.setIdBloqueo(null);
+				asientoViajeRepository.save(asientoBloqueado);
+			}
+		}
+	}
+
+	private boolean pasaronCincoMinutos(Date fechaBloqueo) {
+		boolean pasaronCincoMinutos = false;
+		LocalDateTime fechaBloqueoDateTime = fechaBloqueo.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		
+		LocalDateTime fechaActual = LocalDateTime.now();
+		
+		long diferencia = Duration.between(fechaBloqueoDateTime, fechaActual).toMinutes();
+		if(diferencia >= controlDesbloqueo) {
+			pasaronCincoMinutos = true;
+		}
+		
+		return pasaronCincoMinutos;
 	}
 	
 	
