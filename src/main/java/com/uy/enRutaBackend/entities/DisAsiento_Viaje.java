@@ -32,10 +32,10 @@ public class DisAsiento_Viaje {
 	@Enumerated(EnumType.STRING)
 	private EstadoAsiento estado;
 	
-	@Column(nullable = true)
+	@Column(name = "id_bloqueo", nullable = true)
 	private String idBloqueo;
 	
-	@Column(nullable = true)
+	@Column(name = "fecha_bloqueo", nullable = true)
 	private Date fechaBloqueo;
 
 	public int getId_disAsiento() {

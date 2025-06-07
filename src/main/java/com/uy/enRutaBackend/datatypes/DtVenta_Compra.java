@@ -2,9 +2,10 @@ package com.uy.enRutaBackend.datatypes;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uy.enRutaBackend.entities.EstadoVenta;
 
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtVenta_Compra {
 
 

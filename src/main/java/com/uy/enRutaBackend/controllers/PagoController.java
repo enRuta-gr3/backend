@@ -46,17 +46,18 @@ public class PagoController {
 		}
 	}
 	
-	@PostMapping("/solicitarParametrosMercadoPago")
-	@Operation(summary = "Retorna parámetros para Mercado Pago.")
-	public ResponseEntity<?> solicitarParametrosMercadoPago(@RequestBody DtVenta_Compra compra) {
+	@PostMapping("/solicitarParametrosPago")
+	@Operation(summary = "Retorna parámetros para ejecucion del pago.")
+	public ResponseEntity<?> solicitarParametrosPago(@RequestBody DtVenta_Compra compra) {
 		Venta_Compra venta = serviceVenta.armarVenta(compra);
-		ResultadoOperacion<?> res = servicePago.solicitarParametrosMercadoPago(compra, venta);
+		ResultadoOperacion<?> res = servicePago.solicitarParametrosPago(compra, venta);
 		if(res.isSuccess()) {
-			System.out.println("*PAGOS* - Datos para mercado pago enviados.");
+			System.out.println("*PAGOS* - Parametros para crear pago enviados.");
 			return ResponseEntity.ok(res);			
 		} else {
-			System.out.println("*PAGOS* - Error enviando datos para mercado pago.");
+			System.out.println("*PAGOS* - Error enviando datos para crear pago.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
+	
 }

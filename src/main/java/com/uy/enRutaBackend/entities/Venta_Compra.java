@@ -102,6 +102,5 @@ public class Venta_Compra {
 	public void setPasajes(List<Pasaje> pasajes) {
 		this.pasajes = pasajes;
 	}
-    
-    
+      
 }

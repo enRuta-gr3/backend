@@ -9,7 +9,9 @@ public class DtVendedor extends DtUsuario{
 
     private List<Venta_Compra> ventas;
 
-	public DtVendedor() {}
+	public DtVendedor() {
+		super();
+	}
 	
 	public List<Venta_Compra> getVentas() {
 		return ventas;
@@ -18,7 +20,5 @@ public class DtVendedor extends DtUsuario{
 	public void setVentas(List<Venta_Compra> ventas) {
 		this.ventas = ventas;
 	}
-    
-
 }
 

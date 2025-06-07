@@ -1,6 +1,5 @@
 package com.uy.enRutaBackend.datatypes;
 
-import java.util.Date;
 import java.util.List;
 
 public class DtCliente extends DtUsuario {
@@ -16,7 +15,9 @@ public class DtCliente extends DtUsuario {
     
     private boolean estado_descuento;
 	
-	public DtCliente() {}
+	public DtCliente() {
+		super();
+	}
 
 	public List<DtVenta_Compra> getCompras() {
 		return compras;

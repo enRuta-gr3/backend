@@ -16,8 +16,7 @@ public class DesbloquearAsientosBloqueados {
 	public DesbloquearAsientosBloqueados(IServiceAsiento serviceAsiento) {
 		this.serviceAsiento = serviceAsiento;
 	}
-	
-//	@Scheduled(fixedRate = 120000)
+
 	@Scheduled(fixedRateString = "${intervalo.ejecucion.programada}")
 	public void validarDescargarAsientos() {
 		serviceAsiento.desbloquearPorTiempo();

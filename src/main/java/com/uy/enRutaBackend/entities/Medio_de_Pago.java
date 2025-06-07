@@ -26,6 +26,12 @@ public class Medio_de_Pago {
     @Column(name = "perfiles_habilitados")
 	private String perfiles_habilitados;
     
+    @Column(name = "cotizacion", nullable = true)
+    private double cotizacion;
+    
+    @Column(name = "habilitado")
+    private boolean habilitado;
+    
     @OneToMany(mappedBy = "id_pago")
     private List<Pago> pagos;
     
@@ -61,5 +67,21 @@ public class Medio_de_Pago {
     public void setPagos(List<Pago> pagos) {
         this.pagos = pagos;
     }
+
+	public double getCotizacion() {
+		return cotizacion;
+	}
+
+	public void setCotizacion(double cotizacion) {
+		this.cotizacion = cotizacion;
+	}
+
+	public boolean isHabilitado() {
+		return habilitado;
+	}
+
+	public void setHabilitado(boolean habilitado) {
+		this.habilitado = habilitado;
+	}
     
 }

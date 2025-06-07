@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtMedio_de_Pago;
 import com.uy.enRutaBackend.datatypes.DtMercadoPago;
+import com.uy.enRutaBackend.datatypes.DtPaypal;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.entities.Cliente;
-import com.uy.enRutaBackend.entities.EstadoTransaccion;
 import com.uy.enRutaBackend.entities.Medio_de_Pago;
 import com.uy.enRutaBackend.entities.Pago;
 import com.uy.enRutaBackend.entities.Vendedor;
@@ -44,6 +44,12 @@ public class ServicePago implements IServicePago {
 	private String mpCategoryId;
 	@Value("${mercado.pago.properties.currency_id}")
 	private String mpCurrencyId;
+	@Value("${payPal.properties.id}")
+	private String payPalId;
+	@Value("${payPal.properties.currency}")
+	private String payPalCurrency;
+	@Value("${payPal.properties.intent}")
+	private String payPalIntent;
 	
 	@Autowired
 	public ServicePago(PagoRepository pagoRepository, MedioDePagoRepository mpRepository,
@@ -63,10 +69,16 @@ public class ServicePago implements IServicePago {
 				Vendedor v = vendedorRepository.findById(compra.getVendedor().getUuidAuth()).get();
 				if(v != null)
 					mps =  mediosDePagoMostrador(mps);
+				 else {
+					return new ResultadoOperacion(false, "Vendedor no valido", ErrorCode.LISTA_VACIA);	
+				}
 			} else {
 				Cliente c = clienteRepository.findById(compra.getCliente().getUuidAuth()).get();
-				if(c != null)
-					mps = mediosDePagoOnline(mps);				
+				if(c != null) {
+					mps = mediosDePagoOnline(mps);
+				} else {
+					return new ResultadoOperacion(false, "Cliente no valido", ErrorCode.LISTA_VACIA);	
+				}				
 			}
 			
 			if(mps == null || mps.isEmpty()) {
@@ -81,7 +93,7 @@ public class ServicePago implements IServicePago {
 	private List<DtMedio_de_Pago> mediosDePagoMostrador(List<DtMedio_de_Pago> mps) {
 		List<Medio_de_Pago> mpsEntity = (List<Medio_de_Pago>) mpRepository.findAll();
 		for(Medio_de_Pago mpEntity : mpsEntity) {
-			if(mpEntity.getPerfiles_habilitados().toLowerCase().contains("vendedor")) {
+			if(mpEntity.getPerfiles_habilitados().toLowerCase().contains("vendedor") && mpEntity.isHabilitado()) {
 				mps.add(entityToDt(mpEntity));
 			}
 		}
@@ -98,7 +110,7 @@ public class ServicePago implements IServicePago {
 	private List<DtMedio_de_Pago> mediosDePagoOnline(List<DtMedio_de_Pago> mps) {
 		List<Medio_de_Pago> mpsEntity = (List<Medio_de_Pago>) mpRepository.findAll();
 		for(Medio_de_Pago mpEntity : mpsEntity) {
-			if(mpEntity.getPerfiles_habilitados().toLowerCase().contains("cliente")) {
+			if(mpEntity.getPerfiles_habilitados().toLowerCase().contains("cliente") && mpEntity.isHabilitado()) {
 				mps.add(entityToDt(mpEntity));
 			}
 		}
@@ -113,19 +125,29 @@ public class ServicePago implements IServicePago {
 		pago.setMedio_de_pago(mp);
 		return pagoRepository.save(pago);
 	}
+	
+	@Override
+	public ResultadoOperacion<?> solicitarParametrosPago(DtVenta_Compra compra, Venta_Compra venta) {
+		int idMP = venta.getPago().getMedio_de_pago().getId_medio_de_pago();
+		switch (idMP) {
+		case 1:
+			if(venta.getPago().getMedio_de_pago().isHabilitado())
+				return solicitarParametrosEfectivo(compra, venta);
+		case 2:
+			if(venta.getPago().getMedio_de_pago().isHabilitado())
+				return solicitarParametrosMercadoPago(compra, venta);
+		case 3:
+			if(venta.getPago().getMedio_de_pago().isHabilitado())
+				return solicitarParametrosPayPal(compra, venta);
+		default:
+			return new ResultadoOperacion(false, "No se pudo completar la operacion", ErrorCode.REQUEST_INVALIDO);
+		}
+	}
 
 	@Override
 	public ResultadoOperacion<?> solicitarParametrosMercadoPago(DtVenta_Compra compra, Venta_Compra venta) {		
 		try {
-			DtMercadoPago mercPago = new DtMercadoPago();
-			mercPago.setAccess_token(mpAccessToken);
-			mercPago.setCategory_id(mpCategoryId);
-			mercPago.setCurrency_id(mpCurrencyId);
-			mercPago.setDescription(mpDescription);
-			mercPago.setQuantity(1);
-			mercPago.setTitle(mpTitle);
-			mercPago.setUnit_price(venta.getPago().getMonto());
-			mercPago.setId_venta(venta.getId_venta());
+			DtMercadoPago mercPago = llenarDtMercadoPago(venta);
 			if(mercPago != null) {	
 				return new ResultadoOperacion(true, "Datos obtenidos correctamente", mercPago);
 			} else {
@@ -134,9 +156,75 @@ public class ServicePago implements IServicePago {
 		} catch(Exception e) {
 			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
 		}
-		
 	}
 
-	
+	private DtMercadoPago llenarDtMercadoPago(Venta_Compra venta) {
+		DtMercadoPago mercPago = new DtMercadoPago();
+		mercPago.setAccess_token(mpAccessToken);
+		mercPago.setCategory_id(mpCategoryId);
+		mercPago.setCurrency_id(mpCurrencyId);
+		mercPago.setDescription(mpDescription);
+		mercPago.setQuantity(1);
+		mercPago.setTitle(mpTitle);
+		mercPago.setUnit_price(venta.getPago().getMonto());
+		mercPago.setId_venta(venta.getId_venta());
+		return mercPago;
+	}
 
+	@Override
+	public ResultadoOperacion<?> solicitarParametrosPayPal(DtVenta_Compra compra, Venta_Compra venta) {
+		try {
+			DtPaypal paypal = llenarDatosPaypal(venta);
+			if(paypal != null) {	
+				return new ResultadoOperacion(true, "Datos obtenidos correctamente", paypal);
+			} else {
+				return new ResultadoOperacion(false, ErrorCode.DATOS_INSUFICIENTES.getMsg(), ErrorCode.DATOS_INSUFICIENTES);
+			}
+		} catch(Exception e) {
+			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
+
+	private DtPaypal llenarDatosPaypal(Venta_Compra venta) {
+		DtPaypal dtPay = new DtPaypal();
+		dtPay.setClient_id(payPalId);
+		dtPay.setCurrency(payPalCurrency);
+		dtPay.setIntent(payPalIntent);
+		dtPay.setId_venta(venta.getId_venta());
+		dtPay.setCotizacion(venta.getPago().getMedio_de_pago().getCotizacion());
+		dtPay.setMonto(calcularMontoUsd(venta));
+		return dtPay;
+	}
+
+	private double calcularMontoUsd(Venta_Compra venta) {
+		double monto = (venta.getPago().getMonto() / venta.getPago().getMedio_de_pago().getCotizacion());
+		if(contarDecimales(String.valueOf(monto)) == 0)
+			return monto;
+		else {
+			return Math.round(monto * 100.0) / 100.0;
+		}		
+	}
+	
+	public int contarDecimales(String monto) {
+        if (monto.contains(".")) {
+            return monto.split("\\.")[1].length();
+        }
+        return 0;
+    }
+
+	
+	@Override
+	public ResultadoOperacion<?> solicitarParametrosEfectivo(DtVenta_Compra compra, Venta_Compra venta) {
+		try {
+			DtVenta_Compra aDevolver = new DtVenta_Compra();
+			aDevolver.setId_venta(venta.getId_venta());			
+			if(aDevolver != null) {	
+				return new ResultadoOperacion(true, "Datos obtenidos correctamente", aDevolver);
+			} else {
+				return new ResultadoOperacion(false, ErrorCode.DATOS_INSUFICIENTES.getMsg(), ErrorCode.DATOS_INSUFICIENTES);
+			}
+		} catch(Exception e) {
+			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
 }

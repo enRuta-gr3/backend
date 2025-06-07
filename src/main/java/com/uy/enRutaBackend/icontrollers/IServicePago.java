@@ -10,4 +10,7 @@ public interface IServicePago {
 	ResultadoOperacion<?> solicitarMediosPago(DtVenta_Compra compra);
 	Pago crearPago(double monto, int mpId);
 	ResultadoOperacion<?> solicitarParametrosMercadoPago(DtVenta_Compra compra, Venta_Compra venta);
+	ResultadoOperacion<?> solicitarParametrosPayPal(DtVenta_Compra compra, Venta_Compra venta);
+	ResultadoOperacion<?> solicitarParametrosEfectivo(DtVenta_Compra compra, Venta_Compra venta);
+	ResultadoOperacion<?> solicitarParametrosPago(DtVenta_Compra compra, Venta_Compra venta);
 }
