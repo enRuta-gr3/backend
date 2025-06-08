@@ -227,4 +227,9 @@ public class ServicePago implements IServicePago {
 			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
 		}
 	}
+
+	@Override
+	public void actualizarPago(Pago pago) {
+		pagoRepository.save(pago);		
+	}
 }

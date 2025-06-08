@@ -25,10 +25,10 @@ public class AuthController {
     @PostMapping("/registrarUsuario")
     @Operation(summary = "Registrar Usuario", description = "Permite registrar un usuario")
 	public ResponseEntity<?> registrarUsuario(@RequestBody DtUsuario usuario) throws Exception {
-        if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ResultadoOperacion<>(false, "El email es obligatorio", "EMAIL_REQUIRED"));
-        }
+//        if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body(new ResultadoOperacion<>(false, "El email es obligatorio", "EMAIL_REQUIRED"));
+//        }
 		ResultadoOperacion<?> res = serviceUsuario.registrarUsuario(usuario);
 		if(res.isSuccess()) {
 			System.out.println("*REGISTRO* " + res.getMessage());

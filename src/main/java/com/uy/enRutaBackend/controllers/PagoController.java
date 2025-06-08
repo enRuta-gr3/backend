@@ -59,10 +59,4 @@ public class PagoController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
-	
-	@PostMapping("/confirmarEstadoPago")
-	@Operation(summary = "Confirma el estado del pago, de la venta y retorna los pasajes")
-	public ResponseEntity<?> confirmarEstadoPago(@RequestBody DtVenta_Compra compra) {
-		
-	}
 }
