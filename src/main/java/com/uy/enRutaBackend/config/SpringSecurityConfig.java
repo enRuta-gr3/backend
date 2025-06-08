@@ -37,7 +37,8 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/venta/calcularVenta").permitAll()
 						.requestMatchers("/api/pagos/solicitarMediosDePago").permitAll()
 						.requestMatchers("/api/pagos/solicitarParametrosPago").permitAll()
-						.anyRequest().authenticated() 
+						.requestMatchers("/api/venta/confirmarVenta").permitAll()
+						.anyRequest().authenticated()
 				);
 		return http.build();
 	}

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -224,6 +225,33 @@ public class ServiceAsiento implements IServiceAsiento {
 		}
 		
 		return pasaronCincoMinutos;
+	}
+
+	@Override
+	public List<DisAsiento_Viaje> cambiarEstadoPorVenta(UUID uuidAuth, EstadoAsiento estado) throws Exception {
+		List<DisAsiento_Viaje> asientosBloqueados = asientoViajeRepository
+				.findByEstadoAndIdBloqueo(EstadoAsiento.BLOQUEADO, uuidAuth.toString());
+		if (!asientosBloqueados.isEmpty()) {
+			List<DisAsiento_Viaje> ocupados = new ArrayList<DisAsiento_Viaje>();
+			for (DisAsiento_Viaje bloqueado : asientosBloqueados) {
+				cambiarEstadoPorVenta(bloqueado, estado);
+				ocupados.add(bloqueado);
+			}
+			return ocupados;
+		} else {
+			throw new Exception("Los asientos no están disponibles");
+		}
+	}
+
+	private void cambiarEstadoPorVenta(DisAsiento_Viaje bloqueado, EstadoAsiento estado) {
+		if(estado.equals(EstadoAsiento.OCUPADO)) {
+			bloqueado.setEstado(estado);
+		} else {
+			bloqueado.setEstado(estado);
+			bloqueado.setFechaBloqueo(null);
+			bloqueado.setIdBloqueo(null);
+		}
+		asientoViajeRepository.save(bloqueado);
 	}
 	
 	
