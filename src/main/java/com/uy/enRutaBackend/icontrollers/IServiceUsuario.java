@@ -2,10 +2,7 @@ package com.uy.enRutaBackend.icontrollers;
 
 import java.util.UUID;
 
-import org.json.JSONObject;
-
 import com.uy.enRutaBackend.datatypes.DtUsuario;
-import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 
@@ -17,4 +14,5 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> iniciarSesion(DtUsuario request);
 	DtUsuario registrarUsuarioSinVerificacion(DtUsuario usuario) throws UsuarioExistenteException, Exception;
 	ResultadoOperacion<?> buscarUsuarioPorCi(DtUsuario usuario);
+	ResultadoOperacion<?> modificarPerfil(DtUsuario usuario);
 }

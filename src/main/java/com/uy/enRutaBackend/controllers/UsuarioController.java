@@ -42,6 +42,20 @@ public class UsuarioController {
 
 			}
 		}
+	}
+	
+	@PostMapping("/modificarPerfil")
+    @Operation(summary = "Modificar Perfil")
+	public ResponseEntity<?> modificarPerfil(@RequestBody DtUsuario usuario) {
+		ResultadoOperacion<?> res = serviceUsuario.modificarPerfil(usuario);
 
+		if (res.isSuccess()) {
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getMessage());
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getData());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
 	}
 }

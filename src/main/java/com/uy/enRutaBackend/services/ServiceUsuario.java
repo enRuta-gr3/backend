@@ -418,4 +418,66 @@ public class ServiceUsuario implements IServiceUsuario {
 		
 	}
 
+	@Override
+	public ResultadoOperacion<?> modificarPerfil(DtUsuario usuario) {
+		Usuario aModificar = repository.findById(usuario.getUuidAuth()).get();
+		Usuario modificado = new Usuario();
+		if (aModificar instanceof Cliente) {
+			modificado = actualizarCliente(aModificar, usuario);
+		} else if (aModificar instanceof Vendedor) {
+			modificado = actualizarVendedor(aModificar, usuario);
+		} else if (aModificar instanceof Administrador) {
+			modificado = actualizarAdministrador(aModificar, usuario);
+		}
+
+		DtUsuario usuDt = new DtUsuario();
+		if (modificado != null) {
+			usuDt.setApellidos(modificado.getApellidos());
+			usuDt.setNombres(modificado.getNombres());
+			usuDt.setCi(modificado.getCi());
+			usuDt.setEmail(modificado.getEmail());
+			usuDt.setFecha_nacimiento(modificado.getFecha_nacimiento());
+
+			return new ResultadoOperacion(true, "Datos actualizados correctamente", usuDt);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.SIN_RESULTADOS.getMsg(), ErrorCode.SIN_RESULTADOS);
+		}
+	}
+
+	private Administrador actualizarAdministrador(Usuario aModificar, DtUsuario usuario) {
+		Administrador a = (Administrador) aModificar;
+		a.setEmail(usuario.getEmail());
+		a.setNombres(usuario.getNombres());
+		a.setApellidos(usuario.getApellidos());
+		a.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		return administradorRepository.save(a);
+	}
+
+	private Vendedor actualizarVendedor(Usuario aModificar, DtUsuario usuario) {
+		Vendedor v = (Vendedor) aModificar;
+		v.setEmail(usuario.getEmail());
+		v.setNombres(usuario.getNombres());
+		v.setApellidos(usuario.getApellidos());
+		v.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		return vendedorRepository.save(v);
+	}
+
+	private Cliente actualizarCliente(Usuario aModificar, DtUsuario usuario) {
+		Cliente c = (Cliente) aModificar;
+		if(c.getEmail() != usuario.getEmail()) {
+			actualizarMailSupabase(usuario);
+			c.setEmail(usuario.getEmail());
+		}
+		c.setNombres(usuario.getNombres());
+		c.setApellidos(usuario.getApellidos());
+		c.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		return clienteRepository.save(c);	
+	}
+
+	private void actualizarMailSupabase(DtUsuario usuario) {
+		
+	}
+
+	
+
 }
