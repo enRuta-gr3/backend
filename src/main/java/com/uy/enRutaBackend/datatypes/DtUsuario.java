@@ -53,6 +53,16 @@ public class DtUsuario {
     	this.email = email;
     }
     
+    public DtUsuario(String tipo_usuario, UUID uuidAuth, String ci, String nombres, String apellidos, String email, Date fecha_nacimiento) {
+    	this.tipo_usuario = tipo_usuario;
+    	this.uuidAuth = uuidAuth;
+    	this.ci = ci;
+    	this.nombres = nombres;
+    	this.apellidos = apellidos;
+    	this.email = email;
+    	this.fecha_nacimiento = fecha_nacimiento;
+    }
+    
     public DtUsuario(String tipo_usuario, String ci, String nombres, String apellidos, String email, String contraseña, Date fecha_nacimiento, boolean eliminado, Date ultimo_inicio_sesion, Date fecha_creacion, boolean esEstudiante, boolean esJubilado, boolean estado_descuento) {
     	this.tipo_usuario = tipo_usuario;
     	this.ci = ci;

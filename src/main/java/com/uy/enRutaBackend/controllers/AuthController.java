@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
-import com.uy.enRutaBackend.services.ServiceUsuario;
 
 import io.swagger.v3.oas.annotations.Operation;
 

@@ -16,4 +16,5 @@ public interface IServiceUsuario {
 	public UUID buscarUUIDPorEmail(String email);
 	ResultadoOperacion<?> iniciarSesion(DtUsuario request);
 	DtUsuario registrarUsuarioSinVerificacion(DtUsuario usuario) throws UsuarioExistenteException, Exception;
+	ResultadoOperacion<?> buscarUsuarioPorCi(DtUsuario usuario);
 }

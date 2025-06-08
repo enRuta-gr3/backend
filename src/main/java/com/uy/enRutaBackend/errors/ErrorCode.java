@@ -7,7 +7,8 @@ public enum ErrorCode {
 	YA_EXISTE("Ya existe un objeto con esos datos."),
 	REQUEST_INVALIDO("Error en la operación."),
 	ERROR_LISTADO("Error al obtener el listado"),
-	DATOS_INSUFICIENTES("Faltan datos para procesar la solicitud.")
+	DATOS_INSUFICIENTES("Faltan datos para procesar la solicitud."),
+	SIN_RESULTADOS("No se encontraron datos que cumplan el request")
 	;
 	private final String msg;
 

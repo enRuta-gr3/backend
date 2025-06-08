@@ -29,7 +29,10 @@ import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 import com.uy.enRutaBackend.icontrollers.IServiceSesion;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
+import com.uy.enRutaBackend.persistence.AdministradorRepository;
+import com.uy.enRutaBackend.persistence.ClienteRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
+import com.uy.enRutaBackend.persistence.VendedorRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
 
 import lombok.Getter;
@@ -39,6 +42,10 @@ import lombok.Setter;
 @Setter
 @Service
 public class ServiceUsuario implements IServiceUsuario {
+
+    private final ClienteRepository clienteRepository;
+    private final VendedorRepository vendedorRepository;
+    private final AdministradorRepository administradorRepository;
 
 	private static final Logger log = LoggerFactory.getLogger(ServiceUsuario.class);
 	private static final String SUPABASE_URL = "https://zvynuwmrfmktqwhdjpoe.supabase.co";
@@ -51,12 +58,16 @@ public class ServiceUsuario implements IServiceUsuario {
     private final IServiceSesion sesionService;
 
 	@Autowired
-	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService) {
+	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, ClienteRepository clienteRepository,
+			VendedorRepository vendedorRepository, AdministradorRepository administradorRepository) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtManager = jwtManager;
 		this.sesionService = sesionService;
+		this.clienteRepository = clienteRepository;
+		this.vendedorRepository = vendedorRepository;
+		this.administradorRepository = administradorRepository;
 	}
 	
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -382,6 +393,29 @@ public class ServiceUsuario implements IServiceUsuario {
 		else if(usuario.getTipo_usuario().equalsIgnoreCase("VENDEDOR"))
 			return modelMapper.map(usuario, Vendedor.class);
 		return modelMapper.map(usuario, Usuario.class);
+	}
+
+	@Override
+	public ResultadoOperacion<?> buscarUsuarioPorCi(DtUsuario usuarioDt) {
+		Usuario usuario = new Usuario();
+		if(usuarioDt.getTipo_usuario().equalsIgnoreCase("CLIENTE"))
+			usuario = clienteRepository.findByCi(usuarioDt.getCi());
+		else if(usuarioDt.getTipo_usuario().equalsIgnoreCase("VENDEDOR"))
+			usuario = vendedorRepository.findByCi(usuarioDt.getCi());
+		else if(usuarioDt.getTipo_usuario().equalsIgnoreCase("ADMINISTRADOR"))
+			usuario = administradorRepository.findByCi(usuarioDt.getCi());
+		if(usuario != null) {
+			DtUsuario dtUsuario = entityToDtPerfil(usuario);
+			return new ResultadoOperacion(true, "Usuario obtenido correctamente", dtUsuario);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.SIN_RESULTADOS.getMsg(), ErrorCode.SIN_RESULTADOS);
+		}
+	}
+
+	private DtUsuario entityToDtPerfil(Usuario usuario) {
+		return new DtUsuario(definirTipoUsuario(usuario), usuario.getUuidAuth(), usuario.getCi(), 
+				usuario.getNombres(), usuario.getApellidos(), usuario.getEmail(), usuario.getFecha_nacimiento());
+		
 	}
 
 }
