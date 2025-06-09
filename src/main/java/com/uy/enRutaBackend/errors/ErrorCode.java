@@ -8,7 +8,10 @@ public enum ErrorCode {
 	REQUEST_INVALIDO("Error en la operación."),
 	ERROR_LISTADO("Error al obtener el listado"),
 	DATOS_INSUFICIENTES("Se requiere minimo ci o correo"),
-	SIN_RESULTADOS("Usuario no encontrado")
+	SIN_RESULTADOS("Usuario no encontrado"),
+	USUARIO_YA_ELIMINADO("El usuario ya esta eliminado"),
+	TOKEN_INVALIDO("Session invalida o expirada"),
+	NO_AUTORIZADO("No tiene permiso para eliminar este usuario")
 	;
 	private final String msg;
 

@@ -5,6 +5,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
@@ -25,19 +28,23 @@ import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.PasswordResetToken;
+import com.uy.enRutaBackend.entities.Sesion;
 import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 import com.uy.enRutaBackend.icontrollers.IServiceSesion;
+import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.persistence.PasswordResetTokenRepository;
+import com.uy.enRutaBackend.persistence.SesionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
 @Getter
 @Setter
@@ -48,6 +55,7 @@ public class ServiceUsuario implements IServiceUsuario {
 	private static final String SUPABASE_URL = "https://zvynuwmrfmktqwhdjpoe.supabase.co";
 	private static final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2eW51d21yZm1rdHF3aGRqcG9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMTM3OTMsImV4cCI6MjA1OTg4OTc5M30.T7zfUyRGDl7lctJyJ98TWrp1crjzlkx5VmX-r_x_t4c";
 
+	
 	private final UsuarioRepository repository;
 	private final ModelMapper modelMapper;
     private PasswordEncoder passwordEncoder;
@@ -55,9 +63,11 @@ public class ServiceUsuario implements IServiceUsuario {
     private final IServiceSesion sesionService;
     private final PasswordResetTokenRepository resetTokenRepository;
     private final EmailService emailService;
+    private final IServiceSupabase iserviceSupabase;
+    private final SesionRepository sesionRepository;
 
 	@Autowired
-	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, PasswordResetTokenRepository resetTokenRepository, EmailService emailService) {
+	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, PasswordResetTokenRepository resetTokenRepository, EmailService emailService, IServiceSupabase iserviceSupabase, SesionRepository sesionRepository) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
@@ -65,6 +75,8 @@ public class ServiceUsuario implements IServiceUsuario {
 		this.sesionService = sesionService;
 		this.resetTokenRepository = resetTokenRepository;
 		this.emailService = emailService;
+		this.iserviceSupabase = iserviceSupabase;
+		this.sesionRepository = sesionRepository;
 	}
 	
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -393,7 +405,18 @@ public class ServiceUsuario implements IServiceUsuario {
 	
 	@Override
 	public ResultadoOperacion<?> cambiarPassword(DtUsuario datos) {
-	    Usuario user = repository.findByEmail(datos.getEmail());
+	    Usuario user = null;
+	    String identificador = datos.getEmail(); // puede venir un email o una ci
+
+	    if (identificador == null || identificador.trim().isEmpty()) {
+	        return new ResultadoOperacion<>(false, "Debe proporcionar un email o cédula", ErrorCode.DATOS_INSUFICIENTES);
+	    }
+
+	    if (identificador.contains("@")) {
+	        user = repository.findByEmail(identificador);
+	    } else {
+	        user = repository.findByCi(identificador);
+	    }
 
 	    if (user == null) {
 	        return new ResultadoOperacion<>(false, "Credenciales incorrectas", ErrorCode.CREDENCIALES_INVALIDAS);
@@ -412,7 +435,8 @@ public class ServiceUsuario implements IServiceUsuario {
 
 	    return new ResultadoOperacion<>(true, "Contraseña actualizada correctamente", null);
 	}
-	
+
+
 	
 	@Override
 	public ResultadoOperacion<?> solicitarRecuperacion(String email) {
@@ -453,6 +477,63 @@ public class ServiceUsuario implements IServiceUsuario {
 
 	    return new ResultadoOperacion<>(true, "Contraseña actualizada correctamente", null);
 	}
+	
+	@Override
+	public ResultadoOperacion<?> eliminarUsuario(String token, DtUsuario datos) {
+	    Sesion sesion = sesionRepository.findByAccessToken(token);
+
+	    if (sesion == null || !sesion.isActivo()) {
+	        return new ResultadoOperacion<>(false, "Sesión inválida o expirada", ErrorCode.TOKEN_INVALIDO);
+	    }
+
+	    Usuario usuarioSesion = sesion.getUsuario();  // usuario que tiene la sesión activa
+
+	    // Determinar qué identificador vino (email o ci)
+	    String identificador = datos.getEmail() != null ? datos.getEmail() : datos.getCi();
+
+	    if (identificador == null) {
+	        return new ResultadoOperacion<>(false, "Debe especificar email o cédula para eliminar", ErrorCode.DATOS_INSUFICIENTES);
+	    }
+
+	    Usuario userAEliminar = identificador.contains("@")
+	        ? repository.findByEmail(identificador)
+	        : repository.findByCi(identificador);
+
+	    if (userAEliminar == null) {
+	        return new ResultadoOperacion<>(false, "Usuario no encontrado", ErrorCode.SIN_RESULTADOS);
+	    }
+
+	    // Verificar si el usuario autenticado es el mismo que el que quiere eliminar
+	    if (!usuarioSesion.getUuidAuth().equals(userAEliminar.getUuidAuth())) {
+	        return new ResultadoOperacion<>(false, "No tiene permisos para eliminar este usuario", ErrorCode.NO_AUTORIZADO);
+	    }
+
+	    if (userAEliminar.isEliminado()) {
+	        return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
+	    }
+	    
+	    if (userAEliminar.getEmail() != null) {
+	        try {
+	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
+	        } catch (Exception e) {
+	            return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+	        }
+	    }
+
+	    // Marcar como eliminado
+	    userAEliminar.setEliminado(true);
+	    userAEliminar.setEmail(null);
+	    userAEliminar.setCi(null);
+	    
+	    repository.save(userAEliminar);
+	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente", null);
+	}
+	
+
+	
+
+
+
 
 
 

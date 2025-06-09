@@ -39,6 +39,8 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/usuarios/cambiarContraseña").permitAll()
 						.requestMatchers("/api/usuarios/solicitar-recuperacion").permitAll()
 						.requestMatchers("/api/usuarios/confirmar-recuperacion").permitAll()
+						.requestMatchers("/api/usuarios/eliminarUsuario/**").permitAll()
+						.requestMatchers("/api/admin/eliminarUsuario/**").permitAll()
 						.anyRequest().authenticated() 
 				);
 		return http.build();

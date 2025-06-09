@@ -1,0 +1,88 @@
+package com.uy.enRutaBackend.services;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.uy.enRutaBackend.datatypes.DtUsuario;
+import com.uy.enRutaBackend.entities.Administrador;
+import com.uy.enRutaBackend.entities.Sesion;
+import com.uy.enRutaBackend.entities.Usuario;
+import com.uy.enRutaBackend.errors.ErrorCode;
+import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceAdmin;
+import com.uy.enRutaBackend.icontrollers.IServiceSesion;
+import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
+import com.uy.enRutaBackend.persistence.PasswordResetTokenRepository;
+import com.uy.enRutaBackend.persistence.SesionRepository;
+import com.uy.enRutaBackend.persistence.UsuarioRepository;
+import com.uy.enRutaBackend.security.jwt.JwtManager;
+
+@Service
+public class ServiceAdmin  implements IServiceAdmin{
+	
+	private final UsuarioRepository repository;
+    private final IServiceSupabase iserviceSupabase;
+    private final SesionRepository sesionRepository;
+
+	@Autowired
+	public ServiceAdmin(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, PasswordResetTokenRepository resetTokenRepository, EmailService emailService, IServiceSupabase iserviceSupabase, SesionRepository sesionRepository) {
+		this.repository = repository;
+		this.iserviceSupabase = iserviceSupabase;
+		this.sesionRepository = sesionRepository;
+	}
+	
+	
+	@Override
+	public ResultadoOperacion<?> eliminarUsuarioComoAdmin(String token, DtUsuario datos) {
+	    Sesion sesion = sesionRepository.findByAccessToken(token);
+
+	    if (sesion == null || !sesion.isActivo()) {
+	        return new ResultadoOperacion<>(false, "Sesión inválida o expirada", ErrorCode.TOKEN_INVALIDO);
+	    }
+
+	    Usuario usuarioSesion = sesion.getUsuario();
+
+	    // ✅ Verificar que sea un administrador
+	    if (!(usuarioSesion instanceof Administrador)) {
+	        return new ResultadoOperacion<>(false, "No tiene permisos para realizar esta acción", ErrorCode.NO_AUTORIZADO);
+	    }
+
+	    // ✅ Buscar el usuario a eliminar por email o cédula
+	    String identificador = datos.getEmail() != null ? datos.getEmail() : datos.getCi();
+	    if (identificador == null) {
+	        return new ResultadoOperacion<>(false, "Debe especificar email o cédula para eliminar", ErrorCode.DATOS_INSUFICIENTES);
+	    }
+
+	    Usuario userAEliminar = identificador.contains("@")
+	        ? repository.findByEmail(identificador)
+	        : repository.findByCi(identificador);
+
+	    if (userAEliminar == null) {
+	        return new ResultadoOperacion<>(false, "Usuario no encontrado", ErrorCode.SIN_RESULTADOS);
+	    }
+
+	    if (userAEliminar.isEliminado()) {
+	        return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
+	    }
+
+	    // ✅ Si tenía cuenta en Supabase, borrarla
+	    if (userAEliminar.getEmail() != null) {
+	        try {
+	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
+	        } catch (Exception e) {
+	            return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+	        }
+	    }
+
+	    // ✅ Marcar como eliminado en la base
+	    userAEliminar.setEliminado(true);
+	    userAEliminar.setEmail(null);
+	    userAEliminar.setCi(null);
+
+	    repository.save(userAEliminar);
+	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente por administrador", null);
+	}
+
+}
