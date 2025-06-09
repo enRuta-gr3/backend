@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
+import com.uy.enRutaBackend.datatypes.DtPago;
 import com.uy.enRutaBackend.datatypes.DtPasaje;
+import com.uy.enRutaBackend.datatypes.DtPaypal;
 import com.uy.enRutaBackend.datatypes.DtVentaCompraResponse;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -166,7 +168,26 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 				return new ResultadoOperacion(true, "Estado de venta y pago correctamente cambiado", dtVenta);
 			}
 		} catch (Exception e) {
-			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.ERROR_LISTADO);
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
+	
+	@Override
+	public ResultadoOperacion<?> finalizarVentaPayPal(DtPaypal paypalDt) {
+		try {
+			String estado = servicePago.verificarPagoPaypal(paypalDt.getId_orden());
+			DtVenta_Compra venta = new DtVenta_Compra();
+			DtPago pago = new DtPago();
+			if(estado.equals("OK")) {
+				pago.setEstado_trx(EstadoTransaccion.APROBADA);
+			} else {
+				pago.setEstado_trx(EstadoTransaccion.RECHAZADA);
+			}
+			venta.setId_venta(paypalDt.getId_venta());
+			venta.setPago(pago);			
+			return finalizarVenta(venta);
+		} catch (Exception e) {
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
 		}
 	}
 	

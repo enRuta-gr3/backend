@@ -1,5 +1,8 @@
 package com.uy.enRutaBackend.services;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,7 @@ import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceIntegracionPaypal;
 import com.uy.enRutaBackend.icontrollers.IServicePago;
 import com.uy.enRutaBackend.persistence.ClienteRepository;
 import com.uy.enRutaBackend.persistence.MedioDePagoRepository;
@@ -31,6 +35,7 @@ public class ServicePago implements IServicePago {
 	private final MedioDePagoRepository mpRepository;
 	private final VendedorRepository vendedorRepository;
 	private final ClienteRepository clienteRepository;
+	private final IServiceIntegracionPaypal paypalService;
 	
 	@Value("${mercado.pago.properties.access.token}")
 	private String mpAccessToken;
@@ -44,21 +49,18 @@ public class ServicePago implements IServicePago {
 	private String mpCategoryId;
 	@Value("${mercado.pago.properties.currency_id}")
 	private String mpCurrencyId;
-	@Value("${payPal.properties.id}")
-	private String payPalId;
-	@Value("${payPal.properties.currency}")
-	private String payPalCurrency;
-	@Value("${payPal.properties.intent}")
-	private String payPalIntent;
+
 	
 	@Autowired
 	public ServicePago(PagoRepository pagoRepository, MedioDePagoRepository mpRepository,
-			VendedorRepository vendedorRepository, ClienteRepository clienteRepository/*, IServiceVenta_Compra serviceVenta*/) {
+			VendedorRepository vendedorRepository, ClienteRepository clienteRepository,
+			IServiceIntegracionPaypal paypalService) {
 		super();
 		this.pagoRepository = pagoRepository;
 		this.mpRepository = mpRepository;
 		this.vendedorRepository = vendedorRepository;
 		this.clienteRepository = clienteRepository;
+		this.paypalService = paypalService;
 	}
 
 	@Override
@@ -174,7 +176,9 @@ public class ServicePago implements IServicePago {
 	@Override
 	public ResultadoOperacion<?> solicitarParametrosPayPal(DtVenta_Compra compra, Venta_Compra venta) {
 		try {
-			DtPaypal paypal = llenarDatosPaypal(venta);
+			BigDecimal monto = new BigDecimal(calcularMontoUsd(venta)).setScale(2, RoundingMode.HALF_UP);;
+			DtPaypal paypal = paypalService.crearOrdenDePago(monto);
+			paypal.setId_venta(venta.getId_venta());
 			if(paypal != null) {	
 				return new ResultadoOperacion(true, "Datos obtenidos correctamente", paypal);
 			} else {
@@ -185,16 +189,6 @@ public class ServicePago implements IServicePago {
 		}
 	}
 
-	private DtPaypal llenarDatosPaypal(Venta_Compra venta) {
-		DtPaypal dtPay = new DtPaypal();
-		dtPay.setClient_id(payPalId);
-		dtPay.setCurrency(payPalCurrency);
-		dtPay.setIntent(payPalIntent);
-		dtPay.setId_venta(venta.getId_venta());
-		dtPay.setCotizacion(venta.getPago().getMedio_de_pago().getCotizacion());
-		dtPay.setMonto(calcularMontoUsd(venta));
-		return dtPay;
-	}
 
 	private double calcularMontoUsd(Venta_Compra venta) {
 		double monto = (venta.getPago().getMonto() / venta.getPago().getMedio_de_pago().getCotizacion());
@@ -212,7 +206,6 @@ public class ServicePago implements IServicePago {
         return 0;
     }
 
-	
 	@Override
 	public ResultadoOperacion<?> solicitarParametrosEfectivo(DtVenta_Compra compra, Venta_Compra venta) {
 		try {
@@ -231,5 +224,16 @@ public class ServicePago implements IServicePago {
 	@Override
 	public void actualizarPago(Pago pago) {
 		pagoRepository.save(pago);		
+	}
+
+	@Override
+	public String verificarPagoPaypal(String id_orden) {
+		String estado = new String();
+		try {
+			estado = paypalService.capturePayment(id_orden);
+		} catch (IOException e) {
+			return e.getLocalizedMessage();
+		}
+		return estado;
 	}
 }

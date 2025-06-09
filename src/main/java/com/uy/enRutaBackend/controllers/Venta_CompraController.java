@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.uy.enRutaBackend.datatypes.DtPasaje;
+import com.uy.enRutaBackend.datatypes.DtPaypal;
 import com.uy.enRutaBackend.datatypes.DtVentaCompraResponse;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
@@ -39,6 +40,19 @@ public class Venta_CompraController {
 	@Operation(summary = "Actualiza el estado final de la venta y del pago.")
 	public ResponseEntity<?> completarVenta(@RequestBody DtVenta_Compra compra) {
 		ResultadoOperacion<?> res = ventaService.finalizarVenta(compra);
+		if(res.isSuccess()) {
+			System.out.println("*VENTA* - Venta completada correctamente.");
+			return ResponseEntity.ok(res);			
+		} else {
+			System.out.println("*VENTA* - Error completando la venta.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@PostMapping("/confirmarVentaPaypal")
+	@Operation(summary = "Actualiza el estado final de la venta y del pago.")
+	public ResponseEntity<?> finalizarVentaPayPal(@RequestBody DtPaypal paypalDt) {
+		ResultadoOperacion<?> res = ventaService.finalizarVentaPayPal(paypalDt);
 		if(res.isSuccess()) {
 			System.out.println("*VENTA* - Venta completada correctamente.");
 			return ResponseEntity.ok(res);			

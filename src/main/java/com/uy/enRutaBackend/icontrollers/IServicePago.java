@@ -14,4 +14,5 @@ public interface IServicePago {
 	ResultadoOperacion<?> solicitarParametrosEfectivo(DtVenta_Compra compra, Venta_Compra venta);
 	ResultadoOperacion<?> solicitarParametrosPago(DtVenta_Compra compra, Venta_Compra venta);
 	void actualizarPago(Pago pago);
+	String verificarPagoPaypal(String id_orden);
 }
