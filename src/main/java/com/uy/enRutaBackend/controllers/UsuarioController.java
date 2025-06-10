@@ -1,9 +1,15 @@
 package com.uy.enRutaBackend.controllers;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public class UsuarioController {
 	private final IServiceUsuario serviceUsuario;
 
+	@Autowired
 	public UsuarioController(IServiceUsuario serviceUsuario) {
 		this.serviceUsuario = serviceUsuario;
 	}
@@ -43,5 +50,44 @@ public class UsuarioController {
 			}
 		}
 
+	}
+	
+	@PostMapping("/cambiarContraseña")
+	@Operation(summary = "Cambiar contraseña del usuario")
+	public ResponseEntity<?> cambiarPassword(@RequestBody DtUsuario datos) {
+	    ResultadoOperacion<?> res = serviceUsuario.cambiarPassword(datos);
+
+	    if (res.isSuccess()) {
+	        return ResponseEntity.ok(res);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+	    }
+	}
+	
+	@PostMapping("/solicitar-recuperacion")
+	public ResponseEntity<?> solicitarRecuperacion(@RequestBody Map<String, String> request) {
+	    ResultadoOperacion<?> res = serviceUsuario.solicitarRecuperacion(request.get("email"));
+	    return ResponseEntity.status(res.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(res);
+	}
+
+	@PostMapping("/confirmar-recuperacion")
+	public ResponseEntity<?> confirmarRecuperacion(@RequestBody Map<String, String> request) {
+	    ResultadoOperacion<?> res = serviceUsuario.confirmarRecuperacion(request.get("token"), request.get("nuevaPassword"));
+	    return ResponseEntity.status(res.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(res);
+	}
+	
+	@DeleteMapping("/eliminarUsuario")
+	@Operation(summary = "Eliminar usuario", description = "Marca como eliminado y borra datos sensibles")
+	public ResponseEntity<?> eliminarUsuario(
+	        @RequestHeader("Authorization") String token,
+	        @RequestBody DtUsuario datos) {
+
+	    ResultadoOperacion<?> res = serviceUsuario.eliminarUsuario(token, datos);
+
+	    if (res.isSuccess()) {
+	        return ResponseEntity.ok(res);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+	    }
 	}
 }

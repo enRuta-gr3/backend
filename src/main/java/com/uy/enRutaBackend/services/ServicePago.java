@@ -176,8 +176,8 @@ public class ServicePago implements IServicePago {
 	@Override
 	public ResultadoOperacion<?> solicitarParametrosPayPal(DtVenta_Compra compra, Venta_Compra venta) {
 		try {
-			BigDecimal monto = new BigDecimal(calcularMontoUsd(venta)).setScale(2, RoundingMode.HALF_UP);;
-			DtPaypal paypal = paypalService.crearOrdenDePago(monto);
+			BigDecimal monto = new BigDecimal(calcularMontoUsd(venta)).setScale(2, RoundingMode.HALF_UP);
+			DtPaypal paypal = paypalService.crearOrdenDePago(monto, compra.getPago().getUrlRedir(), venta.getId_venta());
 			paypal.setId_venta(venta.getId_venta());
 			if(paypal != null) {	
 				return new ResultadoOperacion(true, "Datos obtenidos correctamente", paypal);

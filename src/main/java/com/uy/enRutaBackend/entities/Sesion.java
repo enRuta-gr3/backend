@@ -27,7 +27,7 @@ public class Sesion {
 	@JoinColumn(name = "id_usuario")
 	private Usuario usuario;
 	
-	@Column(name = "token")
+	@Column(name = "token", length = 2048)
 	private String accessToken;
 	
 	@Column(name = "fecha_inicio_sesion")

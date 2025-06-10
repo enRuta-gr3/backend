@@ -17,4 +17,8 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> iniciarSesion(DtUsuario request);
 	DtUsuario registrarUsuarioSinVerificacion(DtUsuario usuario) throws UsuarioExistenteException, Exception;
 	ResultadoOperacion<?> buscarUsuarioPorCi(DtUsuario usuario);
+	public ResultadoOperacion<?> cambiarPassword(DtUsuario datos);
+	public ResultadoOperacion<?> confirmarRecuperacion(String token, String nuevaPassword);
+	public ResultadoOperacion<?> solicitarRecuperacion(String email);
+	public ResultadoOperacion<?> eliminarUsuario(String token, DtUsuario datos);
 }

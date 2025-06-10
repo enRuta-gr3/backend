@@ -53,7 +53,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
         }
     }
 	
-	public DtPaypal crearOrdenDePago(BigDecimal amount) throws IOException {
+	public DtPaypal crearOrdenDePago(BigDecimal amount, String urlRedir, int idVenta) throws IOException {
 		
 	    String accessToken = new String();
 		try {
@@ -70,10 +70,9 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	            .put("value", amount.toString()))));
 	    
 	    
-//	    JSONObject appContext = new JSONObject();
-//	    appContext.put("return_url", "https://en-ruta.vercel.app/web-pago-confirmado?orderId=");
-//	    appContext.put("cancel_url", "https://localhost:8080/paypal-cancel");
-//	    jsonRequest.put("application_context", appContext);
+	    JSONObject appContext = new JSONObject(); 
+	    appContext.put("return_url", urlRedir +"?id_venta="+ idVenta + "&id_orden=");
+	    jsonRequest.put("application_context", appContext);
 
 	    System.out.println(jsonRequest);
 	    
@@ -86,9 +85,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	            .header("Content-Type", "application/json")
 	            .build();
 
-	    try (Response response = client.newCall(request).execute()) {
-	    	System.out.println(response);
-	    	
+	    try (Response response = client.newCall(request).execute()) {    	
 	        if (response.isSuccessful()) {
 	        	DtPaypal paypalDt = crearDtPaypal(response);
 	            return paypalDt;

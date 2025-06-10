@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 import com.uy.enRutaBackend.datatypes.DtPaypal;
 
 public interface IServiceIntegracionPaypal {
-	DtPaypal crearOrdenDePago(BigDecimal amount) throws IOException;
+	DtPaypal crearOrdenDePago(BigDecimal amount, String urlRedir, int idVenta) throws IOException;
 	String capturePayment(String orderId) throws IOException;
 }

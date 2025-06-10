@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -22,15 +23,20 @@ import com.uy.enRutaBackend.datatypes.DtSesion;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.PasswordResetToken;
+import com.uy.enRutaBackend.entities.Sesion;
 import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 import com.uy.enRutaBackend.icontrollers.IServiceSesion;
+import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.persistence.AdministradorRepository;
 import com.uy.enRutaBackend.persistence.ClienteRepository;
+import com.uy.enRutaBackend.persistence.PasswordResetTokenRepository;
+import com.uy.enRutaBackend.persistence.SesionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.persistence.VendedorRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
@@ -56,10 +62,15 @@ public class ServiceUsuario implements IServiceUsuario {
     private PasswordEncoder passwordEncoder;
     private final JwtManager jwtManager;
     private final IServiceSesion sesionService;
+    private final PasswordResetTokenRepository resetTokenRepository;
+    private final EmailService emailService;
+    private final IServiceSupabase iserviceSupabase;
+    private final SesionRepository sesionRepository;
 
 	@Autowired
 	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, ClienteRepository clienteRepository,
-			VendedorRepository vendedorRepository, AdministradorRepository administradorRepository) {
+			VendedorRepository vendedorRepository, AdministradorRepository administradorRepository,
+			PasswordResetTokenRepository resetTokenRepository, EmailService emailService, IServiceSupabase iserviceSupabase, SesionRepository sesionRepository) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
@@ -68,6 +79,10 @@ public class ServiceUsuario implements IServiceUsuario {
 		this.clienteRepository = clienteRepository;
 		this.vendedorRepository = vendedorRepository;
 		this.administradorRepository = administradorRepository;
+		this.resetTokenRepository = resetTokenRepository;
+		this.emailService = emailService;
+		this.iserviceSupabase = iserviceSupabase;
+		this.sesionRepository = sesionRepository;
 	}
 	
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -416,6 +431,132 @@ public class ServiceUsuario implements IServiceUsuario {
 		return new DtUsuario(definirTipoUsuario(usuario), usuario.getUuidAuth(), usuario.getCi(), 
 				usuario.getNombres(), usuario.getApellidos(), usuario.getEmail(), usuario.getFecha_nacimiento());
 		
+	}
+	
+	@Override
+	public ResultadoOperacion<?> cambiarPassword(DtUsuario datos) {
+	    Usuario user = null;
+	    String identificador = datos.getEmail(); // puede venir un email o una ci
+
+	    if (identificador == null || identificador.trim().isEmpty()) {
+	        return new ResultadoOperacion<>(false, "Debe proporcionar un email o cédula", ErrorCode.DATOS_INSUFICIENTES);
+	    }
+
+	    if (identificador.contains("@")) {
+	        user = repository.findByEmail(identificador);
+	    } else {
+	        user = repository.findByCi(identificador);
+	    }
+
+	    if (user == null) {
+	        return new ResultadoOperacion<>(false, "Credenciales incorrectas", ErrorCode.CREDENCIALES_INVALIDAS);
+	    }
+
+	    System.out.println("📥 Contraseña actual (plano): " + datos.getContraseña());
+	    System.out.println("🔒 Contraseña guardada (hash): " + user.getContraseña());
+
+	    if (!passwordEncoder.matches(datos.getContraseña(), user.getContraseña())) {
+	        return new ResultadoOperacion<>(false, "Credenciales incorrectas", ErrorCode.CREDENCIALES_INVALIDAS);
+	    }
+
+	    String nuevaPasswordHash = passwordEncoder.encode(datos.getContraseña_nueva());
+	    user.setContraseña(nuevaPasswordHash);
+	    repository.save(user);
+
+	    return new ResultadoOperacion<>(true, "Contraseña actualizada correctamente", null);
+	}
+
+
+	
+	@Override
+	public ResultadoOperacion<?> solicitarRecuperacion(String email) {
+	    Usuario user = repository.findByEmail(email);
+	    if (user == null) {
+	        return new ResultadoOperacion<>(true, "Si el correo existe, se enviará un email con instrucciones", null);
+	    }
+
+	    String token = UUID.randomUUID().toString();
+	    LocalDateTime expiration = LocalDateTime.now().plusMinutes(30);
+	    PasswordResetToken resetToken = new PasswordResetToken(email, token, expiration);
+	    resetTokenRepository.save(resetToken);
+
+	    // Enlace personalizado
+	    String resetLink = "https://en-ruta.vercel.app/reset-password?token=" + token;
+	    emailService.send(email, "Recuperación de contraseña", "Recuperá tu contraseña aquí: " + resetLink);
+
+	    return new ResultadoOperacion<>(true, "Se envió un enlace de recuperación", null);
+	}
+	
+	
+	@Override
+	public ResultadoOperacion<?> confirmarRecuperacion(String token, String nuevaPassword) {
+	    PasswordResetToken resetToken = resetTokenRepository.findByToken(token);
+
+	    if (resetToken == null || resetToken.getExpiration().isBefore(LocalDateTime.now())) {
+	        return new ResultadoOperacion<>(false, "Token inválido o expirado", ErrorCode.REQUEST_INVALIDO);
+	    }
+
+	    Usuario user = repository.findByEmail(resetToken.getEmail());
+	    if (user == null) {
+	        return new ResultadoOperacion<>(false, "Usuario no encontrado", ErrorCode.SIN_RESULTADOS);
+	    }
+
+	    user.setContraseña(passwordEncoder.encode(nuevaPassword));
+	    repository.save(user);
+	    resetTokenRepository.delete(resetToken);
+
+	    return new ResultadoOperacion<>(true, "Contraseña actualizada correctamente", null);
+	}
+	
+	@Override
+	public ResultadoOperacion<?> eliminarUsuario(String token, DtUsuario datos) {
+	    Sesion sesion = sesionRepository.findByAccessToken(token);
+
+	    if (sesion == null || !sesion.isActivo()) {
+	        return new ResultadoOperacion<>(false, "Sesión inválida o expirada", ErrorCode.TOKEN_INVALIDO);
+	    }
+
+	    Usuario usuarioSesion = sesion.getUsuario();  // usuario que tiene la sesión activa
+
+	    // Determinar qué identificador vino (email o ci)
+	    String identificador = datos.getEmail() != null ? datos.getEmail() : datos.getCi();
+
+	    if (identificador == null) {
+	        return new ResultadoOperacion<>(false, "Debe especificar email o cédula para eliminar", ErrorCode.DATOS_INSUFICIENTES);
+	    }
+
+	    Usuario userAEliminar = identificador.contains("@")
+	        ? repository.findByEmail(identificador)
+	        : repository.findByCi(identificador);
+
+	    if (userAEliminar == null) {
+	        return new ResultadoOperacion<>(false, "Usuario no encontrado", ErrorCode.SIN_RESULTADOS);
+	    }
+
+	    // Verificar si el usuario autenticado es el mismo que el que quiere eliminar
+	    if (!usuarioSesion.getUuidAuth().equals(userAEliminar.getUuidAuth())) {
+	        return new ResultadoOperacion<>(false, "No tiene permisos para eliminar este usuario", ErrorCode.NO_AUTORIZADO);
+	    }
+
+	    if (userAEliminar.isEliminado()) {
+	        return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
+	    }
+	    
+	    if (userAEliminar.getEmail() != null) {
+	        try {
+	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
+	        } catch (Exception e) {
+	            return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+	        }
+	    }
+
+	    // Marcar como eliminado
+	    userAEliminar.setEliminado(true);
+	    userAEliminar.setEmail(null);
+	    userAEliminar.setCi(null);
+	    
+	    repository.save(userAEliminar);
+	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente", null);
 	}
 
 }

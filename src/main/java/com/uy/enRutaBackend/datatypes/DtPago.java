@@ -15,6 +15,8 @@ public class DtPago {
     
     private DtMedio_de_Pago medio_de_pago;
     
+    private String urlRedir;
+    
     public int getId_pago() {
         return id_pago;
     }
@@ -53,5 +55,13 @@ public class DtPago {
 
 	public void setMedio_de_pago(DtMedio_de_Pago medio_de_pago) {
 		this.medio_de_pago = medio_de_pago;
+	}
+
+	public String getUrlRedir() {
+		return urlRedir;
+	}
+
+	public void setUrlRedir(String urlRedir) {
+		this.urlRedir = urlRedir;
 	}
 }

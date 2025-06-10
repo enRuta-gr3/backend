@@ -53,7 +53,7 @@ public class PagoController {
 		ResultadoOperacion<?> res = servicePago.solicitarParametrosPago(compra, venta);
 		if(res.isSuccess()) {
 			System.out.println("*PAGOS* - Parametros para crear pago enviados.");
-			return ResponseEntity.ok(res);			
+			return ResponseEntity.ok(res);
 		} else {
 			System.out.println("*PAGOS* - Error enviando datos para crear pago.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);

@@ -65,7 +65,7 @@ public class MOSTRARDATOS {
     }
 
     public void ejecutar() {
-        DtUsuario c1 = new DtUsuario("ADMINISTRADOR", "5.251.766-1", "Franco Rodrigo", "Pirotto Perez","admin@enruta.com", "admin123", null, false, null, null, false, false, false);
+        DtUsuario c1 = new DtUsuario("CLIENTE", "", "Franco", "Pirotto", "francorro02@gmail.com", "holaloco", null, false, null, null, false, false, false);
         try {
 			servicioUsuario.registrarUsuario(c1);
 		} catch (Exception e) {
@@ -73,7 +73,6 @@ public class MOSTRARDATOS {
 			e.printStackTrace();
 		}
 
-        cargardatos(c1);
     }
 
 

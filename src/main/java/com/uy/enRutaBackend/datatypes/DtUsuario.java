@@ -25,6 +25,8 @@ public class DtUsuario {
     
     private String contraseña;
     
+    private String contraseña_nueva;
+    
     private Date fecha_nacimiento;
     
     private boolean eliminado;
@@ -90,6 +92,14 @@ public class DtUsuario {
     public UUID getUuidAuth() {
         return uuidAuth;
     }
+
+    public String getContraseña_nueva() {
+		return contraseña_nueva;
+	}
+
+	public void setContraseña_nueva(String contraseña_nueva) {
+		this.contraseña_nueva = contraseña_nueva;
+	}
 
     public void setUuidAuth(UUID uuidAuth) {
         this.uuidAuth = uuidAuth;
