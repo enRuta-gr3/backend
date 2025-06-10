@@ -71,7 +71,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	    
 	    
 	    JSONObject appContext = new JSONObject(); 
-	    appContext.put("return_url", urlRedir +"?id_venta="+ idVenta + "&id_orden=");
+	    appContext.put("return_url", urlRedir +"?id_venta="+ idVenta);
 	    jsonRequest.put("application_context", appContext);
 
 	    System.out.println(jsonRequest);
