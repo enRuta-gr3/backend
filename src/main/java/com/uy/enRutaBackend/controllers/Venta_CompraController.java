@@ -41,10 +41,10 @@ public class Venta_CompraController {
 	public ResponseEntity<?> completarVenta(@RequestBody DtVenta_Compra compra) {
 		ResultadoOperacion<?> res = ventaService.finalizarVenta(compra);
 		if(res.isSuccess()) {
-			System.out.println("*VENTA* - Venta completada correctamente.");
+			System.out.println("*VENTA* - Venta completada correctamente. ID: " + compra.getId_venta());
 			return ResponseEntity.ok(res);			
 		} else {
-			System.out.println("*VENTA* - Error completando la venta.");
+			System.out.println("*VENTA* - Error completando la venta. ID: " + compra.getId_venta());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
@@ -54,10 +54,10 @@ public class Venta_CompraController {
 	public ResponseEntity<?> finalizarVentaPayPal(@RequestBody DtPaypal paypalDt) {
 		ResultadoOperacion<?> res = ventaService.finalizarVentaPayPal(paypalDt);
 		if(res.isSuccess()) {
-			System.out.println("*VENTA* - Venta completada correctamente.");
+			System.out.println("*VENTA* - Venta completada correctamente. ID: " + paypalDt.getId_venta());
 			return ResponseEntity.ok(res);			
 		} else {
-			System.out.println("*VENTA* - Error completando la venta.");
+			System.out.println("*VENTA* - Error completando la venta. ID: " + paypalDt.getId_venta());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}

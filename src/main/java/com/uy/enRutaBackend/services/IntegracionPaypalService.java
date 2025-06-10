@@ -77,7 +77,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	    System.out.println(jsonRequest);
 	    
 	    RequestBody body = RequestBody.create(jsonRequest.toString(), MediaType.get("application/json"));
-//	    System.out.println(body);
+
 	    Request request = new Request.Builder()
 	            .url(baseUrl + "/v2/checkout/orders")
 	            .post(body)

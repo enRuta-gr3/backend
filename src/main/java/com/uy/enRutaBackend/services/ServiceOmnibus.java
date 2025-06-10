@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
+import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
@@ -117,23 +117,28 @@ public class ServiceOmnibus implements IServiceOmnibus{
     }
 
     private DtOmnibus entityToDto(Omnibus omnibus) {
-        DtOmnibus dto = modelMapper.map(omnibus, DtOmnibus.class);
+        DtOmnibus dto = /*modelMapper.map(omnibus, DtOmnibus.class)*/ new DtOmnibus();
+        dto.setActivo(omnibus.isActivo());
+        dto.setCapacidad(omnibus.getCapacidad());
+        dto.setId_omnibus(omnibus.getId_omnibus());
+        dto.setNro_coche(omnibus.getNro_coche());
+        
 
         if (omnibus.getLocalidad_actual() != null) {
             dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
         }
 
         // Asientos
-        List<Asiento> asientos = asientoRepository.findByOmnibus(omnibus);
-        if (asientos != null && !asientos.isEmpty()) {
-            List<DtAsiento> dtAsientos = asientos.stream()
-                .map(a -> new DtAsiento(
-                    a.getId_asiento(),
-                    a.getNumeroAsiento(),
-                    omnibus.getId_omnibus()))
-                .toList();
-            dto.setAsientos(dtAsientos);
-        }
+//        List<Asiento> asientos = asientoRepository.findByOmnibus(omnibus);
+//        if (asientos != null && !asientos.isEmpty()) {
+//            List<DtAsiento> dtAsientos = asientos.stream()
+//                .map(a -> new DtAsiento(
+//                    a.getId_asiento(),
+//                    a.getNumeroAsiento(),
+//                    omnibus.getId_omnibus()))
+//                .toList();
+//            dto.setAsientos(dtAsientos);
+//        }
 
         // Viajes
         List<Viaje> viajes = viajeRepository.findByOmnibus(omnibus);
@@ -148,8 +153,8 @@ public class ServiceOmnibus implements IServiceOmnibus{
                     dt.setHora_llegada(utils.timeToString(v.getHora_llegada()));
                     dt.setPrecio_viaje(v.getPrecio_viaje());
                     dt.setEstado(v.getEstado().toString());
-                    //dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
-                    //dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
+                    dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
+                    dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
                    // dt.setOmnibus(modelMapper.map(v.getOmnibus(), DtOmnibus.class));
                     return dt; 
                 }).toList();
