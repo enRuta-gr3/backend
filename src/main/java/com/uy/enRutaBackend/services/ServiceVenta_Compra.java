@@ -269,6 +269,7 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 		
 		for(Pasaje pasaje : pasajesCreados) {
 			DtPasaje pasajeDt = servicePasaje.entityToDt(pasaje);
+			pasajeDt.setCiCliente(venta.getCliente().getCi());
 			pasajes.add(pasajeDt);
 		}
 		
