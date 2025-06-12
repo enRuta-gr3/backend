@@ -11,7 +11,8 @@ public enum ErrorCode {
 	SIN_RESULTADOS("Usuario no encontrado"),
 	USUARIO_YA_ELIMINADO("El usuario ya esta eliminado"),
 	TOKEN_INVALIDO("Session invalida o expirada"),
-	NO_AUTORIZADO("No tiene permiso para eliminar este usuario")
+	NO_AUTORIZADO("No tiene permiso para eliminar este usuario"),
+	ERROR_CONSULTANDO_BASE("Ocurrió un error al ir contra la base de datos.")
 	;
 	private final String msg;
 

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -89,5 +88,20 @@ public class UsuarioController {
 	    } else {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
 	    }
+	}
+	
+	@PostMapping("/modificarPerfil")
+    @Operation(summary = "Modificar Perfil")
+	public ResponseEntity<?> modificarPerfil(@RequestBody DtUsuario usuario) {
+		ResultadoOperacion<?> res = serviceUsuario.modificarPerfil(usuario);
+
+		if (res.isSuccess()) {
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getMessage());
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getData());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*MODIFICACION DE PERFIL* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
 	}
 }

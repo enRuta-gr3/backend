@@ -1,13 +1,16 @@
 package com.uy.enRutaBackend.services;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 
 @Service
 public class ServiceSupabase implements IServiceSupabase {
@@ -46,4 +49,24 @@ public class ServiceSupabase implements IServiceSupabase {
             throw new RuntimeException("❌ Error eliminando usuario por email: " + e.getMessage(), e);
         }
     }
+    
+    public boolean verificarExistenciaEnSupabase(String email) throws SQLException {
+    	String esisteMailQuery = "SELECT * FROM auth.users WHERE email = ?";
+    	boolean existe = false;
+    	try (Connection conn = dataSource.getConnection()) {
+    		try (PreparedStatement stmt = conn.prepareStatement(esisteMailQuery)) {
+    			stmt.setString(1, email);
+    			
+    			try (ResultSet rs = stmt.executeQuery()) {
+    				if(rs.next()) {
+    					existe = true;
+    				}
+    			}
+    		}
+    	} catch (SQLException e) {
+    	    e.printStackTrace();
+    	}
+    	return existe;
+	}
+   
 }

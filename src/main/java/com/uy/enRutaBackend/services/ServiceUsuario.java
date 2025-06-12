@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -43,6 +44,11 @@ import com.uy.enRutaBackend.security.jwt.JwtManager;
 
 import lombok.Getter;
 import lombok.Setter;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Getter
 @Setter
@@ -542,21 +548,182 @@ public class ServiceUsuario implements IServiceUsuario {
 	        return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
 	    }
 	    
-	    if (userAEliminar.getEmail() != null) {
+//	    if (userAEliminar.getEmail() != null) {
+//	        try {
+//	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
+//	        } catch (Exception e) {
+//	            return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+//	        }
+//	    }
+	    try {
+	    	eliminarDeSupabase(userAEliminar);
+	    } catch (Exception e) {
+	    	return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+        }
+
+	    eliminarUsuario(userAEliminar);
+	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente", null);
+	}
+
+	/**
+	 * @param userAEliminar
+	 */
+	private void eliminarDeSupabase(Usuario userAEliminar) throws Exception {
+		if (userAEliminar.getEmail() != null) {
 	        try {
 	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
 	        } catch (Exception e) {
-	            return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
+	            throw e;
 	        }
 	    }
+	}
 
-	    // Marcar como eliminado
+	/**
+	 * @param userAEliminar
+	 */
+	private void eliminarUsuario(Usuario userAEliminar) {
+		// Marcar como eliminado
 	    userAEliminar.setEliminado(true);
 	    userAEliminar.setEmail(null);
 	    userAEliminar.setCi(null);
 	    
 	    repository.save(userAEliminar);
-	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente", null);
 	}
 
+	@Override
+	public ResultadoOperacion<?> modificarPerfil(DtUsuario usuario){
+		Usuario aModificar = repository.findById(usuario.getUuidAuth()).get();
+		Usuario modificado = new Usuario();
+		if (aModificar instanceof Cliente) {
+			try {
+				modificado = actualizarCliente(aModificar, usuario);
+				if(modificado == null) {
+					return new ResultadoOperacion(true, "Datos actualizados correctamente", null);
+				}
+			} catch (SQLException e) {
+				return new ResultadoOperacion(false, ErrorCode.ERROR_CONSULTANDO_BASE.getMsg() + " " + e.getMessage(), ErrorCode.ERROR_CONSULTANDO_BASE);
+			} catch (IOException e) {
+				return new ResultadoOperacion(false, "Error al actualizar información en supabase.", ErrorCode.ERROR_CONSULTANDO_BASE);
+			} catch (Exception e) {
+				return new ResultadoOperacion(false, "Error al actualizar información en supabase.", ErrorCode.ERROR_CONSULTANDO_BASE);
+			}
+		} else if (aModificar instanceof Vendedor) {
+			modificado = actualizarVendedor(aModificar, usuario);
+		} else if (aModificar instanceof Administrador) {
+			modificado = actualizarAdministrador(aModificar, usuario);
+		}
+
+		DtUsuario usuDt = new DtUsuario();
+		if (modificado != null) {
+			usuDt.setApellidos(modificado.getApellidos());
+			usuDt.setNombres(modificado.getNombres());
+			usuDt.setCi(modificado.getCi());
+			usuDt.setEmail(modificado.getEmail());
+			usuDt.setFecha_nacimiento(modificado.getFecha_nacimiento());
+
+			return new ResultadoOperacion(true, "Datos actualizados correctamente", usuDt);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.SIN_RESULTADOS.getMsg(), ErrorCode.SIN_RESULTADOS);
+		}
+	}
+
+	private Administrador actualizarAdministrador(Usuario aModificar, DtUsuario usuario) {
+		Administrador a = (Administrador) aModificar;
+		a.setEmail(usuario.getEmail());
+		a.setNombres(usuario.getNombres());
+		a.setApellidos(usuario.getApellidos());
+		a.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		return administradorRepository.save(a);
+	}
+
+	private Vendedor actualizarVendedor(Usuario aModificar, DtUsuario usuario) {
+		Vendedor v = (Vendedor) aModificar;
+		v.setEmail(usuario.getEmail());
+		v.setNombres(usuario.getNombres());
+		v.setApellidos(usuario.getApellidos());
+		v.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		return vendedorRepository.save(v);
+	}
+
+	private Cliente actualizarCliente(Usuario aModificar, DtUsuario usuario) throws Exception {
+		Cliente c = (Cliente) aModificar;
+
+		boolean existeMailEnSupabase = false;
+		try {
+			existeMailEnSupabase = iserviceSupabase.verificarExistenciaEnSupabase(usuario.getEmail());
+		} catch (SQLException e) {
+			throw e;
+		}
+		
+		if(!c.getEmail().equals(usuario.getEmail())) {
+			String accessToken = new String();
+	        
+	        Sesion sesion = sesionRepository.findByUsuario(c);      
+	        accessToken = sesion.getAccessToken();
+	        
+			if(existeMailEnSupabase) {
+				try {
+					actualizarMailSupabase(c, accessToken);
+				} catch (IOException e) {
+					throw e;
+				}
+				
+				c.setEmail(usuario.getEmail());
+				c.setNombres(usuario.getNombres());
+				c.setApellidos(usuario.getApellidos());
+				c.setFecha_nacimiento(usuario.getFecha_nacimiento());
+				return clienteRepository.save(c);	
+			} else {
+				eliminarDeSupabase(c);
+				//llamar al servicio eliminar usuario.
+				eliminarUsuario(c);
+				//agregar contraseña al dtUsuario y quitar el uuid (guardarlo en una variable)
+				usuario.setContraseña(c.getContraseña());
+				usuario.setEsEstudiante(c.isEsEstudiante());
+				usuario.setEsJubilado(c.isEsJubilado());
+				usuario.setEstado_descuento(c.isEstado_descuento());
+				usuario.setFecha_creacion(c.getFecha_creacion());
+				usuario.setUuidAuth(null);
+				//ejecutar registro en supabase
+				try {
+					registrarUsuarioSupabase(usuario);
+				} catch (Exception e) {
+					System.out.println("ERROR registrando usuario en supabase: " + e.getMessage());
+					throw e;
+				}
+			}
+		} else {
+			c.setNombres(usuario.getNombres());
+			c.setApellidos(usuario.getApellidos());
+			c.setFecha_nacimiento(usuario.getFecha_nacimiento());
+			return clienteRepository.save(c);
+		}
+		
+		return null;
+	}
+
+	private void actualizarMailSupabase(Usuario usuario, String accessToken) throws IOException {
+		OkHttpClient client = new OkHttpClient();
+
+        JSONObject json = new JSONObject();
+        json.put("email", usuario.getEmail());
+
+        RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json"));
+        
+        Request request = new Request.Builder()
+            .url(SUPABASE_URL + "/auth/v1/user")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("apikey", API_KEY)
+            .header("Content-Type", "application/json")
+            .put(body)
+            .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                System.out.println("Correo actualizado exitosamente.");
+            } else {
+                System.out.println("Error en la actualización: " + response.body().string());
+            }
+        }
+    }
 }

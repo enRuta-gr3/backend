@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend.icontrollers;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.json.JSONObject;
@@ -21,4 +22,5 @@ public interface IServiceUsuario {
 	public ResultadoOperacion<?> confirmarRecuperacion(String token, String nuevaPassword);
 	public ResultadoOperacion<?> solicitarRecuperacion(String email);
 	public ResultadoOperacion<?> eliminarUsuario(String token, DtUsuario datos);
+	ResultadoOperacion<?> modificarPerfil(DtUsuario usuario);
 }
