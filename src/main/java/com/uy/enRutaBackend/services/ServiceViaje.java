@@ -54,27 +54,62 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	@Override
-    public ResultadoOperacion<?> RegistrarViaje(DtViaje viajeDt) {
-		validarOrigenDestino();
-		validarInicioFin();
-		Viaje aCrear = dtToEntity(viajeDt);
-		try {			
-			Viaje creado = vRepository.save(aCrear);		
-			if (creado != null) {
-				DtViaje creadoDt = entityToDt(creado);
-				cargarTablaControlDisponibilidad(creado);
-				System.out.println("Viaje registrado y persistido correctamente.");
-				return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
-			} else {
-				System.out.println("Error al registrar viaje.");
-				return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), ErrorCode.ERROR_DE_CREACION);
-			}
+	public ResultadoOperacion<?> RegistrarViaje(DtViaje viajeDt) {
+		try {
+			validarOrigenDestino(viajeDt);
+			validarInicioFin(viajeDt);
 		} catch (Exception e) {
-			System.out.println("Error al registrar viaje.");
-			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO + e.getMessage());
+			System.out.println(e.getMessage());
+			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(),
+					ErrorCode.REQUEST_INVALIDO + e.getMessage());
 		}
-    }
+		Viaje aCrear = dtToEntity(viajeDt);
+		if (!vRepository.findByFechaPartidaAndHoraPartidaAndFechaLlegadaAndHoraLlegadaAndEstado(aCrear.getFecha_partida(),
+				aCrear.getHora_partida(), aCrear.getFecha_llegada(), aCrear.getHora_llegada(), EstadoViaje.ABIERTO).isPresent()) {
+			try {
+				Viaje creado = vRepository.save(aCrear);
+				if (creado != null) {
+					DtViaje creadoDt = entityToDt(creado);
+					cargarTablaControlDisponibilidad(creado);
+					System.out.println("Viaje registrado y persistido correctamente.");
+					return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
+				} else {
+					System.out.println("Error al registrar viaje.");
+					return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(),
+							ErrorCode.ERROR_DE_CREACION);
+				}
+			} catch (Exception e) {
+				System.out.println("Error al registrar viaje.");
+				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(),
+						ErrorCode.REQUEST_INVALIDO + e.getMessage());
+			}
+		} else {
+			return new ResultadoOperacion(false, "Ya existe el viaje", ErrorCode.YA_EXISTE);
+		}
+	}
 	
+	private void validarInicioFin(DtViaje viajeDt) throws Exception {
+		if(viajeDt.getLocalidadDestino().getId_localidad() == viajeDt.getLocalidadOrigen().getId_localidad())
+			throw new Exception("Debe seleccionar localidades distintas");
+	}
+
+	private void validarOrigenDestino(DtViaje viajeDt) throws Exception {
+		Date fechaLlegada = Date.valueOf(viajeDt.getFecha_llegada());
+		Date fechaSalida = Date.valueOf(viajeDt.getFecha_partida());
+		Time horaLlegada = Time.valueOf(viajeDt.getHora_llegada());
+		Time horaPartida = Time.valueOf(viajeDt.getHora_partida());
+		
+		if(viajeDt.getFecha_llegada().equals(viajeDt.getFecha_partida())  
+				&& viajeDt.getHora_llegada().equals(viajeDt.getHora_partida())) {
+			throw new Exception("La fecha de llegada no puede ser igual a la de salida.");
+		} else if(fechaSalida.after(fechaLlegada)) {
+			throw new Exception("La fecha de salida no puede ser posterior a la de llegada.");
+		} else if(fechaSalida.equals(fechaLlegada) && horaPartida.after(horaLlegada)) {
+			throw new Exception("La hora de salida no puede ser posterior a la de llegada.");
+		}
+		
+	}
+
 	private void cargarTablaControlDisponibilidad(Viaje viaje) {
 		Omnibus omnibus = (omnibusRepository.findById(viaje.getOmnibus().getId_omnibus())).get();
 		for(Asiento asiento : asientoRepository.findByOmnibus(omnibus)) {
@@ -86,15 +121,7 @@ public class ServiceViaje implements IServiceViaje {
 		}
 	}
 
-	private ResultadoOperacion<?> validarInicioFin() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	private ResultadoOperacion<?> validarOrigenDestino() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
     public ResultadoOperacion<?> listarViajes() throws NoExistenViajesException {

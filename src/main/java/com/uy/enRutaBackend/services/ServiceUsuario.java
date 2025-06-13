@@ -358,10 +358,18 @@ public class ServiceUsuario implements IServiceUsuario {
 		if (solicitante != null && passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
 			String tok = jwtManager.generateToken(solicitante);
 			sesion = sesionService.crearSesion(entityToDtRegistroLogin(solicitante), tok);
+			
 			log.info(sesion.toString());
+			
+			actualizarUltimoInicio(solicitante);
 		}
 
 		return sesion;
+	}
+
+	private void actualizarUltimoInicio(Usuario solicitante) {
+		solicitante.setUltimo_inicio_sesion(new Date());
+		repository.save(solicitante);
 	}
 
 	private DtUsuario entityToDtRegistroLogin(Usuario solicitante) {
@@ -615,6 +623,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		a.setNombres(usuario.getNombres());
 		a.setApellidos(usuario.getApellidos());
 		a.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		a.setFecha_creacion(aModificar.getFecha_creacion());
 		return administradorRepository.save(a);
 	}
 
@@ -624,6 +633,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		v.setNombres(usuario.getNombres());
 		v.setApellidos(usuario.getApellidos());
 		v.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		v.setFecha_creacion(aModificar.getFecha_creacion());
 		return vendedorRepository.save(v);
 	}
 
@@ -633,6 +643,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		c.setNombres(usuario.getNombres());
 		c.setApellidos(usuario.getApellidos());
 		c.setFecha_nacimiento(usuario.getFecha_nacimiento());
+		c.setFecha_creacion(aModificar.getFecha_creacion());
 		return clienteRepository.save(c);
 	}
 
@@ -651,6 +662,7 @@ public class ServiceUsuario implements IServiceUsuario {
 				usuarioDt.setEmail(c.getEmail());
 				usuarioDt.setEliminado(c.isEliminado());
 				usuarioDt.setUltimo_inicio_sesion(c.getUltimo_inicio_sesion());
+				usuarioDt.setFecha_creacion(c.getFecha_creacion());
 				usuarioDt.setCi(c.getCi());
 				usuarioDt.setEsEstudiante(c.isEsEstudiante());
 				usuarioDt.setEsJubilado(c.isEsJubilado());
@@ -662,6 +674,7 @@ public class ServiceUsuario implements IServiceUsuario {
 				usuarioDt.setApellidos(v.getApellidos());
 				usuarioDt.setEmail(v.getEmail());
 				usuarioDt.setEliminado(v.isEliminado());
+				usuarioDt.setFecha_creacion(v.getFecha_creacion());
 				usuarioDt.setUltimo_inicio_sesion(v.getUltimo_inicio_sesion());
 				usuarioDt.setCi(v.getCi());
 			} else if (u instanceof Administrador) {
@@ -670,6 +683,7 @@ public class ServiceUsuario implements IServiceUsuario {
 				usuarioDt.setNombres(a.getNombres());
 				usuarioDt.setApellidos(a.getApellidos());
 				usuarioDt.setEmail(a.getEmail());
+				usuarioDt.setFecha_creacion(a.getFecha_creacion());
 				usuarioDt.setEliminado(a.isEliminado());
 				usuarioDt.setUltimo_inicio_sesion(a.getUltimo_inicio_sesion());
 				usuarioDt.setCi(a.getCi());
