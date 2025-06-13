@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ public class DesbloquearAsientosBloqueados {
 	@Value("${intervalo.ejecucion.programada}")
 	private long intervaloEjecucion;
 	
+	@Autowired
 	public DesbloquearAsientosBloqueados(IServiceAsiento serviceAsiento) {
 		this.serviceAsiento = serviceAsiento;
 	}
