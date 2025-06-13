@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -104,4 +105,21 @@ public class UsuarioController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
+	
+	@GetMapping("/listarUsuarios")
+    @Operation(summary = "Listar usuarios")
+	public ResponseEntity<?> listarUsuarios() {
+		ResultadoOperacion<?> res = serviceUsuario.listarUsuarios();
+
+		if (res.isSuccess()) {
+			System.out.println("*LISTAR USUARIOS* " + res.getMessage());
+			System.out.println("*LISTAR USUARIOS* " + res.getData());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*LISTAR USUARIOS* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	
 }
