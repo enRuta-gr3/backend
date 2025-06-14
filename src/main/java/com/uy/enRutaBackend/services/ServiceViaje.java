@@ -64,8 +64,8 @@ public class ServiceViaje implements IServiceViaje {
 					ErrorCode.REQUEST_INVALIDO + e.getMessage());
 		}
 		Viaje aCrear = dtToEntity(viajeDt);
-//		if (!vRepository.findByFechaPartidaAndHoraPartidaAndFechaLlegadaAndHoraLlegadaAndEstado(aCrear.getFecha_partida(),
-//				aCrear.getHora_partida(), aCrear.getFecha_llegada(), aCrear.getHora_llegada(), EstadoViaje.ABIERTO).isPresent()) {
+		if (!vRepository.mismoViaje(aCrear.getLocalidadOrigen().getId_localidad(), aCrear.getLocalidadDestino().getId_localidad(), aCrear.getFecha_partida(),
+				aCrear.getHora_partida(), aCrear.getFecha_llegada(), aCrear.getHora_llegada(), aCrear.getOmnibus().getId_omnibus(), EstadoViaje.ABIERTO).isPresent()) {
 			try {
 				Viaje creado = vRepository.save(aCrear);
 				if (creado != null) {
@@ -83,9 +83,9 @@ public class ServiceViaje implements IServiceViaje {
 				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(),
 						ErrorCode.REQUEST_INVALIDO + e.getMessage());
 			}
-//		} else {
-//			return new ResultadoOperacion(false, "Ya existe el viaje", ErrorCode.YA_EXISTE);
-//		}
+		} else {
+			return new ResultadoOperacion(false, "Ya existe el viaje", ErrorCode.YA_EXISTE);
+		}
 	}
 	
 	private void validarInicioFin(DtViaje viajeDt) throws Exception {
