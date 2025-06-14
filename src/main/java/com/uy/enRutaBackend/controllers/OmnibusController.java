@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend.controllers;
 
+import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
@@ -16,8 +17,12 @@ import org.springframework.web.bind.annotation.*;
 //@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class OmnibusController {
 
-	@Autowired
-	private IServiceOmnibus omnibusService;
+    private final IServiceOmnibus omnibusService;
+
+    public OmnibusController(IServiceOmnibus omnibusService) {
+        this.omnibusService = omnibusService;
+    }
+
 
     @PostMapping("/registrar")
     public ResponseEntity<ResultadoOperacion<DtOmnibus>> registrarOmnibus(@RequestBody DtOmnibus dto) {
@@ -44,4 +49,12 @@ public class OmnibusController {
 
         return ResponseEntity.ok(resultado); // 200 OK
     }
+    
+    @PostMapping("/cambiarEstado")
+    public ResponseEntity<ResultadoOperacion<?>> cambiarEstado(@RequestBody DtHistoricoEstado dto) {
+        ResultadoOperacion<?> resultado = omnibusService.cambiarEstadoOmnibus(dto);
+        return resultado.isSuccess() ? ResponseEntity.ok(resultado) : ResponseEntity.badRequest().body(resultado);
+    }
+
+
 }

@@ -496,7 +496,11 @@ public class ServiceUsuario implements IServiceUsuario {
 
 		// Enlace personalizado
 		String resetLink = "https://en-ruta.vercel.app/reset-password?token=" + token;
-		emailService.send(email, "Recuperación de contraseña", "Recuperá tu contraseña aquí: " + resetLink);
+	    emailService.send(
+	    	    email,
+	    	    "Recuperación de contraseña",
+	    	    "Recuperá tu contraseña aquí: " + resetLink + "\n\nEste enlace es válido por 30 minutos."
+	    	);
 
 		return new ResultadoOperacion<>(true, "Se envió un enlace de recuperación", null);
 	}
@@ -653,42 +657,44 @@ public class ServiceUsuario implements IServiceUsuario {
 		List<Usuario> usuariosList = repository.findAll();
 		
 		for(Usuario u : usuariosList) {
-			DtUsuario usuarioDt = new DtUsuario();
-			if(u instanceof Cliente) {
-				Cliente c = (Cliente) u;
-				usuarioDt.setTipo_usuario("CLIENTE");
-				usuarioDt.setNombres(c.getNombres());
-				usuarioDt.setApellidos(c.getApellidos());
-				usuarioDt.setEmail(c.getEmail());
-				usuarioDt.setEliminado(c.isEliminado());
-				usuarioDt.setUltimo_inicio_sesion(c.getUltimo_inicio_sesion());
-				usuarioDt.setFecha_creacion(c.getFecha_creacion());
-				usuarioDt.setCi(c.getCi());
-				usuarioDt.setEsEstudiante(c.isEsEstudiante());
-				usuarioDt.setEsJubilado(c.isEsJubilado());
-				usuarioDt.setEstado_descuento(c.isEstado_descuento());
-			} else if (u instanceof Vendedor) {
-				Vendedor v = (Vendedor) u;
-				usuarioDt.setTipo_usuario("VENDEDOR");
-				usuarioDt.setNombres(v.getNombres());
-				usuarioDt.setApellidos(v.getApellidos());
-				usuarioDt.setEmail(v.getEmail());
-				usuarioDt.setEliminado(v.isEliminado());
-				usuarioDt.setFecha_creacion(v.getFecha_creacion());
-				usuarioDt.setUltimo_inicio_sesion(v.getUltimo_inicio_sesion());
-				usuarioDt.setCi(v.getCi());
-			} else if (u instanceof Administrador) {
-				Administrador a = (Administrador) u;
-				usuarioDt.setTipo_usuario("VENDEDOR");
-				usuarioDt.setNombres(a.getNombres());
-				usuarioDt.setApellidos(a.getApellidos());
-				usuarioDt.setEmail(a.getEmail());
-				usuarioDt.setFecha_creacion(a.getFecha_creacion());
-				usuarioDt.setEliminado(a.isEliminado());
-				usuarioDt.setUltimo_inicio_sesion(a.getUltimo_inicio_sesion());
-				usuarioDt.setCi(a.getCi());
+			if(!u.isEliminado()) {
+				DtUsuario usuarioDt = new DtUsuario();
+				if(u instanceof Cliente) {
+					Cliente c = (Cliente) u;
+					usuarioDt.setTipo_usuario("CLIENTE");
+					usuarioDt.setNombres(c.getNombres());
+					usuarioDt.setApellidos(c.getApellidos());
+					usuarioDt.setEmail(c.getEmail());
+					usuarioDt.setEliminado(c.isEliminado());
+					usuarioDt.setUltimo_inicio_sesion(c.getUltimo_inicio_sesion());
+					usuarioDt.setFecha_creacion(c.getFecha_creacion());
+					usuarioDt.setCi(c.getCi());
+					usuarioDt.setEsEstudiante(c.isEsEstudiante());
+					usuarioDt.setEsJubilado(c.isEsJubilado());
+					usuarioDt.setEstado_descuento(c.isEstado_descuento());
+				} else if (u instanceof Vendedor) {
+					Vendedor v = (Vendedor) u;
+					usuarioDt.setTipo_usuario("VENDEDOR");
+					usuarioDt.setNombres(v.getNombres());
+					usuarioDt.setApellidos(v.getApellidos());
+					usuarioDt.setEmail(v.getEmail());
+					usuarioDt.setEliminado(v.isEliminado());
+					usuarioDt.setFecha_creacion(v.getFecha_creacion());
+					usuarioDt.setUltimo_inicio_sesion(v.getUltimo_inicio_sesion());
+					usuarioDt.setCi(v.getCi());
+				} else if (u instanceof Administrador) {
+					Administrador a = (Administrador) u;
+					usuarioDt.setTipo_usuario("ADMINISTRADOR");
+					usuarioDt.setNombres(a.getNombres());
+					usuarioDt.setApellidos(a.getApellidos());
+					usuarioDt.setEmail(a.getEmail());
+					usuarioDt.setFecha_creacion(a.getFecha_creacion());
+					usuarioDt.setEliminado(a.isEliminado());
+					usuarioDt.setUltimo_inicio_sesion(a.getUltimo_inicio_sesion());
+					usuarioDt.setCi(a.getCi());
+				}
+				usuariosDtList.add(usuarioDt);
 			}
-			usuariosDtList.add(usuarioDt);
 		}
 		if(!usuariosDtList.isEmpty()) {
 			return new ResultadoOperacion(true, "Usuarios listados correctamente", usuariosDtList);

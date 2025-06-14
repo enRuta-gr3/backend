@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
 @Service
 public class ServiceSupabase implements IServiceSupabase {
 

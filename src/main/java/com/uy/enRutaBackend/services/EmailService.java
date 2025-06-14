@@ -18,7 +18,7 @@ public class EmailService {
             message.setTo(to);
             message.setSubject(subject);
             message.setText(body);
-            message.setFrom("tuemail@gmail.com"); // debe coincidir con spring.mail.username
+            message.setFrom("enruta.lat@gmail.com"); // debe coincidir con spring.mail.username
 
             mailSender.send(message);
 

@@ -1,7 +1,10 @@
 package com.uy.enRutaBackend.services;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Omnibus;
+import com.uy.enRutaBackend.entities.TareaProgramada;
+import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
@@ -23,6 +28,8 @@ import com.uy.enRutaBackend.persistence.AsientoRepository;
 import com.uy.enRutaBackend.persistence.HistoricoEstadoRepository;
 import com.uy.enRutaBackend.persistence.LocalidadRepository;
 import com.uy.enRutaBackend.persistence.OmnibusRepository;
+import com.uy.enRutaBackend.persistence.TareaProgramadaRepository;
+import com.uy.enRutaBackend.persistence.VendedorRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
 import com.uy.enRutaBackend.utils.UtilsClass;
 
@@ -45,7 +52,13 @@ public class ServiceOmnibus implements IServiceOmnibus{
     private HistoricoEstadoRepository historicoEstadoRepository;
     
     @Autowired
+    private VendedorRepository vendedorRepository;
+    
+    @Autowired
     private UtilsClass utils;
+
+    @Autowired
+    private TareaProgramadaRepository tareaProgramadaRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -168,8 +181,8 @@ public class ServiceOmnibus implements IServiceOmnibus{
                 .map(h -> {
                     DtHistoricoEstado dt = new DtHistoricoEstado();
                     dt.setId_his_estado(h.getId_his_estado());
-                    dt.setFecha_inicio(h.getFecha_inicio());
-                    dt.setFecha_fin(h.getFecha_fin());
+                    dt.setFecha_inicio(h.getFechaInicio());
+                    dt.setFecha_fin(h.getFechaFin());
                     dt.setActivo(h.isActivo());
                     dt.setId_omnibus(h.getOmnibus().getId_omnibus());
                     return dt;
@@ -179,5 +192,110 @@ public class ServiceOmnibus implements IServiceOmnibus{
         
         return dto;
     }
+
+    
+    public ResultadoOperacion<?> cambiarEstadoOmnibus(DtHistoricoEstado dto) {
+        Optional<Omnibus> optOmnibus = omnibusRepository.findById(dto.getId_omnibus());
+        if (optOmnibus.isEmpty()) {
+            return new ResultadoOperacion<>(false, "Ómnibus no encontrado", ErrorCode.SIN_RESULTADOS);
+}
+        Omnibus omnibus = optOmnibus.get();
+        boolean estadoActual = omnibus.isActivo();
+        boolean nuevoEstado = dto.isActivo();
+        Date fechaInicio = dto.getFecha_inicio();
+        Date fechaFin = dto.getFecha_fin();
+        Vendedor vendedor = vendedorRepository.findById(dto.getVendedor()).orElse(null);
+
+        // 🟢 ACTIVACIÓN INMEDIATA
+        if (nuevoEstado) {
+            if (estadoActual) {
+                return new ResultadoOperacion<>(true, "El ómnibus ya está activo.", null);
+            }
+
+            omnibus.setActivo(true);
+            omnibus.setFecha_fin(null);
+            omnibusRepository.save(omnibus);
+
+            tareaProgramadaRepository
+                .findTopByOmnibusAndNuevoEstadoAndFechaEjecucionAfterOrderByFechaEjecucionAsc(
+                    omnibus, true, new Timestamp(new Date().getTime()))
+                .ifPresent(tareaProgramadaRepository::delete);
+            
+            historicoEstadoRepository
+            .findTopByOmnibusAndActivoOrderByFechaInicioDesc(omnibus, false)
+            .ifPresent(prev -> {
+                prev.setFechaFin(new Date());
+                historicoEstadoRepository.save(prev);
+            });
+
+            // Crear histórico de activación
+            Historico_estado hist = new Historico_estado();
+            hist.setOmnibus(omnibus);
+            hist.setVendedor(vendedor);
+            hist.setActivo(true);
+            hist.setFechaInicio(new Date());
+            hist.setFechaFin(null);
+            historicoEstadoRepository.save(hist);
+
+            return new ResultadoOperacion<>(true, "Ómnibus activado correctamente.", null);
+        }
+
+        // 🟡 DESACTIVACIÓN PROGRAMADA
+        if (fechaInicio == null || fechaFin == null) {
+            return new ResultadoOperacion<>(false, "Debe proporcionar fecha de inicio y fin.", ErrorCode.FECHAS_INVALIDAS);
+        }
+
+        Date ahora = new Date();
+        if (fechaInicio.before(ahora)) {
+            return new ResultadoOperacion<>(false, "La fecha de inicio no puede ser anterior al momento actual.", ErrorCode.FECHAS_INVALIDAS);
+        }
+        if (fechaFin.before(ahora)) {
+            return new ResultadoOperacion<>(false, "La fecha de fin no puede ser anterior al momento actual.", ErrorCode.FECHAS_INVALIDAS);
+        }
+        if (fechaFin.before(fechaInicio)) {
+            return new ResultadoOperacion<>(false, "La fecha de fin no puede ser menor a la fecha de inicio.", ErrorCode.FECHAS_INVALIDAS);
+        }
+        if (fechaFin.equals(fechaInicio)) {
+            return new ResultadoOperacion<>(false, "La fecha y hora de inicio y fin no pueden ser iguales.", ErrorCode.FECHAS_INVALIDAS);
+        }
+
+        Timestamp tsInicio = new Timestamp(fechaInicio.getTime());
+        Timestamp tsFin = new Timestamp(fechaFin.getTime());
+
+        if (viajeRepository.existeViajeEntreFechas(omnibus.getId_omnibus(), tsInicio, tsFin)) {
+            return new ResultadoOperacion<>(false, "Tiene viajes asignados en ese período.", ErrorCode.OPERACION_INVALIDA);
+        }
+
+        List<TareaProgramada> tareas = tareaProgramadaRepository.findByOmnibusAndFechaEjecucionBetween(
+            omnibus, tsInicio, tsFin
+        );
+        if (!tareas.isEmpty()) {
+            return new ResultadoOperacion<>(false, "Ya existe una tarea programada.", ErrorCode.OPERACION_INVALIDA);
+        }
+
+        // Crear tarea para DESACTIVAR
+        TareaProgramada tareaDesactivar = new TareaProgramada();
+        tareaDesactivar.setOmnibus(omnibus);
+        tareaDesactivar.setNuevoEstado(false);
+        tareaDesactivar.setFechaEjecucion(fechaInicio);
+        tareaDesactivar.setDescripcion("Desactivar ómnibus automáticamente");
+        tareaDesactivar.setVendedor(vendedor);
+        tareaProgramadaRepository.save(tareaDesactivar);
+
+        // Crear tarea para REACTIVAR
+        TareaProgramada tareaReactivar = new TareaProgramada();
+        tareaReactivar.setOmnibus(omnibus);
+        tareaReactivar.setNuevoEstado(true);
+        tareaReactivar.setFechaEjecucion(fechaFin);
+        tareaReactivar.setDescripcion("Reactivar ómnibus automáticamente");
+        tareaReactivar.setVendedor(vendedor);
+        tareaProgramadaRepository.save(tareaReactivar);
+
+        omnibusRepository.save(omnibus);
+
+        return new ResultadoOperacion<>(true, "Tareas programadas correctamente.", null);
+    }
+
+
 
 }

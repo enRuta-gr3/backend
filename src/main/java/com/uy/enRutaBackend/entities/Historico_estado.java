@@ -21,33 +21,52 @@ public class Historico_estado {
 	private int id_his_estado;
 	
     @Column(name = "fecha_inicio")
-	private Date fecha_inicio;
+    private Date fechaInicio;
+
+    @Column(name = "fecha_fin")
+    private Date fechaFin;
 	
     @Column(name = "activo")
 	private boolean activo;
-    
-    @Column(name = "fecha_fin")
-	private Date fecha_fin;
     
     @ManyToOne
     @JoinColumn(name = "id_omnibus")
     private Omnibus omnibus;
     
+    @ManyToOne
+    @JoinColumn(name = "id_vendedor")
+    private Vendedor vendedor;
 
     public int getId_his_estado() {
         return id_his_estado;
     }
 
+    public Vendedor getVendedor() {
+		return vendedor;
+	}
+
+	public void setVendedor(Vendedor vendedor) {
+		this.vendedor = vendedor;
+	}
+
     public void setId_his_estado(int id_his_estado) {
         this.id_his_estado = id_his_estado;
     }
 
-    public Date getFecha_inicio() {
-        return fecha_inicio;
+    public Date getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(Date fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public Date getFechaFin() {
+		return fechaFin;
     }
 
-    public void setFecha_inicio(Date fecha_inicio) {
-        this.fecha_inicio = fecha_inicio;
+	public void setFechaFin(Date fechaFin) {
+		this.fechaFin = fechaFin;
     }
 
     public boolean isActivo() {
@@ -56,14 +75,6 @@ public class Historico_estado {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }
-
-    public Date getFecha_fin() {
-        return fecha_fin;
-    }
-
-    public void setFecha_fin(Date fecha_fin) {
-        this.fecha_fin = fecha_fin;
     }
 
     public Omnibus getOmnibus() {

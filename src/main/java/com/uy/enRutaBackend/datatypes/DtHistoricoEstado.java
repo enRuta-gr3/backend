@@ -1,6 +1,8 @@
 package com.uy.enRutaBackend.datatypes;
 
 import java.util.Date;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -11,15 +13,17 @@ public class DtHistoricoEstado {
     private Date fecha_fin;
     private boolean activo;
     private int id_omnibus;
+    private UUID vendedor;
 
     public DtHistoricoEstado() {}
 
-    public DtHistoricoEstado(int id_his_estado, Date fecha_inicio, Date fecha_fin, boolean activo, int id_omnibus) {
+    public DtHistoricoEstado(int id_his_estado, Date fecha_inicio, Date fecha_fin, boolean activo, int id_omnibus, UUID vendedor) {
         this.id_his_estado = id_his_estado;
         this.fecha_inicio = fecha_inicio;
         this.fecha_fin = fecha_fin;
         this.activo = activo;
         this.id_omnibus = id_omnibus;
+        this.vendedor = vendedor;
     }
 
     public int getId_his_estado() {
@@ -61,4 +65,14 @@ public class DtHistoricoEstado {
     public void setId_omnibus(int id_omnibus) {
         this.id_omnibus = id_omnibus;
     }
+
+	public UUID getVendedor() {
+		return vendedor;
+	}
+
+	public void setVendedor(UUID vendedor) {
+		this.vendedor = vendedor;
+	}
+
+
 }

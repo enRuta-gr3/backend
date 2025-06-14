@@ -2,12 +2,17 @@ package com.uy.enRutaBackend.datatypes;
 
 import java.util.List;
 
+import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Venta_Compra;
+
+import jakarta.persistence.OneToMany;
 
 
 public class DtVendedor extends DtUsuario{
 
     private List<Venta_Compra> ventas;
+
+    private List<Historico_estado> historicoEstados;
 
 	public DtVendedor() {
 		super();
@@ -15,6 +20,14 @@ public class DtVendedor extends DtUsuario{
 	
 	public List<Venta_Compra> getVentas() {
 		return ventas;
+	}
+
+	public List<Historico_estado> getHistoricoEstados() {
+		return historicoEstados;
+	}
+
+	public void setHistoricoEstados(List<Historico_estado> historicoEstados) {
+		this.historicoEstados = historicoEstados;
 	}
 
 	public void setVentas(List<Venta_Compra> ventas) {
