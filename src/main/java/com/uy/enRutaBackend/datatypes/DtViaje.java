@@ -2,7 +2,7 @@ package com.uy.enRutaBackend.datatypes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtViaje {
 
 	private int id_viaje;
@@ -50,7 +50,6 @@ public class DtViaje {
 		this.omnibus = omnibus;
 		this.asientosDisponibles = omnibus.getCapacidad();
 	}
-
 
 	@Override
 	public String toString() {

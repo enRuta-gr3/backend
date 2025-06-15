@@ -2,6 +2,9 @@ package com.uy.enRutaBackend.datatypes;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtCliente extends DtUsuario {
 	
 	

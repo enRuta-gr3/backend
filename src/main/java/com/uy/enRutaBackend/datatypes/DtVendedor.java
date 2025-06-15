@@ -2,12 +2,11 @@ package com.uy.enRutaBackend.datatypes;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 
-import jakarta.persistence.OneToMany;
-
-
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtVendedor extends DtUsuario{
 
     private List<Venta_Compra> ventas;

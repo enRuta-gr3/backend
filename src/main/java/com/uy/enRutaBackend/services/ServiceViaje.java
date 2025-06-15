@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,6 +201,38 @@ public class ServiceViaje implements IServiceViaje {
 		}			
 		return null;
 	}
+
+	@Override
+	public ResultadoOperacion<?> calcularCantidadViajesLocalidad() {
+		List<DtViaje> estadistica = new ArrayList<DtViaje>();
+		List<Object[]> viajesLocalidad = vRepository.contarViajes();
+		if(viajesLocalidad.size() > 0) {
+		estadistica = viajesLocalidad.stream()
+				.map(obj -> {
+					String nombre = (String)obj[0];
+					Long cantidad = (Long)obj[1];
+					return crearDtViaje(nombre, cantidad);
+				}).collect(Collectors.toList());
 	
+			return new ResultadoOperacion(true, OK_MESSAGE, estadistica);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+	}
+	
+	private DtViaje crearDtViaje(String nombre, long cantidad) {
+		int cantInt = (int)cantidad;
+		DtViaje dtViaje = new DtViaje();
+		dtViaje.setLocalidadOrigen(crearDtLocalidad(nombre));
+		dtViaje.setCantidad((int) cantidad);
+		return dtViaje;
+		
+	}
+
+	private DtLocalidad crearDtLocalidad(String nombre) {
+		DtLocalidad localidad = new DtLocalidad();
+		localidad.setNombreLocalidad(nombre);
+		return localidad;
+	}
 	
 }

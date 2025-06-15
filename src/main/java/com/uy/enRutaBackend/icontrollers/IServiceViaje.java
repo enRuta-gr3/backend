@@ -8,4 +8,5 @@ public interface IServiceViaje {
 
 	ResultadoOperacion<?> RegistrarViaje(DtViaje viajeDt);
 	ResultadoOperacion<?> listarViajes() throws NoExistenViajesException;
+	ResultadoOperacion<?> calcularCantidadViajesLocalidad();
 }

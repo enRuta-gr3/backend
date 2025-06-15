@@ -5,7 +5,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uy.enRutaBackend.entities.EstadoAsiento;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtDisAsiento {	
 	private int id_disAsiento;
 	private DtAsiento asiento;

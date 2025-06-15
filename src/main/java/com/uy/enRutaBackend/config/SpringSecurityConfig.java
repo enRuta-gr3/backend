@@ -50,6 +50,7 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/omnibus/cambiarEstado").permitAll()
 						.requestMatchers("/api/pasajes/solicitarHistorialPasajes").permitAll()
 						.requestMatchers("/api/pasajes/listarPasajesPorViaje").permitAll()
+						.requestMatchers("/api/estadisticas/viajesPorLocalidad").permitAll()
 						.anyRequest().authenticated()
 				);
 		return http.build();

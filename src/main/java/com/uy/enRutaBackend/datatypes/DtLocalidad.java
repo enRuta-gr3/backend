@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtLocalidad {
 	private int id_localidad;
 	private String nombreLocalidad;

@@ -35,10 +35,6 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 		    @Param("fin") Timestamp fin
 		);
 
-/*
-	Optional<Omnibus> findByFechaPartidaAndHoraPartidaAndFechaLlegadaAndHoraLlegadaAndEstado(Date fechaPartida,
-			Time horaPartida, Date fechaLlegada, Time horaLlegada, EstadoViaje abierto);
-*/
 	@Query("SELECT v FROM Viaje v WHERE " +
 		       "v.localidadOrigen.id = :idLocalidadOrigen AND " +
 		       "v.localidadDestino.id = :idLocalidadDestino AND " +
@@ -58,6 +54,12 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 		    @Param("idOmnibus") int idOmnibus,
 		    @Param("estado") EstadoViaje estado
 		);
+
+
+	@Query("SELECT v.localidadOrigen.nombre, COUNT(v) as cantidad "
+			+ "FROM Viaje v "
+			+ "GROUP BY localidadOrigen.nombre")
+	List<Object[]> contarViajes();
 
 
 

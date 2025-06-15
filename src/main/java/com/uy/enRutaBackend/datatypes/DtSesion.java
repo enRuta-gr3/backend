@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtSesion {
 	private DtUsuario usuario;
 	private String access_token;
