@@ -51,6 +51,7 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/pasajes/solicitarHistorialPasajes").permitAll()
 						.requestMatchers("/api/pasajes/listarPasajesPorViaje").permitAll()
 						.requestMatchers("/api/estadisticas/viajesPorLocalidad").permitAll()
+						.requestMatchers("/api/cargasMasivas/cargarArchivo").permitAll()
 						.anyRequest().authenticated()
 				);
 		return http.build();
