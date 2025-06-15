@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtUsuario;
+import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServicePasaje;
@@ -31,9 +32,8 @@ public class PasajeController {
 		this.servicePasaje = servicePasaje;
 	}
 
-
 	@PostMapping("/solicitarHistorialPasajes")
-	@Operation(summary = "Devuelve el historial de pasajes de un usuario")
+	@Operation(summary = "Devuelve el historial de pasajes de un usuario.")
 	public ResponseEntity<?> solicitarHistorialPasajes (@RequestBody DtUsuario usuario) {
 		List<Venta_Compra> comprasCliente = serviceVenta.listarVentas(usuario);
 		if(comprasCliente != null && !comprasCliente.isEmpty()) {
@@ -50,6 +50,20 @@ public class PasajeController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario no ha comprado pasajes aún.");
 		}
 		
+	}
+	
+	@PostMapping("/listarPasajesPorViaje")
+	@Operation(summary = "Devuelve la lista de pasajes vendidos para un viaje.")
+	public ResponseEntity<?> listarPasajesPorViaje(@RequestBody DtViaje viajeDt) {
+		ResultadoOperacion<?> res = servicePasaje.listarPasajesPorViaje(viajeDt);
+		if (res.isSuccess()) {
+			System.out.println("*PASAJES* - Se listan los pasajes para el usuario indicado.");
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*PASAJES* - " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+
 	}
 
 }

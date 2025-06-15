@@ -7,12 +7,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtAsiento;
+import com.uy.enRutaBackend.datatypes.DtCliente;
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtPasaje;
+import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
@@ -154,5 +157,41 @@ public class ServicePasaje implements IServicePasaje {
 			}
 		}
 		return historialPasajes;
+	}
+
+
+	@Override
+	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt) {
+		Viaje viaje = mapper.map(viajeDt, Viaje.class);
+		List<Pasaje> pasajes = pasajeRepository.findByViaje(viaje);
+		List<DtPasaje> pasajesDt = new ArrayList<DtPasaje>();
+		for(Pasaje pasaje : pasajes) {
+			DtPasaje pasajeDt = entityToDt(pasaje);
+			pasajeDt.setVenta_compra(llenarDtVenta(pasaje.getVenta_compra()));
+			pasajesDt.add(pasajeDt);
+		}
+		if(!pasajesDt.isEmpty()) {
+			return new ResultadoOperacion(true, "Listado de pasajes obtenido correctamente", pasajesDt);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+	}
+
+
+	private DtVenta_Compra llenarDtVenta(Venta_Compra venta_compra) {
+		DtVenta_Compra venta = new DtVenta_Compra();
+		venta.setCliente(llenarDtCliente(venta_compra.getCliente()));
+		venta.setId_venta(venta_compra.getId_venta());
+		return venta;
+	}
+
+
+	private DtCliente llenarDtCliente(Cliente c) {
+		DtCliente cliente = new DtCliente();
+		if(c.getCi() != null)
+			cliente.setCi(c.getCi());
+		cliente.setNombres(c.getNombres());
+		cliente.setApellidos(c.getApellidos());
+		return cliente;
 	}
 }
