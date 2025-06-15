@@ -374,7 +374,7 @@ public class ServiceUsuario implements IServiceUsuario {
 
 	private DtUsuario entityToDtRegistroLogin(Usuario solicitante) {
 		return new DtUsuario(definirTipoUsuario(solicitante), solicitante.getUuidAuth(), solicitante.getCi(),
-				solicitante.getNombres(), solicitante.getApellidos(), solicitante.getEmail());
+				solicitante.getNombres(), solicitante.getApellidos(), solicitante.getEmail(), solicitante.getFecha_nacimiento());
 	}
 
 	private String definirTipoUsuario(Usuario solicitante) {
