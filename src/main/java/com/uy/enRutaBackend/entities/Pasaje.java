@@ -1,8 +1,13 @@
 package com.uy.enRutaBackend.entities;
 
-import java.util.Optional;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 
 @Entity
@@ -27,7 +32,7 @@ public class Pasaje {
     
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_venta_compra", nullable = false)
-    private Venta_Compra venta_compra;
+    private Venta_Compra ventaCompra;
     
     public Pasaje() {}
     
@@ -35,7 +40,7 @@ public class Pasaje {
         this.precio = precio;
         this.viaje = viaje;
         this.asiento = asiento;
-        this.venta_compra = venta_compra;
+        this.ventaCompra = venta_compra;
     }
 
     
@@ -73,11 +78,11 @@ public class Pasaje {
     }
 
     public Venta_Compra getVenta_compra() {
-        return venta_compra;
+        return ventaCompra;
     }
 
     public void setVenta_compra(Venta_Compra venta_compra) {
-        this.venta_compra = venta_compra;
+        this.ventaCompra = venta_compra;
     }
     
     

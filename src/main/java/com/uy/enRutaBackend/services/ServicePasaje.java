@@ -17,8 +17,11 @@ import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.entities.Viaje;
+import com.uy.enRutaBackend.errors.ErrorCode;
+import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServicePasaje;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
+import com.uy.enRutaBackend.persistence.PasajeRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
 import com.uy.enRutaBackend.persistence.persistence;
 import com.uy.enRutaBackend.utils.UtilsClass;
@@ -29,17 +32,20 @@ public class ServicePasaje implements IServicePasaje {
     private final persistence persistence;
     private final AsientoRepository asientoRepository;
     private final ViajeRepository viajeRepository;
+    private final PasajeRepository pasajeRepository;
     private final ModelMapper mapper;
     private final UtilsClass utils;
 
     public ServicePasaje(persistence persistence,
                          AsientoRepository asientoRepository,
-                         ViajeRepository viajeRepository, ModelMapper mapper, UtilsClass utils) {
+                         ViajeRepository viajeRepository, ModelMapper mapper, UtilsClass utils,
+                         PasajeRepository pasajeRepository) {
         this.persistence = persistence;
         this.asientoRepository = asientoRepository;
         this.viajeRepository = viajeRepository;
         this.mapper = mapper;
         this.utils = utils;
+        this.pasajeRepository = pasajeRepository;
     }
     
     
@@ -120,5 +126,33 @@ public class ServicePasaje implements IServicePasaje {
 		localidadDt.setNombreLocalidad(localidad.getNombre());
 		localidadDt.setDepartamento(mapper.map(localidad.getDepartamento(), DtDepartamento.class));
 		return localidadDt;
+	}
+
+
+	@Override
+	public ResultadoOperacion<?> solicitarHistorial(List<Venta_Compra> comprasUsuario) {
+		List<DtPasaje> historialPasajes = buscarPasajesEnCompras(comprasUsuario);
+		if(!historialPasajes.isEmpty()) {
+			return new ResultadoOperacion(true, "Historial obtenido correctamente", historialPasajes);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+		
+	}
+
+
+	/**
+	 * @param comprasUsuario
+	 * @return
+	 */
+	private List<DtPasaje> buscarPasajesEnCompras(List<Venta_Compra> comprasUsuario) {
+		List<DtPasaje> historialPasajes = new ArrayList<DtPasaje>();
+		for(Venta_Compra compra : comprasUsuario) {
+			List<Pasaje> pasajes = pasajeRepository.findAllByVentaCompra(compra);
+			for(Pasaje pasaje : pasajes) {
+				historialPasajes.add(entityToDt(pasaje));
+			}
+		}
+		return historialPasajes;
 	}
 }

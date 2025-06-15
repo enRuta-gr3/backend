@@ -12,6 +12,7 @@ import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtPago;
 import com.uy.enRutaBackend.datatypes.DtPasaje;
 import com.uy.enRutaBackend.datatypes.DtPaypal;
+import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtVentaCompraResponse;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -23,6 +24,7 @@ import com.uy.enRutaBackend.entities.EstadoTransaccion;
 import com.uy.enRutaBackend.entities.EstadoVenta;
 import com.uy.enRutaBackend.entities.Pago;
 import com.uy.enRutaBackend.entities.Pasaje;
+import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.entities.Viaje;
@@ -34,6 +36,7 @@ import com.uy.enRutaBackend.icontrollers.IServicePasaje;
 import com.uy.enRutaBackend.icontrollers.IServiceVenta_Compra;
 import com.uy.enRutaBackend.persistence.ClienteRepository;
 import com.uy.enRutaBackend.persistence.DescuentoRepository;
+import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.persistence.VendedorRepository;
 import com.uy.enRutaBackend.persistence.VentaCompraRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
@@ -49,11 +52,13 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
     private final VendedorRepository repositoryVendedor;
     private final IServiceAsiento serviceAsiento;
     private final IServicePasaje servicePasaje;
+    private final UsuarioRepository repositoryUsuario;
 
     @Autowired
     public ServiceVenta_Compra(ClienteRepository repositoryCliente, DescuentoRepository repositoryDescuento, 
     		ViajeRepository viajeRepository, VentaCompraRepository repositoryVentaCompra, IServicePago servicePago, 
-    		VendedorRepository repositoryVendedor, IServiceAsiento serviceAsiento, IServicePasaje servicePasaje) {
+    		VendedorRepository repositoryVendedor, IServiceAsiento serviceAsiento, IServicePasaje servicePasaje,
+    		UsuarioRepository repositoryUsuario) {
         this.repositoryCliente = repositoryCliente;
         this.repositoryDescuento = repositoryDescuento;
         this.viajeRepository = viajeRepository;
@@ -62,6 +67,7 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
         this.repositoryVendedor = repositoryVendedor;
         this.serviceAsiento = serviceAsiento;
         this.servicePasaje = servicePasaje;
+        this.repositoryUsuario = repositoryUsuario;
     }
 
     @Override
@@ -276,5 +282,16 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 		return pasajes;
 	}
 
-
+	@Override
+	public List<Venta_Compra> listarVentas(DtUsuario usuario) {
+		List<Venta_Compra> ventas = new ArrayList<Venta_Compra>();
+		Usuario u = repositoryUsuario.findById(usuario.getUuidAuth()).get();
+		if(u instanceof Cliente) {
+			ventas = repositoryVentaCompra.findAllByCliente((Cliente)u);
+			System.out.println("Usuario enviado: " + u.getCi());
+		} else if (u instanceof Vendedor){
+			ventas = repositoryVentaCompra.findAllByVendedor((Vendedor)u);
+		}
+		return ventas;
+	}
 }

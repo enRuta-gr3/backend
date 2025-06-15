@@ -48,6 +48,7 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/admin/eliminarUsuario/**").permitAll()
 						.requestMatchers("/api/usuarios/listarUsuarios").permitAll()
 						.requestMatchers("/api/omnibus/cambiarEstado").permitAll()
+						.requestMatchers("/api/pasajes/solicitarHistorialPasajes").permitAll()
 						.anyRequest().authenticated()
 				);
 		return http.build();
