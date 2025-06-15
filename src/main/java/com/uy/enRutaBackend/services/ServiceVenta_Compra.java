@@ -289,8 +289,8 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 		if(u instanceof Cliente) {
 			ventas = repositoryVentaCompra.findAllByCliente((Cliente)u);
 			System.out.println("Usuario enviado: " + u.getCi());
-		} else if (u instanceof Vendedor){
-			ventas = repositoryVentaCompra.findAllByVendedor((Vendedor)u);
+		} else {
+			ventas = null;
 		}
 		return ventas;
 	}

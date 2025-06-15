@@ -36,14 +36,19 @@ public class PasajeController {
 	@Operation(summary = "Devuelve el historial de pasajes de un usuario")
 	public ResponseEntity<?> solicitarHistorialPasajes (@RequestBody DtUsuario usuario) {
 		List<Venta_Compra> comprasCliente = serviceVenta.listarVentas(usuario);
-		ResultadoOperacion<?> res = servicePasaje.solicitarHistorial(comprasCliente);
-		if(res.isSuccess()) {
-			System.out.println("*PASAJES* - Se listan los pasajes para el usuario indicado.");
-			return ResponseEntity.ok(res);			
+		if(comprasCliente != null && !comprasCliente.isEmpty()) {
+			ResultadoOperacion<?> res = servicePasaje.solicitarHistorial(comprasCliente);
+			if(res.isSuccess()) {
+				System.out.println("*PASAJES* - Se listan los pasajes para el usuario indicado.");
+				return ResponseEntity.ok(res);			
+			} else {
+				System.out.println("*PASAJES* - " + res.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+			}
 		} else {
-			System.out.println("*PASAJES* - " + res.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario no ha comprado pasajes aún.");
 		}
+		
 	}
 
 }
