@@ -46,6 +46,7 @@ public class PasajeController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 			}
 		} else {
+			System.out.println("*PASAJES* - El usuario no ha comprado pasajes aún.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario no ha comprado pasajes aún.");
 		}
 		
