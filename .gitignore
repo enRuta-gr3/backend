@@ -9,3 +9,13 @@ target/classes/com/uy/enRutaBackend/datatypes/DtHistoricoEstado.class
 target/classes/com/uy/enRutaBackend/datatypes/DtOmnibus.class
 target/classes/com/uy/enRutaBackend/datatypes/DtViaje.class
 target/classes/META-INF/maven/com.uy/enRuta-backend/pom.properties
+cargas/localidades.csv
+cargas/localidades_20250616_200322.csv
+target/classes/application.properties
+target/classes/com/uy/enRutaBackend/controllers/OmnibusController.class
+target/classes/com/uy/enRutaBackend/datatypes/DtAsiento.class
+target/classes/com/uy/enRutaBackend/datatypes/DtHistoricoEstado.class
+target/classes/com/uy/enRutaBackend/datatypes/DtOmnibus.class
+target/classes/com/uy/enRutaBackend/datatypes/DtViaje.class
+target/classes/META-INF/maven/com.uy/enRuta-backend/pom.properties
+target/classes/META-INF/maven/com.uy/enRuta-backend/pom.xml
