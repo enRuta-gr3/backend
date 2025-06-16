@@ -8,4 +8,6 @@ public interface ICsvService {
 
 	ResultadoOperacion<?> cargarArchivo(MultipartFile archivo);
 
+	ResultadoOperacion<?> crearUsuarios();
+
 }

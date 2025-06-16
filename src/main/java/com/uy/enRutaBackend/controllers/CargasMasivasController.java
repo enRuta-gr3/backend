@@ -4,6 +4,7 @@ import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,9 +44,19 @@ public class CargasMasivasController {
 	        )
 	    )
 	)
-
 	public ResponseEntity<?> cargarArchivo(@RequestParam("file") MultipartFile archivo) {
 		ResultadoOperacion<?> res = csvService.cargarArchivo(archivo);
+		if(res.isSuccess()) {
+			return ResponseEntity.ok(res);
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/crearUsuarios")
+	@Operation(summary = "Realizar alta masiva de usuarios desde archivo csv")
+    public ResponseEntity<?> crearUsuarios() {
+		ResultadoOperacion<?> res = csvService.crearUsuarios();
 		if(res.isSuccess()) {
 			return ResponseEntity.ok(res);
 		} else {

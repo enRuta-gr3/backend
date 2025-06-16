@@ -21,8 +21,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtSesion;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
+import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.PasswordResetToken;
@@ -43,6 +45,7 @@ import com.uy.enRutaBackend.persistence.SesionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.persistence.VendedorRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
+import com.uy.enRutaBackend.utils.UtilsClass;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +54,8 @@ import lombok.Setter;
 @Setter
 @Service
 public class ServiceUsuario implements IServiceUsuario {
+
+    private final UtilsClass utilsClass;
 
 	private final ClienteRepository clienteRepository;
 	private final VendedorRepository vendedorRepository;
@@ -75,7 +80,7 @@ public class ServiceUsuario implements IServiceUsuario {
 			JwtManager jwtManager, IServiceSesion sesionService, ClienteRepository clienteRepository,
 			VendedorRepository vendedorRepository, AdministradorRepository administradorRepository,
 			PasswordResetTokenRepository resetTokenRepository, EmailService emailService,
-			IServiceSupabase iserviceSupabase, SesionRepository sesionRepository) {
+			IServiceSupabase iserviceSupabase, SesionRepository sesionRepository, UtilsClass utilsClass) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
@@ -88,6 +93,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		this.emailService = emailService;
 		this.iserviceSupabase = iserviceSupabase;
 		this.sesionRepository = sesionRepository;
+		this.utilsClass = utilsClass;
 	}
 
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -701,5 +707,47 @@ public class ServiceUsuario implements IServiceUsuario {
 		} else {
 			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
 		}
+	}
+
+	@Override
+	public DtResultadoCargaMasiva procesarUsuarios(List<DtUsuarioCargaMasiva> leidosCsv) throws Exception{
+		DtResultadoCargaMasiva resultadoCargaMasiva = new DtResultadoCargaMasiva();
+		for (DtUsuarioCargaMasiva usuarioLeido : leidosCsv) {
+			resultadoCargaMasiva.setTotalLineasARegistrar(resultadoCargaMasiva.getTotalLineasARegistrar()+1);
+			DtUsuario usuarioDt = crearDtRegistro(usuarioLeido);
+			try {
+				DtUsuario registrado = registrarUsuarioSinVerificacion(usuarioDt);
+				if(registrado != null) {
+					actualizarResultado(resultadoCargaMasiva, "ok", registrado);					
+				} else {
+					actualizarResultado(resultadoCargaMasiva, "error", null);					
+				}
+			} catch (Exception e) {
+				actualizarResultado(resultadoCargaMasiva, "error", null);	
+				System.out.println("No se pudo procesar el usuario" + usuarioDt.toString());
+			}	
+		}
+		return resultadoCargaMasiva;
+	}
+
+
+	private void actualizarResultado(DtResultadoCargaMasiva resultadoCargaMasiva, String estado, DtUsuario registrado) {
+		if(registrado != null && estado.equals("ok")) {
+			resultadoCargaMasiva.setTotalLineasOk(resultadoCargaMasiva.getTotalLineasOk()+1);
+			resultadoCargaMasiva.agregarElemento(registrado);
+		} else {
+			resultadoCargaMasiva.setTotalLineasError(resultadoCargaMasiva.getTotalLineasError()+1);
+		}
+	}
+
+	private DtUsuario crearDtRegistro(DtUsuarioCargaMasiva usuarioLeido) {
+		DtUsuario usuDt = new DtUsuario();
+		usuDt.setTipo_usuario(usuarioLeido.getTipoUsuario());
+		usuDt.setCi(usuarioLeido.getCedula());
+		usuDt.setApellidos(usuarioLeido.getApellidos());
+		usuDt.setNombres(usuarioLeido.getNombres());
+		usuDt.setEmail(usuarioLeido.getEmail());
+		usuDt.setFecha_nacimiento(java.sql.Date.valueOf(usuarioLeido.getFechaNacimiento()));
+		return usuDt;
 	}
 }
