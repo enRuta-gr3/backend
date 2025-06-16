@@ -7,24 +7,33 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
-import com.uy.enRutaBackend.datatypes.DtViaje;
+import com.uy.enRutaBackend.datatypes.DtLocalidadCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
+import com.uy.enRutaBackend.entities.Departamento;
 import com.uy.enRutaBackend.entities.Localidad;
-import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceLocalidad;
+import com.uy.enRutaBackend.persistence.DepartamentoRepository;
 import com.uy.enRutaBackend.persistence.LocalidadRepository;
+import com.uy.enRutaBackend.utils.UtilsClass;
 
 @Service
 public class ServiceLocalidad implements IServiceLocalidad {
 
+	private final UtilsClass utilsClass;
+	
     private final LocalidadRepository repository;
+    private final DepartamentoRepository deptoRepository;
     private static final String OK_MESSAGE = "Operación realizada con éxito";
 
     @Autowired
-    public ServiceLocalidad(LocalidadRepository repository) {
+    public ServiceLocalidad(UtilsClass utilsClass, LocalidadRepository repository, DepartamentoRepository deptoRepository) {
+        this.utilsClass = utilsClass;
         this.repository = repository;
+        this.deptoRepository = deptoRepository;
     }
 
 	@Override
@@ -91,6 +100,44 @@ public class ServiceLocalidad implements IServiceLocalidad {
 	private DtLocalidad entityToDt(Localidad localidad) {
 		ModelMapper modelMapper = new ModelMapper();
 		return modelMapper.map(localidad, DtLocalidad.class);
+	}
+
+	@Override
+	public DtResultadoCargaMasiva procesarLocalidades(List<DtLocalidadCargaMasiva> leidosCsv) {
+		DtResultadoCargaMasiva resultadoCargaMasiva = new DtResultadoCargaMasiva();
+		for(DtLocalidadCargaMasiva localidadLeida : leidosCsv) {
+			resultadoCargaMasiva.setTotalLineasARegistrar(resultadoCargaMasiva.getTotalLineasARegistrar()+1);
+			DtLocalidad localidadDt = crearDtRegistro(localidadLeida);
+			try {
+				DtLocalidad localidadRegistrada = crearLocalidad(localidadDt);
+				if(localidadRegistrada != null) {
+					utilsClass.actualizarResultado(resultadoCargaMasiva, "ok", localidadRegistrada);					
+				} else {
+					utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);					
+				}
+			} catch (Exception e) {
+				utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);	
+				System.out.println("No se pudo procesar el usuario" + localidadDt.toString());
+			}	
+		}
+		return resultadoCargaMasiva;
+	}
+
+	private DtLocalidad crearLocalidad(DtLocalidad localidadDt) {
+		return *;
+	}
+
+	private DtLocalidad crearDtRegistro(DtLocalidadCargaMasiva localidadLeida) {
+		DtLocalidad locDt = new DtLocalidad();
+		locDt.setNombreLocalidad(localidadLeida.getNombreLocalidad());
+		Departamento depto = deptoRepository.findByNombre(localidadLeida.getNombreDepartamento());
+		DtDepartamento deptoDt = new DtDepartamento();
+		if(depto != null) {
+			ModelMapper modelMapper = new ModelMapper();
+			modelMapper.map(depto, deptoDt);
+		}
+		locDt.setDepartamento(deptoDt);
+		return locDt;
 	}
     
 }

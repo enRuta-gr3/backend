@@ -58,10 +58,19 @@ public class CargasMasivasController {
     public ResponseEntity<?> crearUsuarios() {
 		ResultadoOperacion<?> res = csvService.crearUsuarios();	
 		if(res.isSuccess()) {
-			csvService.renombrarCsv();
 			return ResponseEntity.ok(res);
 		} else {
-			csvService.renombrarCsv();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/crearLocalidades")
+	@Operation(summary = "Realizar alta masiva de localidades desde archivo csv")
+    public ResponseEntity<?> crearLocalidades() {
+		ResultadoOperacion<?> res = csvService.crearLocalidades();	
+		if(res.isSuccess()) {
+			return ResponseEntity.ok(res);
+		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}

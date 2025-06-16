@@ -718,12 +718,12 @@ public class ServiceUsuario implements IServiceUsuario {
 			try {
 				DtUsuario registrado = registrarUsuarioSinVerificacion(usuarioDt);
 				if(registrado != null) {
-					actualizarResultado(resultadoCargaMasiva, "ok", registrado);					
+					utilsClass.actualizarResultado(resultadoCargaMasiva, "ok", registrado);					
 				} else {
-					actualizarResultado(resultadoCargaMasiva, "error", null);					
+					utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);					
 				}
 			} catch (Exception e) {
-				actualizarResultado(resultadoCargaMasiva, "error", null);	
+				utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);	
 				System.out.println("No se pudo procesar el usuario" + usuarioDt.toString());
 			}	
 		}
@@ -731,14 +731,7 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 
-	private void actualizarResultado(DtResultadoCargaMasiva resultadoCargaMasiva, String estado, DtUsuario registrado) {
-		if(registrado != null && estado.equals("ok")) {
-			resultadoCargaMasiva.setTotalLineasOk(resultadoCargaMasiva.getTotalLineasOk()+1);
-			resultadoCargaMasiva.agregarElemento(registrado);
-		} else {
-			resultadoCargaMasiva.setTotalLineasError(resultadoCargaMasiva.getTotalLineasError()+1);
-		}
-	}
+	
 
 	private DtUsuario crearDtRegistro(DtUsuarioCargaMasiva usuarioLeido) {
 		DtUsuario usuDt = new DtUsuario();
