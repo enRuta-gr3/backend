@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 public class CsvService implements ICsvService {
 	
 	private static final String DIRECTORIO_CARGA = System.getProperty("user.dir") + "/cargas";
+	private static final String ARCHIVO_USUARIOS = "usuarios.csv";
 	private final IServiceUsuario serviceUsuario;
 	
 	public CsvService(IServiceUsuario serviceUsuario) {
@@ -35,8 +39,10 @@ public class CsvService implements ICsvService {
 	public ResultadoOperacion<?> cargarArchivo(MultipartFile archivo) {
 		try {
 		Files.createDirectories(Paths.get(DIRECTORIO_CARGA));
-		
 		Path rutaArchivo = Paths.get(DIRECTORIO_CARGA, archivo.getOriginalFilename());
+		
+		Files.delete(rutaArchivo);
+		
 		Files.write(rutaArchivo, archivo.getBytes(), StandardOpenOption.CREATE);
 
 		return new ResultadoOperacion(true, "Archivo cargado correctamente.", rutaArchivo.toString());
@@ -47,10 +53,11 @@ public class CsvService implements ICsvService {
 
 	@Override
 	public ResultadoOperacion<?> crearUsuarios() {
+		
 		List<DtUsuarioCargaMasiva> leidosCsv = new ArrayList<DtUsuarioCargaMasiva>();
 		DtResultadoCargaMasiva resultado = new DtResultadoCargaMasiva();
 		try {
-			leidosCsv = leerCsvUsuario(DIRECTORIO_CARGA + "/usuarios.csv");
+			leidosCsv = leerCsvUsuario(DIRECTORIO_CARGA + "/" + ARCHIVO_USUARIOS);
 			resultado = serviceUsuario.procesarUsuarios(leidosCsv);
 			if(resultado != null) {
 				System.out.println(" *CARGA MASIVA USUARIOS* - Carga exitosa");
@@ -69,6 +76,29 @@ public class CsvService implements ICsvService {
 			System.out.println(" *CARGA MASIVA USUARIOS* - Error procesando usuarios. " + e.getMessage());
 			return new ResultadoOperacion(false, "Error procesando usuarios. " + e.getMessage(), ErrorCode.ERROR_DE_CREACION);
 		}
+	}
+	
+	@Override
+	public void renombrarCsv() {
+		String archivo = ARCHIVO_USUARIOS;
+		String nombreOriginal = archivo.substring(0,archivo.lastIndexOf("."));
+		String extension = archivo.substring(archivo.lastIndexOf("."));
+		LocalDateTime ahora = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+		String fechaFormateada = ahora.format(formatter);
+
+		Path origen = Paths.get(DIRECTORIO_CARGA + "/" + archivo);
+		
+		String nuevoNombre = nombreOriginal + "_" + fechaFormateada + extension;
+
+		Path destino = Paths.get(DIRECTORIO_CARGA, nuevoNombre);
+				
+		try {
+			Files.copy(origen, destino, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private List<DtUsuarioCargaMasiva> leerCsvUsuario(String archivo) throws IllegalStateException, FileNotFoundException {

@@ -44,6 +44,4 @@ public class DtResultadoCargaMasiva {
     public List<Object> getElementos() {
         return objetos;
     }
-
-
 }

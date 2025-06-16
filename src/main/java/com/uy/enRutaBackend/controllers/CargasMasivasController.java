@@ -1,8 +1,8 @@
 package com.uy.enRutaBackend.controllers;
 
-import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,10 +56,12 @@ public class CargasMasivasController {
 	@GetMapping("/crearUsuarios")
 	@Operation(summary = "Realizar alta masiva de usuarios desde archivo csv")
     public ResponseEntity<?> crearUsuarios() {
-		ResultadoOperacion<?> res = csvService.crearUsuarios();
+		ResultadoOperacion<?> res = csvService.crearUsuarios();	
 		if(res.isSuccess()) {
+			csvService.renombrarCsv();
 			return ResponseEntity.ok(res);
 		} else {
+			csvService.renombrarCsv();
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
