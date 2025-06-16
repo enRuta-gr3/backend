@@ -50,8 +50,8 @@ public class CsvService implements ICsvService {
 		try {
 		Files.createDirectories(Paths.get(DIRECTORIO_CARGA));
 		Path rutaArchivo = Paths.get(DIRECTORIO_CARGA, archivo.getOriginalFilename());
-		
-		Files.delete(rutaArchivo);
+		if(Files.exists(rutaArchivo))
+			Files.delete(rutaArchivo);
 		
 		Files.write(rutaArchivo, archivo.getBytes(), StandardOpenOption.CREATE);
 

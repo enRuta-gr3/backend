@@ -107,27 +107,31 @@ public class ServiceLocalidad implements IServiceLocalidad {
 		DtResultadoCargaMasiva resultadoCargaMasiva = new DtResultadoCargaMasiva();
 		for(DtLocalidadCargaMasiva localidadLeida : leidosCsv) {
 			resultadoCargaMasiva.setTotalLineasARegistrar(resultadoCargaMasiva.getTotalLineasARegistrar()+1);
-			DtLocalidad localidadDt = crearDtRegistro(localidadLeida);
+			DtLocalidad localidadDt;
 			try {
-				DtLocalidad localidadRegistrada = crearLocalidad(localidadDt);
-				if(localidadRegistrada != null) {
-					utilsClass.actualizarResultado(resultadoCargaMasiva, "ok", localidadRegistrada);					
-				} else {
-					utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);					
-				}
+				localidadDt = crearDtRegistro(localidadLeida);
+				try {
+					DtLocalidad localidadRegistrada = crearLocalidad(localidadDt);
+					if(localidadRegistrada != null) {
+						utilsClass.actualizarResultado(resultadoCargaMasiva, "ok", localidadRegistrada);					
+					} else {
+						utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);
+						System.out.println("No se pudo procesar la localidad. " + localidadDt.toString());
+					}
+				} catch (Exception e) {
+					utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);	
+					System.out.println("No se pudo procesar la localidad. " + localidadDt.toString());
+				}	
 			} catch (Exception e) {
 				utilsClass.actualizarResultado(resultadoCargaMasiva, "error", null);	
-				System.out.println("No se pudo procesar el usuario" + localidadDt.toString());
-			}	
+				System.out.println("No se pudo procesar la localidad. " + e.getMessage());
+			}
+			
 		}
 		return resultadoCargaMasiva;
 	}
 
-	private DtLocalidad crearLocalidad(DtLocalidad localidadDt) {
-		return *;
-	}
-
-	private DtLocalidad crearDtRegistro(DtLocalidadCargaMasiva localidadLeida) {
+	private DtLocalidad crearDtRegistro(DtLocalidadCargaMasiva localidadLeida) throws Exception {
 		DtLocalidad locDt = new DtLocalidad();
 		locDt.setNombreLocalidad(localidadLeida.getNombreLocalidad());
 		Departamento depto = deptoRepository.findByNombre(localidadLeida.getNombreDepartamento());
@@ -135,9 +139,27 @@ public class ServiceLocalidad implements IServiceLocalidad {
 		if(depto != null) {
 			ModelMapper modelMapper = new ModelMapper();
 			modelMapper.map(depto, deptoDt);
+			locDt.setDepartamento(deptoDt);
+			return locDt;
+		} else {
+			throw new Exception("Departamento no es válido.");
+		}	
+	}
+	
+
+	private DtLocalidad crearLocalidad(DtLocalidad localidadDt) throws Exception {
+		Localidad loc = formatearDatosDtLocalidad(localidadDt);
+		boolean existe = verificarExistenciaLocalidadEnDepartamento(loc);
+		DtLocalidad creadaDt = new DtLocalidad();
+		if (!existe) {
+			Localidad localidadCreada = repository.save(loc);
+			if (localidadCreada != null) {
+				creadaDt = entityToDt(localidadCreada);
+			}
+		} else {
+			throw new Exception("Ya existe la localidad");
 		}
-		locDt.setDepartamento(deptoDt);
-		return locDt;
+		return creadaDt;
 	}
     
 }
