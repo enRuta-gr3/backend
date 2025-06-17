@@ -604,6 +604,12 @@ public class ServiceUsuario implements IServiceUsuario {
 	@Override
 	public ResultadoOperacion<?> modificarPerfil(DtUsuario usuario) {
 		Usuario aModificar = repository.findById(usuario.getUuidAuth()).get();
+		if(usuario.getEmail() != aModificar.getEmail()) {
+			Usuario tieneEmail = repository.findByEmail(usuario.getEmail());
+			if(tieneEmail != null) {
+				return new ResultadoOperacion(false, "La dirección de correo ya fue registrada", ErrorCode.YA_EXISTE);
+			}
+		}
 		Usuario modificado = new Usuario();
 		if (aModificar instanceof Cliente) {
 			modificado = actualizarCliente(aModificar, usuario);
