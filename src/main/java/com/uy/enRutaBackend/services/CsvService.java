@@ -18,8 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.uy.enRutaBackend.datatypes.DtLocalidadCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
-import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
@@ -138,6 +138,45 @@ public class CsvService implements ICsvService {
 				.build().parse();
 		return localidades;
 	}
+	
+	@Override
+	public ResultadoOperacion<?> crearOmnibus() {
+		List<DtOmnibusCargaMasiva> leidosCsv = new ArrayList<DtOmnibusCargaMasiva>();
+		DtResultadoCargaMasiva resultado = new DtResultadoCargaMasiva();
+		try {
+			leidosCsv = leerCsvOmnibus(DIRECTORIO_CARGA + "/" + ARCHIVO_OMNIBUS);
+			resultado = serviceOmnibus.procesarOmnibus(leidosCsv);
+			renombrarCsv(ARCHIVO_OMNIBUS);
+			if(resultado != null) {
+				System.out.println(" *CARGA MASIVA OMNIBUS* - Carga exitosa");
+				return new ResultadoOperacion(true, "Omnibus procesados correctamente.", resultado);				
+			} else {
+				System.out.println(" *CARGA MASIVA OMNIBUS* - Error procesando omnibus.");
+				return new ResultadoOperacion(false, "No se procesaron los omnibus, verifique los datos", ErrorCode.ERROR_DE_CREACION);
+			}			
+		} catch (IllegalStateException e) {
+			renombrarCsv(ARCHIVO_OMNIBUS);
+			System.out.println(" *CARGA MASIVA OMNIBUS* - Error procesando omnibus. " + e.getMessage());
+			return new ResultadoOperacion(false, "Error procesando omnibus. " + e.getMessage(), ErrorCode.ERROR_DE_CREACION);
+		} catch (FileNotFoundException e) {
+			renombrarCsv(ARCHIVO_OMNIBUS);
+			System.out.println(" *CARGA MASIVA OMNIBUS* - Error procesando omnibus. " + e.getMessage());
+			return new ResultadoOperacion(false, "Error procesando omnibus. " + e.getMessage(), ErrorCode.ERROR_DE_CREACION);
+		} catch (Exception e) {
+			renombrarCsv(ARCHIVO_OMNIBUS);
+			System.out.println(" *CARGA MASIVA OMNIBUS* - Error procesando omnibus. " + e.getMessage());
+			return new ResultadoOperacion(false, "Error procesando omnibus. " + e.getMessage(), ErrorCode.ERROR_DE_CREACION);
+		}
+	}
+	
+
+	private List<DtOmnibusCargaMasiva> leerCsvOmnibus(String archivo) throws IllegalStateException, FileNotFoundException {
+		List<DtOmnibusCargaMasiva> omnibus = new CsvToBeanBuilder<DtOmnibusCargaMasiva>(new FileReader(archivo))
+				.withType(DtOmnibusCargaMasiva.class)
+				.withIgnoreLeadingWhiteSpace(true)
+				.build().parse();
+		return omnibus;
+	}
 
 	public void renombrarCsv(String archivo) {
 		String nombreOriginal = archivo.substring(0,archivo.lastIndexOf("."));
@@ -159,7 +198,5 @@ public class CsvService implements ICsvService {
 		}
 
 	}
-	
-	
 	
 }

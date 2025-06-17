@@ -74,4 +74,15 @@ public class CargasMasivasController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
+	
+	@GetMapping("/crearOmnibus")
+	@Operation(summary = "Realizar alta masiva de omnibus desde archivo csv")
+    public ResponseEntity<?> crearOmnibus() {
+		ResultadoOperacion<?> res = csvService.crearOmnibus();	
+		if(res.isSuccess()) {
+			return ResponseEntity.ok(res);
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
 }

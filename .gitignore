@@ -19,3 +19,8 @@ target/classes/com/uy/enRutaBackend/datatypes/DtOmnibus.class
 target/classes/com/uy/enRutaBackend/datatypes/DtViaje.class
 target/classes/META-INF/maven/com.uy/enRuta-backend/pom.properties
 target/classes/META-INF/maven/com.uy/enRuta-backend/pom.xml
+cargas/omnibus.csv
+cargas/omnibus_20250616_211532.csv
+cargas/omnibus_20250616_212205.csv
+cargas/omnibus_20250616_212634.csv
+cargas/omnibus_20250616_214628.csv

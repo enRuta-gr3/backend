@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
+import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.Historico_estado;
+import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
 import com.uy.enRutaBackend.entities.TareaProgramada;
 import com.uy.enRutaBackend.entities.Vendedor;
@@ -296,6 +299,76 @@ public class ServiceOmnibus implements IServiceOmnibus{
         return new ResultadoOperacion<>(true, "Tareas programadas correctamente.", null);
     }
 
+	@Override
+	public DtResultadoCargaMasiva procesarOmnibus(List<DtOmnibusCargaMasiva> leidosCsv) {
+		DtResultadoCargaMasiva resultadoCargaMasiva = new DtResultadoCargaMasiva();
+		for(DtOmnibusCargaMasiva omnibusLeido : leidosCsv) {
+			resultadoCargaMasiva.setTotalLineasARegistrar(resultadoCargaMasiva.getTotalLineasARegistrar()+1);
+			DtOmnibus omnibusDt;
+			try {
+				omnibusDt = crearDt(omnibusLeido);
+				try {
+					DtOmnibus omnibusRegistrado = crearOmnibus(omnibusDt, omnibusLeido);
+					if(omnibusRegistrado != null) {
+						utils.actualizarResultado(resultadoCargaMasiva, "ok", omnibusRegistrado);					
+					} else {
+						utils.actualizarResultado(resultadoCargaMasiva, "error", null);
+						System.out.println("No se pudo crear el omnibus. " + omnibusDt.toString());
+					}
+				} catch (Exception e) {
+					utils.actualizarResultado(resultadoCargaMasiva, "error", null);	
+					System.out.println("No se pudo crear el omnibus. " + e.getMessage());
+				}
+			} catch (Exception e) {
+				utils.actualizarResultado(resultadoCargaMasiva, "error", null);	
+				System.out.println("No se pudo crear el omnibus. " + e.getMessage());
+			}
+			
+		}
+		
+		return resultadoCargaMasiva;
+	}
 
+	private DtOmnibus crearDt(DtOmnibusCargaMasiva omnibusLeido) throws Exception {
+		DtOmnibus busDt = new DtOmnibus();
+		busDt.setCapacidad(omnibusLeido.getCapacidad());
+		if(!omnibusRepository.existsByNroCoche(omnibusLeido.getNroCoche())) {
+			busDt.setNro_coche(omnibusLeido.getNroCoche());
+		} else {
+			throw new Exception("Ya existe coche con ese numero.");
+		}
+		busDt.setActivo(omnibusLeido.isActivo());
+		busDt.setFecha_fin(java.sql.Date.valueOf(omnibusLeido.getFechaFin()));
+		return busDt;
+	}
+
+	private DtOmnibus crearOmnibus(DtOmnibus omnibusDt, DtOmnibusCargaMasiva omnibusLeido) throws Exception {
+		Omnibus bus = dtoToEntity(omnibusDt);
+		Localidad loc = localidadRepository.findByDepartamentoNombreAndNombre(omnibusLeido.getNombreDepartamento(), omnibusLeido.getNombreLocalidad());
+		if(loc != null) {
+			bus.setLocalidad_actual(loc);			
+		} else {
+			throw new Exception("La localidad indicada no existe.");
+		}
+		
+		Omnibus guardado = omnibusRepository.save(bus);
+
+        List<Asiento> asientos = new ArrayList<>();
+        for (int i = 1; i <= bus.getCapacidad(); i++) {
+            Asiento asiento = new Asiento();
+            asiento.setNumeroAsiento(i);
+            asiento.setOmnibus(bus);
+            asientos.add(asiento);
+        }
+
+        asientoRepository.saveAll(asientos);
+
+        
+        bus.setAsientos(asientos);
+        
+
+        DtOmnibus creado = entityToDto(guardado);
+		return creado;
+	}
 
 }

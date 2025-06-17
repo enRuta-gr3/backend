@@ -12,4 +12,6 @@ public interface LocalidadRepository extends CrudRepository<Localidad, Integer>{
 
 	List<Localidad> findByDepartamentoIdDepartamento(int idDepartamento);
 
+	Localidad findByDepartamentoNombreAndNombre(String nombreDepartamento, String nombreLocalidad);
+
 }
