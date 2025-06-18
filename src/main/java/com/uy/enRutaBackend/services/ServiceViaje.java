@@ -112,14 +112,18 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	private void cargarTablaControlDisponibilidad(Viaje viaje) {
+		List<DisAsiento_Viaje> asientosDisponibles = new ArrayList<DisAsiento_Viaje>();
 		Omnibus omnibus = (omnibusRepository.findById(viaje.getOmnibus().getId_omnibus())).get();
 		for(Asiento asiento : asientoRepository.findByOmnibus(omnibus)) {
 			DisAsiento_Viaje disponibilidad = new DisAsiento_Viaje();
 			disponibilidad.setAsiento(asiento);
 			disponibilidad.setViaje(viaje);
 			disponibilidad.setEstado(EstadoAsiento.LIBRE);
+			asientosDisponibles.add(disponibilidad);
 			disAsientosRepository.save(disponibilidad);
 		}
+		viaje.setDisponibilidad(asientosDisponibles);
+		vRepository.save(viaje);
 	}
 
 
@@ -203,7 +207,7 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	@Override
-	public ResultadoOperacion<?> calcularCantidadViajesLocalidad() {
+	public ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio) {
 		List<DtViaje> estadistica = new ArrayList<DtViaje>();
 		List<Object[]> viajesLocalidad = vRepository.contarViajes();
 		if(viajesLocalidad.size() > 0) {
@@ -226,7 +230,6 @@ public class ServiceViaje implements IServiceViaje {
 		dtViaje.setLocalidadOrigen(crearDtLocalidad(nombre));
 		dtViaje.setCantidad((int) cantidad);
 		return dtViaje;
-		
 	}
 
 	private DtLocalidad crearDtLocalidad(String nombre) {
@@ -235,4 +238,13 @@ public class ServiceViaje implements IServiceViaje {
 		return localidad;
 	}
 	
+	@Override
+	public ResultadoOperacion<?> reasignarOmnibus(int idViaje, int idOmnibus) {
+		Viaje aReasignar = vRepository.findById(idViaje).get();
+		Omnibus nuevoBus = omnibusRepository.findById(idOmnibus).get();
+		Viaje reasignado = 
+		
+		
+		return null;
+	}
 }

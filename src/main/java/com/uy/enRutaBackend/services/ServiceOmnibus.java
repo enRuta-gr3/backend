@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend.services;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +19,7 @@ import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
+import com.uy.enRutaBackend.entities.EstadoAsiento;
 import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
@@ -28,6 +30,7 @@ import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
+import com.uy.enRutaBackend.persistence.DisAsientoViajeRepository;
 import com.uy.enRutaBackend.persistence.HistoricoEstadoRepository;
 import com.uy.enRutaBackend.persistence.LocalidadRepository;
 import com.uy.enRutaBackend.persistence.OmnibusRepository;
@@ -62,6 +65,9 @@ public class ServiceOmnibus implements IServiceOmnibus{
 
     @Autowired
     private TareaProgramadaRepository tareaProgramadaRepository;
+    
+    @Autowired
+    private DisAsientoViajeRepository disAsientosRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -201,7 +207,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
         Optional<Omnibus> optOmnibus = omnibusRepository.findById(dto.getId_omnibus());
         if (optOmnibus.isEmpty()) {
             return new ResultadoOperacion<>(false, "Ómnibus no encontrado", ErrorCode.SIN_RESULTADOS);
-}
+        }
         Omnibus omnibus = optOmnibus.get();
         boolean estadoActual = omnibus.isActivo();
         boolean nuevoEstado = dto.isActivo();
@@ -371,4 +377,49 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		return creado;
 	}
 
+	@Override
+	public ResultadoOperacion<?> buscarOmnibusDisponibles(int idViaje) {
+		List<Omnibus> omnibusDisponibles = new ArrayList<Omnibus>();
+		Viaje viajeEnviado = viajeRepository.findById(idViaje).get();
+		if(viajeEnviado != null) {
+			Localidad locOrigen = viajeEnviado.getLocalidadOrigen();
+			java.sql.Date fechaPartida = viajeEnviado.getFecha_partida();
+			Time horaPartida = viajeEnviado.getHora_partida();
+			int cantidadPasajes = disAsientosRepository.countByViajeAndEstado(viajeEnviado, EstadoAsiento.OCUPADO);
+			java.sql.Date fechaLlegada = viajeEnviado.getFecha_llegada();
+			Time horaLlegada = viajeEnviado.getHora_llegada();
+			List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida, fechaLlegada, horaLlegada);
+			for(Omnibus o : omnibusSinViajesEnRango) {
+				if(o.getLocalidad_actual().equals(locOrigen) 
+						&& o.getCapacidad() >= cantidadPasajes
+						&& o.isActivo()) {
+					omnibusDisponibles.add(o);
+				}
+			}
+			List<DtOmnibus> aMostrar = omnibusDisponibles.stream()
+                    .map(this::entityToDtoSinViajes)
+                    .toList();
+			
+			if(!aMostrar.isEmpty())
+				return new ResultadoOperacion<>(true, "Ómnibus disponibles ", aMostrar);
+			else
+				return new ResultadoOperacion<>(false, "No hay ómnibus disponibles.", ErrorCode.LISTA_VACIA);
+		} else {
+			return new ResultadoOperacion<>(false, "No existe viaje con ese ID.", ErrorCode.REQUEST_INVALIDO);
+		}
+	}
+	
+	private DtOmnibus entityToDtoSinViajes(Omnibus omnibus) {
+        DtOmnibus dto = new DtOmnibus();
+        dto.setActivo(omnibus.isActivo());
+        dto.setCapacidad(omnibus.getCapacidad());
+        dto.setId_omnibus(omnibus.getId_omnibus());
+        dto.setNro_coche(omnibus.getNro_coche());
+        
+
+        if (omnibus.getLocalidad_actual() != null) {
+            dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
+        }
+		return dto;
+	}
 }

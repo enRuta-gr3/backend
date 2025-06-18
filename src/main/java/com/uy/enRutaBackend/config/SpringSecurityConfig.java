@@ -23,7 +23,8 @@ public class SpringSecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().requestMatchers("/auth-controller/login").permitAll().requestMatchers("/public/**").permitAll()
-						.requestMatchers("/api/auth/iniciarSesion").permitAll()
+						.requestMatchers("/api/**").permitAll()
+						/*.requestMatchers("/api/auth/iniciarSesion").permitAll()
 						.requestMatchers("/api/auth/registrarUsuario").permitAll()
 						.requestMatchers("/api/departamentos/listarDepartamentos").permitAll()
 						.requestMatchers("/api/localidades/registrarLocalidad").permitAll()
@@ -55,6 +56,8 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/cargasMasivas/crearUsuarios").permitAll()
 						.requestMatchers("/api/cargasMasivas/crearLocalidades").permitAll()
 						.requestMatchers("/api/cargasMasivas/crearOmnibus").permitAll()
+						.requestMatchers("/api/omnibus/listarOmibusDisponiblesViaje**").permitAll()
+						.requestMatchers("/api/viajes/reasignarViaje**").permitAll()*/
 						.anyRequest().authenticated()
 				);
 		return http.build();

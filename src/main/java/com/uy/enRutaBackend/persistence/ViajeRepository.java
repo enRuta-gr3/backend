@@ -62,6 +62,17 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 	List<Object[]> contarViajes();
 
 
-
+	@Query("""
+		    SELECT v.omnibus FROM Viaje v
+		    WHERE (v.fecha_llegada = :fechaPartida AND v.hora_llegada <= :horaPartida)
+		       OR (v.fecha_llegada < :fechaPartida)
+		       OR (v.fecha_partida = :fechaLlegada AND v.hora_partida >= :horaLlegada)
+		       OR (v.fecha_partida > :fechaLlegada)
+		""")
+	List<Omnibus> omnibusSinViajes(@Param("fechaPartida") Date fechaPartida,
+		    @Param("horaPartida") Time horaPartida,
+		    @Param("fechaLlegada") Date fechaLlegada,
+		    @Param("horaLlegada") Time horaLlegada
+		    );
 
 }
