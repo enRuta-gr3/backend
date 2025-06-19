@@ -4,6 +4,7 @@ package com.uy.enRutaBackend.persistence;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +61,19 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 			+ "FROM Viaje v "
 			+ "GROUP BY localidadOrigen.nombre")
 	List<Object[]> contarViajes();
+
+
+
+	@Query(value = """
+		    SELECT * FROM viaje 
+		    WHERE estado = :estado
+		    AND (fecha_partida + hora_partida) BETWEEN :desde AND :hasta
+		""", nativeQuery = true)
+		List<Viaje> findViajesProximosPorEstado(
+		    @Param("estado") String estado,
+		    @Param("desde") Timestamp desde,
+		    @Param("hasta") Timestamp hasta
+		);
 
 
 

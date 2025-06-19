@@ -1,9 +1,15 @@
 package com.uy.enRutaBackend.services;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.query.sqm.tree.update.SqmUpdateStatement;
 import org.slf4j.Logger;
@@ -12,13 +18,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.entities.Buzon_notificacion;
+import com.uy.enRutaBackend.entities.EstadoVenta;
+import com.uy.enRutaBackend.entities.EstadoViaje;
 import com.uy.enRutaBackend.entities.Historico_estado;
+import com.uy.enRutaBackend.entities.Notificacion;
+import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Omnibus;
+import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.TareaProgramada;
+import com.uy.enRutaBackend.entities.Usuario;
+import com.uy.enRutaBackend.entities.Venta_Compra;
+import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.icontrollers.ITareaProgramadaService;
+import com.uy.enRutaBackend.persistence.BuzonNotificacionRepository;
 import com.uy.enRutaBackend.persistence.HistoricoEstadoRepository;
+import com.uy.enRutaBackend.persistence.NotificacionRepository;
 import com.uy.enRutaBackend.persistence.OmnibusRepository;
+import com.uy.enRutaBackend.persistence.PasajeRepository;
 import com.uy.enRutaBackend.persistence.TareaProgramadaRepository;
+import com.uy.enRutaBackend.persistence.UsuarioRepository;
+import com.uy.enRutaBackend.persistence.ViajeRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class TareaProgramadaService implements ITareaProgramadaService {
@@ -32,7 +54,23 @@ public class TareaProgramadaService implements ITareaProgramadaService {
     private OmnibusRepository omnibusRepo;
 
     @Autowired
+    private ViajeRepository viajeRepository;
+    
+    @Autowired
+    private BuzonNotificacionRepository buzonNotis;
+
+    @Autowired
     private HistoricoEstadoRepository historicoEstadoRepo;
+
+    @Autowired
+    private NotificacionRepository notificacionRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private PasajeRepository pasajeRepository;
+
 
     @Scheduled(fixedRate = 50000) // Cada 50 segundos
     public void verificarTareasPendientes() {
@@ -112,4 +150,60 @@ public class TareaProgramadaService implements ITareaProgramadaService {
             logger.info("Tarea ejecutada para ómnibus ID {} - Nuevo estado: {}", omnibus.getId_omnibus(), nuevoEstado);
         }
     }
+    
+    @Scheduled(fixedRate = 60000) // Cada minuto
+    @Transactional
+    public void cerrarVentasDeViajesProximos() {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime enMediaHora = ahora.plusMinutes(30);
+
+        List<Pasaje> pasajes = pasajeRepository.findPasajesDeViajesCercanos(
+        	    EstadoViaje.ABIERTO.name(),
+        	    Timestamp.valueOf(ahora),
+        	    Timestamp.valueOf(enMediaHora)
+        	);
+
+        // Agrupar por viaje
+        Map<Viaje, List<Pasaje>> agrupadosPorViaje = pasajes.stream()
+            .collect(Collectors.groupingBy(Pasaje::getViaje));
+
+        for (Map.Entry<Viaje, List<Pasaje>> entry : agrupadosPorViaje.entrySet()) {
+            Viaje viaje = entry.getKey();
+            List<Pasaje> pasajesDelViaje = entry.getValue();
+
+            viaje.setEstado(EstadoViaje.CERRADO);
+            viajeRepository.save(viaje);
+
+            Set<UUID> usuariosNotificados = new HashSet<>();
+
+            for (Pasaje pasaje : pasajesDelViaje) {
+                Venta_Compra venta = pasaje.getVenta_compra();
+                Usuario usuario = venta.getCliente();
+
+                if (usuario == null || usuariosNotificados.contains(usuario.getUuidAuth()))
+                    continue;
+
+                usuariosNotificados.add(usuario.getUuidAuth());
+
+                Buzon_notificacion buzon = usuario.getNotificaciones();
+                if (buzon == null) {
+                    System.out.println("⚠️ Usuario sin buzón: " + usuario.getUuidAuth());
+                    continue;
+                }
+
+                Notificacion noti = new Notificacion();
+                noti.setMensaje("🚍 Se cerraron las ventas para su viaje del " +
+                                viaje.getFecha_partida() + " a las " +
+                                viaje.getHora_partida() + ". Recuerde que el viaje parte en 30 minutos.");
+                noti.setFiltro_destinatario("CLIENTE");
+                noti.setFechaEnvio(new Date());
+                noti.setLeido(false);
+                noti.setBuzon_notificacion(buzon);
+
+                notificacionRepository.save(noti);
+            }
+        }
+    }
+
+
 }

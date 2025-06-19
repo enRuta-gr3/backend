@@ -26,6 +26,7 @@ import com.uy.enRutaBackend.datatypes.DtSesion;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
 import com.uy.enRutaBackend.entities.Administrador;
+import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Cliente;
 import com.uy.enRutaBackend.entities.PasswordResetToken;
 import com.uy.enRutaBackend.entities.Sesion;
@@ -149,6 +150,16 @@ public class ServiceUsuario implements IServiceUsuario {
 
 			if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && !emailVacio) {
 				usuRegistro = registrarUsuarioSupabase(usuario);
+				
+				agregarContraseña(usuRegistro);
+				Usuario usuarioset = dtToEntity(usuRegistro);
+				
+			    Buzon_notificacion buzon = new Buzon_notificacion();
+			    buzon.setUsuario(usuarioset);
+			    usuarioset.setNotificaciones(buzon);
+			    agregarContraseña(usuario);
+			    repository.save(usuarioset);
+			    
 			} else {
 				usuRegistro = registrarUsuarioSinVerificacion(usuario);
 			}
@@ -255,6 +266,10 @@ public class ServiceUsuario implements IServiceUsuario {
 		verificarDescuento(usuario);
 
 		Usuario usuarioCrear = dtToEntity(usuario);
+
+	    Buzon_notificacion buzon = new Buzon_notificacion();
+	    buzon.setUsuario(usuarioCrear);
+	    usuarioCrear.setNotificaciones(buzon);
 
 		repository.save(usuarioCrear);
 		return entityToDtRegistroLogin(usuarioCrear);

@@ -7,8 +7,6 @@ import com.uy.enRutaBackend.datatypes.DtPaypal;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtVentaCompraResponse;
 import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
-import com.uy.enRutaBackend.entities.Cliente;
-import com.uy.enRutaBackend.entities.Pago;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 

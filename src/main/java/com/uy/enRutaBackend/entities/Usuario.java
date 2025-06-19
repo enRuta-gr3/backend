@@ -8,10 +8,12 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Setter;
 
@@ -28,6 +30,9 @@ public class Usuario {
     
     @Column(name = "cedula", unique = true)
     private String ci;
+    
+    @Column(name = "tipo_usuario", insertable = false, updatable = false)
+    private String tipoUsuario;
     
     @Column(name = "nombres")
     private String nombres;
@@ -53,8 +58,8 @@ public class Usuario {
     @Column(name = "fecha_creacion")
     private Date fecha_creacion;
        
-    @OneToMany(mappedBy = "id_buzon")
-    private List<Buzon_notificacion> notificaciones;
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Buzon_notificacion buzonNotificacion;
     
     @OneToMany(mappedBy = "id_sesion", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Sesion> sesiones;
@@ -109,6 +114,30 @@ public class Usuario {
     public String getEmail() {
         return email;
     }
+
+    public String getTipoUsuario() {
+		return tipoUsuario;
+	}
+
+	public void setTipoUsuario(String tipoUsuario) {
+		this.tipoUsuario = tipoUsuario;
+	}
+
+	public Buzon_notificacion getNotificaciones() {
+		return buzonNotificacion;
+	}
+
+	public void setNotificaciones(Buzon_notificacion buzonNotificacion) {
+		this.buzonNotificacion = buzonNotificacion;
+	}
+
+	public List<Sesion> getSesiones() {
+		return sesiones;
+	}
+
+	public void setSesiones(List<Sesion> sesiones) {
+		this.sesiones = sesiones;
+	}
 
     public void setEmail(String email) {
         this.email = email;

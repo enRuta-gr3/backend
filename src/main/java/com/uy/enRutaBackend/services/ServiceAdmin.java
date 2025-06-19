@@ -1,10 +1,21 @@
 package com.uy.enRutaBackend.services;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.datatypes.DtEstadisticaActividadUsuarios;
+import com.uy.enRutaBackend.datatypes.DtEstadisticaUsuarios;
+import com.uy.enRutaBackend.datatypes.DtPromedioClienteDTO;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Sesion;
@@ -14,9 +25,12 @@ import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceAdmin;
 import com.uy.enRutaBackend.icontrollers.IServiceSesion;
 import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
+import com.uy.enRutaBackend.persistence.AdministradorRepository;
+import com.uy.enRutaBackend.persistence.OmnibusRepository;
 import com.uy.enRutaBackend.persistence.PasswordResetTokenRepository;
 import com.uy.enRutaBackend.persistence.SesionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
+import com.uy.enRutaBackend.persistence.VentaCompraRepository;
 import com.uy.enRutaBackend.security.jwt.JwtManager;
 
 @Service
@@ -25,12 +39,15 @@ public class ServiceAdmin  implements IServiceAdmin{
 	private final UsuarioRepository repository;
     private final IServiceSupabase iserviceSupabase;
     private final SesionRepository sesionRepository;
+    private final VentaCompraRepository ventaCompraRepository;
+        
 
 	@Autowired
-	public ServiceAdmin(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, PasswordResetTokenRepository resetTokenRepository, EmailService emailService, IServiceSupabase iserviceSupabase, SesionRepository sesionRepository) {
+	public ServiceAdmin(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtManager jwtManager, IServiceSesion sesionService, PasswordResetTokenRepository resetTokenRepository, EmailService emailService, IServiceSupabase iserviceSupabase, SesionRepository sesionRepository, VentaCompraRepository ventaCompraRepository) {
 		this.repository = repository;
 		this.iserviceSupabase = iserviceSupabase;
 		this.sesionRepository = sesionRepository;
+		this. ventaCompraRepository =  ventaCompraRepository;
 	}
 	
 	
@@ -84,5 +101,43 @@ public class ServiceAdmin  implements IServiceAdmin{
 	    repository.save(userAEliminar);
 	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente por administrador", null);
 	}
+
+	@Override
+	public DtEstadisticaUsuarios obtenerEstadisticasUsuarios() {
+	    long total = repository.countByEliminadoFalse();
+	    long administradores = repository.countByTipoUsuarioAndEliminadoFalse("ADMINISTRADOR");
+	    long vendedores = repository.countByTipoUsuarioAndEliminadoFalse("VENDEDOR");
+	    long clientes = repository.countByTipoUsuarioAndEliminadoFalse("CLIENTE");
+
+	    return new DtEstadisticaUsuarios(total, administradores, vendedores, clientes);
+	}
+	
+	@Override
+	public DtEstadisticaActividadUsuarios obtenerEstadisticasActividadUsuarios() {
+	    // Calculamos fecha hace 30 días
+	    LocalDate haceUnMes = LocalDate.now().minusDays(30);
+	    Date fechaLimite = java.sql.Date.valueOf(haceUnMes);
+
+	    long activos = repository.countActivos(fechaLimite);
+	    long inactivos = repository.countInactivos(fechaLimite);
+
+	    return new DtEstadisticaActividadUsuarios(activos, inactivos);
+	}
+	
+	
+	public List<DtPromedioClienteDTO> obtenerPromedioImportePorCliente() {
+	    List<Object[]> resultados = ventaCompraRepository.obtenerPromedioImportePorClienteRaw();
+
+	    return resultados.stream()
+	        .map(obj -> new DtPromedioClienteDTO(
+	            (UUID) obj[0],                         
+	            (String) obj[1],                       
+	            obj[2] != null ? ((Number) obj[2]).doubleValue() : 0.0
+	        ))
+	        .toList();
+	}
+
+
+
 
 }

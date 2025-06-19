@@ -55,6 +55,9 @@ public class SpringSecurityConfig {
 						.requestMatchers("/api/cargasMasivas/crearUsuarios").permitAll()
 						.requestMatchers("/api/cargasMasivas/crearLocalidades").permitAll()
 						.requestMatchers("/api/cargasMasivas/crearOmnibus").permitAll()
+						.requestMatchers("/api/admin/estadisticaCantidadUsuarios").permitAll()
+						.requestMatchers("/api/admin/estadisticaActividad").permitAll()
+						.requestMatchers("/api/admin/estadisticaPromedioCompras").permitAll()
 						.anyRequest().authenticated()
 				);
 		return http.build();

@@ -1,14 +1,17 @@
 package com.uy.enRutaBackend.entities;
 
-import java.util.List;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "notificacion")
@@ -19,18 +22,45 @@ public class Notificacion {
     @Column(name = "id_notificacion")
     private int id_notificacion;
     
+    @ManyToOne
+    @JoinColumn(name = "buzon_id")
+    private Buzon_notificacion buzon_notificacion;
+	
+    private boolean leido;
+    
     @Column(name = "mensaje")
     private String mensaje;
 
     @Column(name = "filtro_destinatario")
     private String filtro_destinatario;
 
-    @OneToMany(mappedBy = "id_buzon")
-    private List<Buzon_notificacion> destinatarios;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_envio")
+    private Date fechaEnvio;
     
-    public int getId() {
+	public int getId_notificacion() {
         return id_notificacion;
     }
+
+	public void setId_notificacion(int id_notificacion) {
+		this.id_notificacion = id_notificacion;
+	}
+
+	public Buzon_notificacion getBuzon_notificacion() {
+		return buzon_notificacion;
+	}
+
+	public void setBuzon_notificacion(Buzon_notificacion buzon_notificacion) {
+		this.buzon_notificacion = buzon_notificacion;
+	}
+
+	public boolean isLeido() {
+		return leido;
+	}
+
+	public void setLeido(boolean leido) {
+		this.leido = leido;
+	}
 
     public String getMensaje() {
         return mensaje;
@@ -40,20 +70,20 @@ public class Notificacion {
         this.mensaje = mensaje;
     }
 
-    public String getFiltroDestinatario() {
+	public String getFiltro_destinatario() {
         return filtro_destinatario;
     }
 
-    public void setFiltroDestinatario(String filtro_destinatario) {
+	public void setFiltro_destinatario(String filtro_destinatario) {
         this.filtro_destinatario = filtro_destinatario;
     }
 
-    public List<Buzon_notificacion> getDestinatarios() {
-        return destinatarios;
+	public Date getFechaEnvio() {
+		return fechaEnvio;
     }
 
-    public void setDestinatarios(List<Buzon_notificacion> destinatarios) {
-        this.destinatarios = destinatarios;
+	public void setFechaEnvio(Date fechaEnvio) {
+		this.fechaEnvio = fechaEnvio;
     }
 
 }

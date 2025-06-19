@@ -1,37 +1,48 @@
 package com.uy.enRutaBackend.entities;
 
+
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Buzon_notifiacion")
+@Table(name = "buzon_notificacion")
 public class Buzon_notificacion {
 	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_buzon")
-    private int id_buzon;
+    @Column(name = "id_buzon_notificacion")
+    private int id_buzon_notificacion;
 
-	@ManyToOne
+    @OneToMany(mappedBy = "buzon_notificacion")
+    private List<Notificacion> notificaciones;
+
+    @OneToOne
 	@JoinColumn(name = "usuario_id") 
 	private Usuario usuario;
 	
-	@ManyToOne
-	@JoinColumn(name = "notificaciones_id")
-	private Notificacion notificacion;
+	public int getId_buzon_notificacion() {
+		return id_buzon_notificacion;
+	}
 	
-    private boolean leido;
+	public void setId_buzon_notificacion(int id_buzon_notificacion) {
+		this.id_buzon_notificacion = id_buzon_notificacion;
+	}
     
+	public List<Notificacion> getNotificaciones() {
+		return notificaciones;
+	}
     
-    
-    public int getId() {
-        return id_buzon;
+	public void setNotificaciones(List<Notificacion> notificaciones) {
+		this.notificaciones = notificaciones;
     }
 
     public Usuario getUsuario() {
@@ -42,20 +53,7 @@ public class Buzon_notificacion {
         this.usuario = usuario;
     }
 
-    public Notificacion getNotificacion() {
-        return notificacion;
-    }
 
-    public void setBuzon(Notificacion notificacion) {
-        this.notificacion = notificacion;
-    }
 
-    public boolean isLeido() {
-        return leido;
-    }
-
-    public void setLeido(boolean leido) {
-        this.leido = leido;
-    }
 }
 
