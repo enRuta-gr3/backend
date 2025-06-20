@@ -5,12 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
@@ -26,8 +28,9 @@ public class EstadisticasController {
 	
 	@GetMapping("/viajesPorLocalidad")
 	@Operation(summary = "Devuelve cuantos viajes se dieron de alta para cada localidad.")
-	public ResponseEntity<?> viajesPorLocalidad() {
-		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesLocalidad();
+	@Hidden
+	public ResponseEntity<?> viajesPorLocalidad(@RequestParam int anio) {
+		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesLocalidad(anio);
 		if (res != null && res.isSuccess()) {
 			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
 			//System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getData());

@@ -4,7 +4,6 @@ package com.uy.enRutaBackend.persistence;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.uy.enRutaBackend.entities.EstadoViaje;
+import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Omnibus;
 import com.uy.enRutaBackend.entities.Viaje;
 
@@ -63,7 +63,6 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 	List<Object[]> contarViajes();
 
 
-
 	@Query(value = """
 		    SELECT * FROM viaje 
 		    WHERE estado = :estado
@@ -75,7 +74,19 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 		    @Param("hasta") Timestamp hasta
 		);
 
-
-
+	@Query("""
+		    SELECT v.omnibus FROM Viaje v
+		    WHERE ((v.fecha_llegada = :fechaPartida AND v.hora_llegada <= :horaPartida)
+		       OR (v.fecha_llegada < :fechaPartida) AND v.localidadDestino = :origen)
+		       OR ((v.fecha_partida = :fechaLlegada AND v.hora_partida >= :horaLlegada)
+		       OR (v.fecha_partida > :fechaLlegada) AND v.localidadOrigen = :destino)
+		""")
+	List<Omnibus> omnibusSinViajes(@Param("fechaPartida") Date fechaPartida,
+		    @Param("horaPartida") Time horaPartida,
+		    @Param("fechaLlegada") Date fechaLlegada,
+		    @Param("horaLlegada") Time horaLlegada,
+		    @Param("origen") Localidad localidadOrigen,
+		    @Param("destino") Localidad localidadDestino
+		    );
 
 }

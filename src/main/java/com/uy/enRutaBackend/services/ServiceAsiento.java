@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.DesbloquearAsientosBloqueados;
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtDisAsiento;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -34,6 +35,8 @@ import com.uy.enRutaBackend.persistence.ViajeRepository;
 @Service
 public class ServiceAsiento implements IServiceAsiento {
 
+    private final DesbloquearAsientosBloqueados desbloquearAsientosBloqueados;
+
 	private static final String OK_MESSAGE = "Operación realizada con éxito";
 	
     private final AsientoRepository asientoRepository;
@@ -44,11 +47,12 @@ public class ServiceAsiento implements IServiceAsiento {
     private int controlDesbloqueo;
 
     @Autowired
-    public ServiceAsiento(AsientoRepository asientoRepository, ViajeRepository viajeRepository, DisAsientoViajeRepository asientoViajeRepository, ModelMapper mapper) {
+    public ServiceAsiento(AsientoRepository asientoRepository, ViajeRepository viajeRepository, DisAsientoViajeRepository asientoViajeRepository, ModelMapper mapper, DesbloquearAsientosBloqueados desbloquearAsientosBloqueados) {
 		this.asientoRepository = asientoRepository;
 		this.viajeRepository = viajeRepository;
 		this.asientoViajeRepository = asientoViajeRepository;
 		this.mapper = mapper;
+		this.desbloquearAsientosBloqueados = desbloquearAsientosBloqueados;
 	}
     
     @Override
@@ -166,7 +170,7 @@ public class ServiceAsiento implements IServiceAsiento {
 		for(DtDisAsiento asiento : asientos) {
 			DisAsiento_Viaje aCambiar = (asientoViajeRepository.findById(asiento.getId_disAsiento())).get();
 			aCambiar.setEstado(estado);
-			if(estado.equals(EstadoAsiento.LIBRE)) {
+			if(estado.equals(EstadoAsiento.LIBRE) || estado.equals(EstadoAsiento.REASIGNADO)) {
 				aCambiar.setIdBloqueo(null);
 				aCambiar.setFechaBloqueo(null);
 			} else if (estado.equals(EstadoAsiento.BLOQUEADO)){
@@ -252,6 +256,14 @@ public class ServiceAsiento implements IServiceAsiento {
 			bloqueado.setIdBloqueo(null);
 		}
 		asientoViajeRepository.save(bloqueado);
+	}
+
+	@Override
+	public void marcarReasignado(DisAsiento_Viaje asiento) {
+		List<DtDisAsiento> aLibre = new ArrayList<DtDisAsiento>();
+		DtDisAsiento libreDt = toDt(asiento);
+		aLibre.add(libreDt);
+		cambiarEstadoAsientos(aLibre, EstadoAsiento.REASIGNADO);
 	}
 	
 	

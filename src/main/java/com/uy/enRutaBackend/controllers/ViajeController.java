@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -53,7 +54,6 @@ public class ViajeController {
 		ResultadoOperacion<?> res = serviceViaje.listarViajes();
 		if (res != null && res.isSuccess()) {
 			System.out.println("*VIAJES* " + res.getMessage());
-			System.out.println("*VIAJES* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
@@ -63,6 +63,17 @@ public class ViajeController {
 				System.out.println("*VIAJES* " + res.getMessage());
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 			}
+		}
+	}
+	
+	@GetMapping("/reasignarViaje")
+	@Operation(summary = "Permite asignar un nuevo omnibus a un viaje.")
+	public ResponseEntity<?> reasignarOmnibus(@RequestParam int idViaje, @RequestParam int idOmnibus) {
+		ResultadoOperacion<?> resultado = serviceViaje.reasignarOmnibus(idViaje, idOmnibus);
+		if (resultado.isSuccess()) {
+			return ResponseEntity.ok(resultado);
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 		}
 	}
 }

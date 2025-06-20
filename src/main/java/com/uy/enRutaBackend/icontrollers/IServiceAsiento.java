@@ -14,4 +14,5 @@ public interface IServiceAsiento {
 	ResultadoOperacion<?> cambiarEstadoDisponibilidad(List<DtDisAsiento> asientos);
 	void desbloquearPorTiempo();
 	List<DisAsiento_Viaje> cambiarEstadoPorVenta(UUID uuidAuth, EstadoAsiento estado) throws Exception;
+	void marcarReasignado(DisAsiento_Viaje asiento);
 }
