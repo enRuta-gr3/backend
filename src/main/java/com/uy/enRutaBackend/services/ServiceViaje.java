@@ -23,6 +23,7 @@ import com.uy.enRutaBackend.entities.Viaje;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.NoExistenViajesException;
+import com.uy.enRutaBackend.icontrollers.IServiceAsiento;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 import com.uy.enRutaBackend.persistence.AsientoRepository;
 import com.uy.enRutaBackend.persistence.DisAsientoViajeRepository;
@@ -44,14 +45,17 @@ public class ServiceViaje implements IServiceViaje {
     private final AsientoRepository asientoRepository;
     private final OmnibusRepository omnibusRepository;
     private final UtilsClass utils;
+    private final IServiceAsiento serviceAsiento;
   
     @Autowired
-    public ServiceViaje(ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, OmnibusRepository omnibusRepository, UtilsClass utils) {
+    public ServiceViaje(ViajeRepository vRepository, DisAsientoViajeRepository disAsientosRepository, AsientoRepository asientoRepository, 
+    		OmnibusRepository omnibusRepository, UtilsClass utils, IServiceAsiento serviceAsiento) {
 		this.vRepository = vRepository;
 		this.disAsientosRepository = disAsientosRepository;
 		this.asientoRepository = asientoRepository;
 		this.omnibusRepository = omnibusRepository;
 		this.utils = utils;
+		this.serviceAsiento = serviceAsiento;
 	}
 
 	@Override
@@ -241,10 +245,71 @@ public class ServiceViaje implements IServiceViaje {
 	@Override
 	public ResultadoOperacion<?> reasignarOmnibus(int idViaje, int idOmnibus) {
 		Viaje aReasignar = vRepository.findById(idViaje).get();
-		Omnibus nuevoBus = omnibusRepository.findById(idOmnibus).get();
-		Viaje reasignado = 
+		Omnibus anterior = aReasignar.getOmnibus();
+		//Reasigno nuevo omnibus
+		Viaje reasignado = reasignar(aReasignar, idOmnibus);
+		//Creo los asientos para el viaje
+		cargarTablaControlDisponibilidad(reasignado);
+		//busco los asientos ocupados y asigno los nuevos
+		List<DisAsiento_Viaje> vendidos = tienePasajesVendidos(reasignado, anterior);
+		if(!vendidos.isEmpty()) {
+			asignarNuevosAsientos(vendidos, reasignado);
+		}
+		//deshabilito los asientos anteriores
+		deshabilitarAsientosAnteriores(reasignado, anterior);
 		
-		
-		return null;
+		return new ResultadoOperacion(true, OK_MESSAGE, "Reasignacion completada correctamente.");
 	}
+
+	/**
+	 * @param idViaje
+	 * @param idOmnibus
+	 * @return
+	 */
+	private Viaje reasignar(Viaje viaje, int idOmnibus) {		
+		Omnibus nuevoBus = omnibusRepository.findById(idOmnibus).get();
+		viaje.setOmnibus(nuevoBus);
+		Viaje reasignado = vRepository.save(viaje);
+		return reasignado;
+	}
+	
+	private List<DisAsiento_Viaje> tienePasajesVendidos(Viaje reasignado, Omnibus anterior) {
+		List<DisAsiento_Viaje> asientosVendidos = new ArrayList<DisAsiento_Viaje>();
+		List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
+		for(Asiento asiento : asientosOmnibusAnterior) {
+			DisAsiento_Viaje ocupado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
+			if(ocupado.getEstado().equals(EstadoAsiento.OCUPADO)){
+				asientosVendidos.add(ocupado);
+			}
+		}
+		return asientosVendidos;
+	}
+	
+	private void asignarNuevosAsientos(List<DisAsiento_Viaje> vendidos, Viaje reasignado) {
+		List<Asiento> nuevos = asientoRepository.findByOmnibus(reasignado.getOmnibus());
+		
+		for(DisAsiento_Viaje asientoVendido : vendidos) {
+			int nroAsientoVendido = asientoVendido.getAsiento().getNumeroAsiento();
+			String idBloqueo = asientoVendido.getIdBloqueo();
+			for(Asiento nuevoAsiento : nuevos) {
+				if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {
+					DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(nuevoAsiento, reasignado);
+					asientoReasignar.setIdBloqueo(idBloqueo);
+					asientoReasignar.setAsiento(nuevoAsiento);
+					asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
+					disAsientosRepository.save(asientoReasignar);
+				}
+			}
+		}
+		
+	}
+
+	private void deshabilitarAsientosAnteriores(Viaje reasignado, Omnibus anterior) {
+		List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
+		for(Asiento asiento : asientosOmnibusAnterior) {
+			DisAsiento_Viaje ocupado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
+			serviceAsiento.marcarReasignado(ocupado);
+		}			
+	}
+
 }
