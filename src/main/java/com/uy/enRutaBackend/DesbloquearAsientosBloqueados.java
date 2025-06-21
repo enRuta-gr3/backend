@@ -32,7 +32,7 @@ public class DesbloquearAsientosBloqueados {
         scheduler.scheduleAtFixedRate(this::validarDescargarAsientos, 1, intervaloEjecucion, TimeUnit.MILLISECONDS);
     }
 	
-	@Transactional
+	
 	public void validarDescargarAsientos() {
 		System.out.println("Se ejecuta tarea programada para desbloquear asientos");
 		serviceAsiento.desbloquearPorTiempo();
