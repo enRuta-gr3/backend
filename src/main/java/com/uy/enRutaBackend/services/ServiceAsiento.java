@@ -35,8 +35,6 @@ import com.uy.enRutaBackend.persistence.ViajeRepository;
 @Service
 public class ServiceAsiento implements IServiceAsiento {
 
-    private final DesbloquearAsientosBloqueados desbloquearAsientosBloqueados;
-
 	private static final String OK_MESSAGE = "Operación realizada con éxito";
 	
     private final AsientoRepository asientoRepository;
@@ -47,12 +45,11 @@ public class ServiceAsiento implements IServiceAsiento {
     private int controlDesbloqueo;
 
     @Autowired
-    public ServiceAsiento(AsientoRepository asientoRepository, ViajeRepository viajeRepository, DisAsientoViajeRepository asientoViajeRepository, ModelMapper mapper, DesbloquearAsientosBloqueados desbloquearAsientosBloqueados) {
+    public ServiceAsiento(AsientoRepository asientoRepository, ViajeRepository viajeRepository, DisAsientoViajeRepository asientoViajeRepository, ModelMapper mapper) {
 		this.asientoRepository = asientoRepository;
 		this.viajeRepository = viajeRepository;
 		this.asientoViajeRepository = asientoViajeRepository;
 		this.mapper = mapper;
-		this.desbloquearAsientosBloqueados = desbloquearAsientosBloqueados;
 	}
     
     @Override
