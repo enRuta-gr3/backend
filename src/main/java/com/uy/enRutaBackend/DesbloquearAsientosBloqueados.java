@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.uy.enRutaBackend.icontrollers.IServiceAsiento;
 
@@ -31,7 +32,7 @@ public class DesbloquearAsientosBloqueados {
         scheduler.scheduleAtFixedRate(this::validarDescargarAsientos, 1, intervaloEjecucion, TimeUnit.MILLISECONDS);
     }
 	
-	//@Scheduled(fixedRateString = "${intervalo.ejecucion.programada}")
+	@Transactional
 	public void validarDescargarAsientos() {
 		System.out.println("Se ejecuta tarea programada para desbloquear asientos");
 		serviceAsiento.desbloquearPorTiempo();
