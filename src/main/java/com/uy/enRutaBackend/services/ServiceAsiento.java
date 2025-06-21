@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.uy.enRutaBackend.DesbloquearAsientosBloqueados;
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtDisAsiento;
 import com.uy.enRutaBackend.datatypes.DtViaje;

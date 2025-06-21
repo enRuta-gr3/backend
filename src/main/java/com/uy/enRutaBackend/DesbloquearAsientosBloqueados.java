@@ -22,7 +22,7 @@ public class DesbloquearAsientosBloqueados {
 	private long intervaloEjecucion;
 	
 	@Autowired
-	public DesbloquearAsientosBloqueados(@Lazy IServiceAsiento serviceAsiento, ScheduledExecutorService scheduler) {
+	public DesbloquearAsientosBloqueados(IServiceAsiento serviceAsiento, ScheduledExecutorService scheduler) {
 		this.serviceAsiento = serviceAsiento;
 		this.scheduler = scheduler;
 	}
