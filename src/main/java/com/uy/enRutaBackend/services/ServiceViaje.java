@@ -211,7 +211,7 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	@Override
-	public ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio) {
+	public ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio, int mes) {
 		List<DtViaje> estadistica = new ArrayList<DtViaje>();
 		List<Object[]> viajesLocalidad = vRepository.contarViajes();
 		if(viajesLocalidad.size() > 0) {

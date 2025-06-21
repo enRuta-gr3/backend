@@ -29,8 +29,8 @@ public class EstadisticasController {
 	@GetMapping("/viajesPorLocalidad")
 	@Operation(summary = "Devuelve cuantos viajes se dieron de alta para cada localidad.")
 	@Hidden
-	public ResponseEntity<?> viajesPorLocalidad(@RequestParam int anio) {
-		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesLocalidad(anio);
+	public ResponseEntity<?> viajesPorLocalidad(@RequestParam int anio, int mes) {
+		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesLocalidad(anio, mes);
 		if (res != null && res.isSuccess()) {
 			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
 			//System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getData());
