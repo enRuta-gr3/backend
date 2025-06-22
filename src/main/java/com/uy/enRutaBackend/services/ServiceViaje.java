@@ -3,6 +3,7 @@ package com.uy.enRutaBackend.services;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.datatypes.ClaveAgrupacionLocalidad;
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
+import com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -220,26 +223,19 @@ public class ServiceViaje implements IServiceViaje {
 		if(viajesLocalidad.size() > 0) {
 			
 			
-			Map<ClaveAgrupacion, Long> agrupadosPorLocalidad = viajesLocalidad.stream()
+			Map<ClaveAgrupacionLocalidad, Long> agrupadosPorLocalidad = viajesLocalidad.stream()
 				.filter(obj -> {
 		            Date fecha = (Date) obj[2];
 		            LocalDate fechaLocal = fecha.toLocalDate();
 		            return fechaLocal.getMonthValue() == mes && fechaLocal.getYear() == anio;
 		        })
 				.collect(Collectors.groupingBy(
-			            obj -> new ClaveAgrupacion((String) obj[0], (String) obj[1]),
+			            obj -> new ClaveAgrupacionLocalidad((String) obj[0], (String) obj[1]),
 			            Collectors.summingLong(obj -> (Long) obj[3])
 			        ));
 			    estadistica = agrupadosPorLocalidad.entrySet().stream()
 			        .map(e -> crearDtViaje(e.getKey().nombre(), e.getKey().localidad(), e.getValue()))
 			        .collect(Collectors.toList());
-
-//
-//				.map(obj -> {
-//					String nombre = (String)obj[0];
-//					Long cantidad = (Long)obj[2];
-//					return crearDtViaje(nombre, cantidad);
-//				}).collect(Collectors.toList());
 	
 			return new ResultadoOperacion(true, OK_MESSAGE, estadistica);
 		} else {
@@ -332,6 +328,32 @@ public class ServiceViaje implements IServiceViaje {
 		}			
 	}
 
-	
-	record ClaveAgrupacion(String nombre, String localidad) {}
+	@Override
+	public ResultadoOperacion<?> calcularCantidadViajesPorMesAlAnio(int anio) {
+		List<Viaje> viajesEnAnio = vRepository.obtenerViajesPorAnio(anio);
+		if(viajesEnAnio.size() > 0) {
+			Map<YearMonth, Long> viajesPorMes = viajesEnAnio.stream()
+					.collect(Collectors.groupingBy(
+							viaje -> YearMonth.from(viaje.getFecha_partida().toLocalDate()), 
+							Collectors.counting()
+							));
+			List<DtEstadisticaViajesMes> estadisticaPorMes = viajesPorMes.entrySet().stream()
+					.map(est -> crearDtViajesPorMes(est.getKey(), est.getValue()))
+					.collect(Collectors.toList());
+			
+			return new ResultadoOperacion(true, OK_MESSAGE, estadisticaPorMes);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+	}
+
+	private DtEstadisticaViajesMes crearDtViajesPorMes(YearMonth mes, Long cantidad) {
+		DtEstadisticaViajesMes viajesMes = new DtEstadisticaViajesMes();
+		String[] separaAnioMes = mes.toString().split("-");
+		viajesMes.setMes(separaAnioMes[1]);
+		viajesMes.setAnio(separaAnioMes[0]);
+		viajesMes.setCantidad(cantidad.intValue());
+		return viajesMes;
+	}
+
 }

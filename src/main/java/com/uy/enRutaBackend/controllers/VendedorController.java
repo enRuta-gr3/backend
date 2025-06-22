@@ -55,13 +55,21 @@ public class VendedorController {
 			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
 			return ResponseEntity.ok(res);
 		} else {
-			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
-				System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(res);
-			} else {
-				System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-			}
+			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/viajesPorMes")
+	@Operation(summary = "Devuelve cuantos viajes se realizan por mes para un año especifico.")
+	public ResponseEntity<?> viajesPorMes(@RequestParam int anio) {
+		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesPorMesAlAnio(anio);
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Viajes/Mes* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
 }
