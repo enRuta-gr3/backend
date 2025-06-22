@@ -16,4 +16,5 @@ public interface IServicePasaje {
 	public DtPasaje entityToDt(Pasaje pasaje);
 	public ResultadoOperacion<?> solicitarHistorial(List<Venta_Compra> comprasUsuario);
 	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt);
+	public ResultadoOperacion<?> listarPasajesPorVenta(Venta_Compra venta);
 }

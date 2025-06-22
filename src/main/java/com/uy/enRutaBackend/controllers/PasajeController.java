@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtUsuario;
@@ -63,7 +65,20 @@ public class PasajeController {
 			System.out.println("*PASAJES* - " + res.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
-
+	}
+	
+	@GetMapping("/listarPasajesPorVenta")
+	@Operation(summary = "Devuelve la lista de pasajes asociados a una venta.")
+	public ResponseEntity<?> listarPasajesPorVenta(@RequestParam int idVenta) {
+		Venta_Compra venta = serviceVenta.obtenerVenta(idVenta);
+		ResultadoOperacion<?> res = servicePasaje.listarPasajesPorVenta(venta);
+		if (res.isSuccess()) {
+			System.out.println("*PASAJES* - Se listan los pasajes para una venta.");
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*PASAJES* - " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
 	}
 
 }

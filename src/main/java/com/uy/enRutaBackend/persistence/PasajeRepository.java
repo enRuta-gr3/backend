@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.uy.enRutaBackend.entities.EstadoPasaje;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
 import com.uy.enRutaBackend.entities.Viaje;
@@ -26,11 +27,15 @@ public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 		    WHERE v.estado = :estado
 		      AND (v.fecha_partida::timestamp + v.hora_partida) BETWEEN :desde AND :hasta
 		      AND vc.estado = 'COMPLETADA'
+		      AND p.estado_pasaje = 'VIGENTE'
 		""", nativeQuery = true)
 		List<Pasaje> findPasajesDeViajesCercanos(
 		    @Param("estado") String estado,
 		    @Param("desde") Timestamp desde,
 		    @Param("hasta") Timestamp hasta
 		);
+	
+	
+	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(Venta_Compra compra, EstadoPasaje estado);
 
 }

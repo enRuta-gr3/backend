@@ -292,10 +292,9 @@ public class ServiceViaje implements IServiceViaje {
 			int nroAsientoVendido = asientoVendido.getAsiento().getNumeroAsiento();
 			String idBloqueo = asientoVendido.getIdBloqueo();
 			for(Asiento nuevoAsiento : nuevos) {
-				if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {
+				if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {					
 					DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(nuevoAsiento, reasignado);
 					asientoReasignar.setIdBloqueo(idBloqueo);
-					asientoReasignar.setAsiento(nuevoAsiento);
 					asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
 					disAsientosRepository.save(asientoReasignar);
 				}
@@ -307,8 +306,8 @@ public class ServiceViaje implements IServiceViaje {
 	private void deshabilitarAsientosAnteriores(Viaje reasignado, Omnibus anterior) {
 		List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
 		for(Asiento asiento : asientosOmnibusAnterior) {
-			DisAsiento_Viaje ocupado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
-			serviceAsiento.marcarReasignado(ocupado);
+			DisAsiento_Viaje aReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
+			serviceAsiento.marcarReasignado(aReasignar);
 		}			
 	}
 

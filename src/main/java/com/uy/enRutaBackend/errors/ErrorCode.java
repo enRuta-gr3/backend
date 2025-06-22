@@ -16,7 +16,8 @@ public enum ErrorCode {
 	FECHAS_INVALIDAS("Debe proporcionar fecha de inicio y fecha de fin si el ómnibus se marca como inactivo."),
 	OPERACION_INVALIDA("El ómnibus tiene viajes asignados en ese período y no puede darse de baja."),
 	ERROR_CONSULTANDO_BASE("Ocurrió un error al ir contra la base de datos."), 
-	ERROR_PROCESANDO_CARGA("Ocurrió un error procesando la carga.")
+	ERROR_PROCESANDO_CARGA("Ocurrió un error procesando la carga."),
+	ERROR_DEVOLUCION("No se puede realizar la devolución. El viaje está próximo a partir.")
 	;
 	private final String msg;
 

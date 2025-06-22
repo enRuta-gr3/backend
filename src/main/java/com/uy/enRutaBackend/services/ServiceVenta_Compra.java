@@ -294,4 +294,9 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 		}
 		return ventas;
 	}
+
+	@Override
+	public Venta_Compra obtenerVenta(int idVenta) {
+		return repositoryVentaCompra.findById(idVenta).get();
+	}
 }

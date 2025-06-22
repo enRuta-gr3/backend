@@ -16,4 +16,5 @@ public interface IServiceVenta_Compra {
 	ResultadoOperacion<?> finalizarVenta(DtVenta_Compra compra);
 	ResultadoOperacion<?> finalizarVentaPayPal(DtPaypal paypalDt);
 	List<Venta_Compra> listarVentas(DtUsuario usuario);
+	Venta_Compra obtenerVenta(int idVenta);
 }

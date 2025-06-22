@@ -2,6 +2,8 @@ package com.uy.enRutaBackend.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,13 +36,18 @@ public class Pasaje {
     @JoinColumn(name = "id_venta_compra", nullable = false)
     private Venta_Compra ventaCompra;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado_pasaje")
+    private EstadoPasaje estadoPasaje;
+    
     public Pasaje() {}
     
-    public Pasaje(double precio, Viaje viaje, Asiento asiento, Venta_Compra venta_compra) {
+    public Pasaje(double precio, Viaje viaje, Asiento asiento, Venta_Compra venta_compra, EstadoPasaje estadoPasaje) {
         this.precio = precio;
         this.viaje = viaje;
         this.asiento = asiento;
         this.ventaCompra = venta_compra;
+        this.estadoPasaje = estadoPasaje;
     }
 
     
@@ -84,6 +91,14 @@ public class Pasaje {
     public void setVenta_compra(Venta_Compra venta_compra) {
         this.ventaCompra = venta_compra;
     }
+
+	public EstadoPasaje getEstadoPasaje() {
+		return estadoPasaje;
+	}
+
+	public void setEstadoPasaje(EstadoPasaje estadoPasaje) {
+		this.estadoPasaje = estadoPasaje;
+	}
     
     
 }

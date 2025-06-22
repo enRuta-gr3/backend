@@ -8,4 +8,6 @@ import com.uy.enRutaBackend.entities.Medio_de_Pago;
 @Repository
 public interface MedioDePagoRepository extends CrudRepository<Medio_de_Pago, Integer>{
 
+	Medio_de_Pago findByNombre(String string);
+
 }

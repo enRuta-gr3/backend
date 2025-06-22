@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.hibernate.query.sqm.tree.update.SqmUpdateStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +18,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
-import com.uy.enRutaBackend.entities.EstadoVenta;
 import com.uy.enRutaBackend.entities.EstadoViaje;
 import com.uy.enRutaBackend.entities.Historico_estado;
-import com.uy.enRutaBackend.entities.Notificacion;
-import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Omnibus;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.TareaProgramada;
@@ -39,6 +35,8 @@ import com.uy.enRutaBackend.persistence.PasajeRepository;
 import com.uy.enRutaBackend.persistence.TareaProgramadaRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
 import com.uy.enRutaBackend.persistence.ViajeRepository;
+import com.uy.enRutaBackend.utils.AsuntoEmail;
+import com.uy.enRutaBackend.utils.NotificacionesHelper;
 
 import jakarta.transaction.Transactional;
 
@@ -71,6 +69,8 @@ public class TareaProgramadaService implements ITareaProgramadaService {
     @Autowired
     private PasajeRepository pasajeRepository;
 
+    @Autowired
+    private NotificacionesHelper notificacionesHelper;
 
     @Scheduled(fixedRate = 50000) // Cada 50 segundos
     public void verificarTareasPendientes() {
@@ -184,23 +184,32 @@ public class TareaProgramadaService implements ITareaProgramadaService {
                     continue;
 
                 usuariosNotificados.add(usuario.getUuidAuth());
+                
+                String mensaje = "🚍 Se cerraron las ventas para su viaje del " +
+                        viaje.getFecha_partida().toString() + " a las " +
+                        viaje.getHora_partida().toString() + ". Recuerde que el viaje parte en 30 minutos.";
 
-                Buzon_notificacion buzon = usuario.getNotificaciones();
+                Buzon_notificacion buzon = notificacionesHelper.obtenerBuzon(usuario);
+//                Buzon_notificacion buzon = usuario.getNotificaciones();
                 if (buzon == null) {
-                    System.out.println("⚠️ Usuario sin buzón: " + usuario.getUuidAuth());
+//                    System.out.println("⚠️ Usuario sin buzón: " + usuario.getUuidAuth());
                     continue;
                 }
-
-                Notificacion noti = new Notificacion();
-                noti.setMensaje("🚍 Se cerraron las ventas para su viaje del " +
-                                viaje.getFecha_partida() + " a las " +
-                                viaje.getHora_partida() + ". Recuerde que el viaje parte en 30 minutos.");
-                noti.setFiltro_destinatario("CLIENTE");
-                noti.setFechaEnvio(new Date());
-                noti.setLeido(false);
-                noti.setBuzon_notificacion(buzon);
-
-                notificacionRepository.save(noti);
+                
+                notificacionesHelper.generarNotificacion(buzon, mensaje, usuario.getTipoUsuario());
+                
+                notificacionesHelper.enviarNotificacionEmail(usuario, AsuntoEmail.CIERRE_VENTA.getAsunto(), mensaje);
+//
+//                Notificacion noti = new Notificacion();
+//                noti.setMensaje("🚍 Se cerraron las ventas para su viaje del " +
+//                                viaje.getFecha_partida() + " a las " +
+//                                viaje.getHora_partida() + ". Recuerde que el viaje parte en 30 minutos.");
+//                noti.setFiltro_destinatario("CLIENTE");
+//                noti.setFechaEnvio(new Date());
+//                noti.setLeido(false);
+//                noti.setBuzon_notificacion(buzon);
+//
+//                notificacionRepository.save(noti);
             }
         }
     }

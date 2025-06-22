@@ -16,6 +16,7 @@ import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.EstadoPasaje;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
@@ -68,7 +69,7 @@ public class ServicePasaje implements IServicePasaje {
                     throw new IllegalArgumentException("El asiento no pertenece al ómnibus del viaje.");
                 }
 
-                Pasaje pasaje = new Pasaje(monto, viaje, asiento, venta_compra);
+                Pasaje pasaje = new Pasaje(monto, viaje, asiento, venta_compra, EstadoPasaje.VIGENTE);
                 listaPasajes.add(pasaje);
             }
         }
@@ -164,12 +165,7 @@ public class ServicePasaje implements IServicePasaje {
 	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt) {
 		Viaje viaje = mapper.map(viajeDt, Viaje.class);
 		List<Pasaje> pasajes = pasajeRepository.findByViaje(viaje);
-		List<DtPasaje> pasajesDt = new ArrayList<DtPasaje>();
-		for(Pasaje pasaje : pasajes) {
-			DtPasaje pasajeDt = entityToDt(pasaje);
-			pasajeDt.setVenta_compra(llenarDtVenta(pasaje.getVenta_compra()));
-			pasajesDt.add(pasajeDt);
-		}
+		List<DtPasaje> pasajesDt = toDtList(pasajes);
 		if(!pasajesDt.isEmpty()) {
 			return new ResultadoOperacion(true, "Listado de pasajes obtenido correctamente", pasajesDt);
 		} else {
@@ -193,5 +189,33 @@ public class ServicePasaje implements IServicePasaje {
 		cliente.setNombres(c.getNombres());
 		cliente.setApellidos(c.getApellidos());
 		return cliente;
+	}
+
+
+	@Override
+	public ResultadoOperacion<?> listarPasajesPorVenta(Venta_Compra compra) {
+		List<Pasaje> pasajes = new ArrayList<Pasaje>();
+		pasajes = pasajeRepository.findAllByVentaCompraAndEstadoPasaje(compra, EstadoPasaje.VIGENTE);
+		List<DtPasaje> pasajesDt = toDtList(pasajes);
+		if(!pasajesDt.isEmpty()) {
+			return new ResultadoOperacion(true, "Listado de pasajes obtenido correctamente", pasajesDt);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+	}
+
+
+	/**
+	 * @param pasajes
+	 * @return
+	 */
+	private List<DtPasaje> toDtList(List<Pasaje> pasajes) {
+		List<DtPasaje> pasajesDt = new ArrayList<DtPasaje>();
+		for(Pasaje pasaje : pasajes) {
+			DtPasaje pasajeDt = new DtPasaje();
+			pasajeDt = entityToDt(pasaje);
+			pasajesDt.add(pasajeDt);
+		}
+		return pasajesDt;
 	}
 }

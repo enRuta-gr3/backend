@@ -1,31 +1,52 @@
 package com.uy.enRutaBackend.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.uy.enRutaBackend.datatypes.DtPasaje;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceVendedor;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@RequestMapping("/api/estadisticas")
-public class EstadisticasController {
+@RequestMapping("/api/vendedor")
+public class VendedorController {
 
 	private final IServiceViaje serviceViaje;
+	private final IServiceVendedor serviceVendedor;
 
 	@Autowired
-	public EstadisticasController(IServiceViaje serviceViaje) {
+	public VendedorController(IServiceViaje serviceViaje, IServiceVendedor serviceVendedor) {
 		this.serviceViaje = serviceViaje;
+		this.serviceVendedor = serviceVendedor;
 	}
 	
+	@PostMapping("/devolverPasajes")
+	@Operation(summary = "Permite devolver pasajes previamente comprados.")
+	public ResponseEntity<?> devolverPasajes(@RequestBody List<DtPasaje> pasajes) {
+		ResultadoOperacion<?> res = serviceVendedor.devolverPasajes(pasajes);
+		if (res != null && res.isSuccess()) {
+			System.out.println("*DEVOLUCION - * " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*DEVOLUCION - * " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+
 	@GetMapping("/viajesPorLocalidad")
 	@Operation(summary = "Devuelve cuantos viajes se dieron de alta para cada localidad.")
 	@Hidden
@@ -33,7 +54,6 @@ public class EstadisticasController {
 		ResultadoOperacion<?> res = serviceViaje.calcularCantidadViajesLocalidad(anio);
 		if (res != null && res.isSuccess()) {
 			System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getMessage());
-			//System.out.println("*ESTADISTICAS - Viajes/Localidad* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
