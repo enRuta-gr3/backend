@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.uy.enRutaBackend.datatypes.DtNotificacion;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtSesion;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
@@ -28,6 +29,7 @@ import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.Notificacion;
 import com.uy.enRutaBackend.entities.PasswordResetToken;
 import com.uy.enRutaBackend.entities.Sesion;
 import com.uy.enRutaBackend.entities.Usuario;
@@ -40,7 +42,9 @@ import com.uy.enRutaBackend.icontrollers.IServiceSesion;
 import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
 import com.uy.enRutaBackend.persistence.AdministradorRepository;
+import com.uy.enRutaBackend.persistence.BuzonNotificacionRepository;
 import com.uy.enRutaBackend.persistence.ClienteRepository;
+import com.uy.enRutaBackend.persistence.NotificacionRepository;
 import com.uy.enRutaBackend.persistence.PasswordResetTokenRepository;
 import com.uy.enRutaBackend.persistence.SesionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
@@ -75,13 +79,17 @@ public class ServiceUsuario implements IServiceUsuario {
 	private final EmailService emailService;
 	private final IServiceSupabase iserviceSupabase;
 	private final SesionRepository sesionRepository;
+	private final BuzonNotificacionRepository buzonRepository;
+	private final NotificacionRepository notificacionRepository;
 
 	@Autowired
 	public ServiceUsuario(UsuarioRepository repository, ModelMapper modelMapper, PasswordEncoder passwordEncoder,
 			JwtManager jwtManager, IServiceSesion sesionService, ClienteRepository clienteRepository,
 			VendedorRepository vendedorRepository, AdministradorRepository administradorRepository,
 			PasswordResetTokenRepository resetTokenRepository, EmailService emailService,
-			IServiceSupabase iserviceSupabase, SesionRepository sesionRepository, UtilsClass utilsClass) {
+			IServiceSupabase iserviceSupabase, SesionRepository sesionRepository, 
+			UtilsClass utilsClass, BuzonNotificacionRepository buzonRepository,
+			NotificacionRepository notificacionRepository) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
@@ -95,6 +103,8 @@ public class ServiceUsuario implements IServiceUsuario {
 		this.iserviceSupabase = iserviceSupabase;
 		this.sesionRepository = sesionRepository;
 		this.utilsClass = utilsClass;
+		this.buzonRepository = buzonRepository;
+		this.notificacionRepository = notificacionRepository;
 	}
 
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -751,9 +761,6 @@ public class ServiceUsuario implements IServiceUsuario {
 		return resultadoCargaMasiva;
 	}
 
-
-	
-
 	private DtUsuario crearDtRegistro(DtUsuarioCargaMasiva usuarioLeido) {
 		DtUsuario usuDt = new DtUsuario();
 		usuDt.setTipo_usuario(usuarioLeido.getTipoUsuario());
@@ -763,5 +770,36 @@ public class ServiceUsuario implements IServiceUsuario {
 		usuDt.setEmail(usuarioLeido.getEmail());
 		usuDt.setFecha_nacimiento(java.sql.Date.valueOf(usuarioLeido.getFechaNacimiento()));
 		return usuDt;
+	}
+
+	@Override
+	public ResultadoOperacion<?> listarNotificaciones(DtUsuario usuario) {
+		Usuario usu = repository.findById(usuario.getUuidAuth()).get();
+		Buzon_notificacion buzon = buzonRepository.findByUsuario(usu);
+		if(buzon != null) {
+			List<Notificacion> notificaciones = notificacionRepository.findByBuzonNotificacion(buzon);
+			if(notificaciones.size() > 0) {
+				List<DtNotificacion> notisDt = new ArrayList<DtNotificacion>();
+				for(Notificacion noti : notificaciones) {
+					DtNotificacion notiDt = crearDtNotificacion(noti);
+					notisDt.add(notiDt);
+				}
+				return new ResultadoOperacion(true, "Notificaciones obtenidas.", notisDt);
+			} else {
+				return new ResultadoOperacion(false, "El usuario no tiene notificaciones.", ErrorCode.LISTA_VACIA);
+			}
+		} else {
+			return new ResultadoOperacion(false, "El usuario no tiene buzón aun.", ErrorCode.OPERACION_INVALIDA);
+		}	
+	}
+
+	private DtNotificacion crearDtNotificacion(Notificacion noti) {
+		DtNotificacion notiDt = new DtNotificacion();
+		notiDt.setId_notificacion(noti.getId_notificacion());
+		notiDt.setBuzonNotificacion(noti.getBuzon_notificacion().getId_buzon_notificacion());
+		notiDt.setFechaEnvio(noti.getFechaEnvio());
+		notiDt.setLeido(noti.isLeido());
+		notiDt.setMensaje(noti.getMensaje());
+		return notiDt;		
 	}
 }

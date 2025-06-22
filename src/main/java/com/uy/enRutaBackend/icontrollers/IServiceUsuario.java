@@ -24,4 +24,5 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> modificarPerfil(DtUsuario usuario);
 	ResultadoOperacion<?> listarUsuarios();
 	DtResultadoCargaMasiva procesarUsuarios(List<DtUsuarioCargaMasiva> leidosCsv) throws Exception;
+	ResultadoOperacion<?> listarNotificaciones(DtUsuario usuario);
 }

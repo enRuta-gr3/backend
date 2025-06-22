@@ -24,7 +24,7 @@ public class Notificacion {
     
     @ManyToOne
     @JoinColumn(name = "buzon_id")
-    private Buzon_notificacion buzon_notificacion;
+    private Buzon_notificacion buzonNotificacion;
 	
     private boolean leido;
     
@@ -47,11 +47,11 @@ public class Notificacion {
 	}
 
 	public Buzon_notificacion getBuzon_notificacion() {
-		return buzon_notificacion;
+		return buzonNotificacion;
 	}
 
 	public void setBuzon_notificacion(Buzon_notificacion buzon_notificacion) {
-		this.buzon_notificacion = buzon_notificacion;
+		this.buzonNotificacion = buzon_notificacion;
 	}
 
 	public boolean isLeido() {

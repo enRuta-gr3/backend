@@ -22,7 +22,7 @@ public class Buzon_notificacion {
     @Column(name = "id_buzon_notificacion")
     private int id_buzon_notificacion;
 
-    @OneToMany(mappedBy = "buzon_notificacion")
+    @OneToMany(mappedBy = "buzonNotificacion")
     private List<Notificacion> notificaciones;
 
     @OneToOne

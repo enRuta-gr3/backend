@@ -113,7 +113,6 @@ public class UsuarioController {
 
 		if (res.isSuccess()) {
 			System.out.println("*LISTAR USUARIOS* " + res.getMessage());
-			System.out.println("*LISTAR USUARIOS* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			System.out.println("*LISTAR USUARIOS* " + res.getMessage());
@@ -121,5 +120,17 @@ public class UsuarioController {
 		}
 	}
 	
+	@PostMapping("/listarNotificaciones")
+	@Operation(summary = "Lista las notificaciones de un usuario")
+	public ResponseEntity<?> listarNotificaciones(@RequestBody DtUsuario usuario) {
+		ResultadoOperacion<?> res = serviceUsuario.listarNotificaciones(usuario);
+		if (res.isSuccess()) {
+			System.out.println("*LISTAR NOTIFICACIONES* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*LISTAR USUARIOS* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
 	
 }
