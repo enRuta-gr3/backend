@@ -203,13 +203,14 @@ public class ServiceAsiento implements IServiceAsiento {
 	@Override
 	public void desbloquearPorTiempo() {
 		List<DisAsiento_Viaje> asientosBloqueados = asientoViajeRepository.findByEstado(EstadoAsiento.BLOQUEADO);
-		for(DisAsiento_Viaje asientoBloqueado : asientosBloqueados) {
-			if(pasaronCincoMinutos(asientoBloqueado.getFechaBloqueo())) {
+		for (DisAsiento_Viaje asientoBloqueado : asientosBloqueados) {
+			if (pasaronCincoMinutos(asientoBloqueado.getFechaBloqueo())) {
 				asientoBloqueado.setEstado(EstadoAsiento.LIBRE);
 				asientoBloqueado.setFechaBloqueo(null);
 				asientoBloqueado.setIdBloqueo(null);
 				asientoViajeRepository.save(asientoBloqueado);
 			}
+			System.out.println("Se desbloqueo el asiento con idAsientoViaje: " + asientoBloqueado.getId_disAsiento());
 		}
 	}
 

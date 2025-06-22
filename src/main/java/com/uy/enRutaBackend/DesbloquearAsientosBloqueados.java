@@ -34,7 +34,7 @@ public class DesbloquearAsientosBloqueados {
 	
 	
 	public void validarDescargarAsientos() {
-		System.out.println("Se ejecuta tarea programada para desbloquear asientos");
+//		System.out.println("Se ejecuta tarea programada para desbloquear asientos");
 		serviceAsiento.desbloquearPorTiempo();
 	}
 }
