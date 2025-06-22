@@ -2,14 +2,17 @@ package com.uy.enRutaBackend.services;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.uy.enRutaBackend.datatypes.DtDepartamento;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -211,16 +214,32 @@ public class ServiceViaje implements IServiceViaje {
 	}
 
 	@Override
-	public ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio) {
+	public ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio, int mes) {
 		List<DtViaje> estadistica = new ArrayList<DtViaje>();
-		List<Object[]> viajesLocalidad = vRepository.contarViajes();
+		List<Object[]> viajesLocalidad = vRepository.contarViajes();		
 		if(viajesLocalidad.size() > 0) {
-		estadistica = viajesLocalidad.stream()
-				.map(obj -> {
-					String nombre = (String)obj[0];
-					Long cantidad = (Long)obj[1];
-					return crearDtViaje(nombre, cantidad);
-				}).collect(Collectors.toList());
+			
+			
+			Map<ClaveAgrupacion, Long> agrupadosPorLocalidad = viajesLocalidad.stream()
+				.filter(obj -> {
+		            Date fecha = (Date) obj[2];
+		            LocalDate fechaLocal = fecha.toLocalDate();
+		            return fechaLocal.getMonthValue() == mes && fechaLocal.getYear() == anio;
+		        })
+				.collect(Collectors.groupingBy(
+			            obj -> new ClaveAgrupacion((String) obj[0], (String) obj[1]),
+			            Collectors.summingLong(obj -> (Long) obj[3])
+			        ));
+			    estadistica = agrupadosPorLocalidad.entrySet().stream()
+			        .map(e -> crearDtViaje(e.getKey().nombre(), e.getKey().localidad(), e.getValue()))
+			        .collect(Collectors.toList());
+
+//
+//				.map(obj -> {
+//					String nombre = (String)obj[0];
+//					Long cantidad = (Long)obj[2];
+//					return crearDtViaje(nombre, cantidad);
+//				}).collect(Collectors.toList());
 	
 			return new ResultadoOperacion(true, OK_MESSAGE, estadistica);
 		} else {
@@ -228,17 +247,19 @@ public class ServiceViaje implements IServiceViaje {
 		}
 	}
 	
-	private DtViaje crearDtViaje(String nombre, long cantidad) {
-		int cantInt = (int)cantidad;
+	private DtViaje crearDtViaje(String nombreLocalidad, String nombreDepartamento, long cantidad) {
 		DtViaje dtViaje = new DtViaje();
-		dtViaje.setLocalidadOrigen(crearDtLocalidad(nombre));
+		dtViaje.setLocalidadOrigen(crearDtLocalidad(nombreLocalidad, nombreDepartamento));
 		dtViaje.setCantidad((int) cantidad);
 		return dtViaje;
 	}
 
-	private DtLocalidad crearDtLocalidad(String nombre) {
+	private DtLocalidad crearDtLocalidad(String nombreLocalidad, String nombreDepartamento) {
 		DtLocalidad localidad = new DtLocalidad();
-		localidad.setNombreLocalidad(nombre);
+		localidad.setNombreLocalidad(nombreLocalidad);
+		DtDepartamento depto = new DtDepartamento();
+		depto.setNombreDepartamento(nombreDepartamento);
+		localidad.setDepartamento(depto);
 		return localidad;
 	}
 	
@@ -311,4 +332,6 @@ public class ServiceViaje implements IServiceViaje {
 		}			
 	}
 
+	
+	record ClaveAgrupacion(String nombre, String localidad) {}
 }

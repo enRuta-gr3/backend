@@ -9,5 +9,5 @@ public interface IServiceViaje {
 	ResultadoOperacion<?> RegistrarViaje(DtViaje viajeDt);
 	ResultadoOperacion<?> listarViajes() throws NoExistenViajesException;
 	ResultadoOperacion<?> reasignarOmnibus(int idViaje, int idOmnibus);
-	ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio);
+	ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio, int mes);
 }

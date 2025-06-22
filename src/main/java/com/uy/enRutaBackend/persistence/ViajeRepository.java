@@ -57,9 +57,9 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 		);
 
 
-	@Query("SELECT v.localidadOrigen.nombre, COUNT(v) as cantidad "
+	@Query("SELECT v.localidadOrigen.nombre, v.localidadOrigen.departamento.nombre, v.fecha_partida, COUNT(v) as cantidad "
 			+ "FROM Viaje v "
-			+ "GROUP BY localidadOrigen.nombre")
+			+ "GROUP BY localidadOrigen.nombre, v.localidadOrigen.departamento.nombre, v.fecha_partida")
 	List<Object[]> contarViajes();
 
 

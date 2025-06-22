@@ -143,16 +143,18 @@ public class ServiceVendedor implements IServiceVendedor {
 	        + " y Nro " + idPasajesDevueltos.get(idPasajesDevueltos.size() - 1);
 
 	
-			mensaje = String.format("Se devolvieron los pasajes Nro %s para el viaje hacia %s, del día %s, hora %s. Por un monto total de $%s.",
+			mensaje = String.format("Se devolvieron los pasajes Nro %s para el viaje hacia %s - %s, del día %s, hora %s. Por un monto total de $%s.",
 					listaPasajes,
 					viaje.getLocalidadDestino().getNombre(),
+					viaje.getLocalidadDestino().getDepartamento().getNombre(),
 					utils.dateToString(viaje.getFecha_partida()),
 					utils.timeToString(viaje.getHora_partida()),
 					montoDevolver);
 		} else {
-			mensaje = String.format("Se devolvió el pasaje Nro %s, para el viaje hacia %s, del día %s, hora %s. Por un monto total de $%s.",
+			mensaje = String.format("Se devolvió el pasaje Nro %s, para el viaje hacia %s - %s, del día %s, hora %s. Por un monto total de $%s.",
 					idPasajesDevueltos.get(0),
 					viaje.getLocalidadDestino().getNombre(),
+					viaje.getLocalidadDestino().getDepartamento().getNombre(),
 					utils.dateToString(viaje.getFecha_partida()),
 					utils.timeToString(viaje.getHora_partida()),
 					montoDevolver);

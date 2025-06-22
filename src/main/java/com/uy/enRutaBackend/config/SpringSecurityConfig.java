@@ -22,7 +22,9 @@ public class SpringSecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().requestMatchers("/auth-controller/login").permitAll().requestMatchers("/public/**").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/auth-controller/login")
+						.permitAll().requestMatchers("/public/**").permitAll()
 						.requestMatchers("/api/**").permitAll()
 						/*.requestMatchers("/api/auth/iniciarSesion").permitAll()
 						.requestMatchers("/api/auth/registrarUsuario").permitAll()
@@ -69,7 +71,7 @@ public class SpringSecurityConfig {
 	}
 	
 	@Bean
-	public UserDetailsService userDetailsService() {
+	UserDetailsService userDetailsService() {
 	    return new InMemoryUserDetailsManager(
 	        User.withUsername("admin")
 	            .password("{noop}admin") 
