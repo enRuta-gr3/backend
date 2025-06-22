@@ -133,4 +133,17 @@ public class UsuarioController {
 		}
 	}
 	
+	@PostMapping("/verificarDescuento")
+	@Operation(summary = "Permite verificar el descuento de un cliente")
+	public ResponseEntity<?> verificarDescuento(@RequestBody DtUsuario usuario) {
+		ResultadoOperacion<?> res = serviceUsuario.verificarDescuento(usuario);
+		if (res.isSuccess()) {
+			System.out.println("*VERIFICAR DESCUENTO* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*VERIFICAR DESCUENTO* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
 }

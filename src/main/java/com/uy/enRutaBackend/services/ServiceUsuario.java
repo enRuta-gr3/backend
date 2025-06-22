@@ -273,7 +273,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		}
 		agregarFechaCreacion(usuario);
 		agregarContraseña(usuario);
-		verificarDescuento(usuario);
+		verificarDescuentoRegistro(usuario);
 
 		Usuario usuarioCrear = dtToEntity(usuario);
 
@@ -285,9 +285,22 @@ public class ServiceUsuario implements IServiceUsuario {
 		return entityToDtRegistroLogin(usuarioCrear);
 	}
 
-	private void verificarDescuento(DtUsuario usuario) {
+	private void verificarDescuentoRegistro(DtUsuario usuario) {
 		if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE"))
 			usuario.setEstado_descuento(true);
+	}
+	
+	@Override
+	public ResultadoOperacion<?> verificarDescuento(DtUsuario usuario) {
+		Usuario u = repository.findById(usuario.getUuidAuth()).get();
+		if (u instanceof Cliente) {
+			Cliente cliente = (Cliente) u;
+			cliente.setEstado_descuento(true);
+			clienteRepository.save(cliente);
+			return new ResultadoOperacion(true, "Cambio de estado de descuento actualizado correctamente", null);
+		} else {
+			return new ResultadoOperacion(false, "Usuario no es cliente, no aplica descuentos.", null);
+		}
 	}
 
 	private void agregarUUID(DtUsuario usuario) throws UsuarioExistenteException {

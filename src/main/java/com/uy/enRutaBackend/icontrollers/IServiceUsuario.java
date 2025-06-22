@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
+import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 
@@ -25,4 +26,5 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> listarUsuarios();
 	DtResultadoCargaMasiva procesarUsuarios(List<DtUsuarioCargaMasiva> leidosCsv) throws Exception;
 	ResultadoOperacion<?> listarNotificaciones(DtUsuario usuario);
+	ResultadoOperacion<?> verificarDescuento(DtUsuario usuario);
 }
