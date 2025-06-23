@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtPorcentajeOmnibusAsignados;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
@@ -368,11 +370,9 @@ public class ServiceOmnibus implements IServiceOmnibus{
         }
 
         asientoRepository.saveAll(asientos);
-
         
         bus.setAsientos(asientos);
         
-
         DtOmnibus creado = entityToDto(guardado);
 		return creado;
 	}
@@ -429,4 +429,46 @@ public class ServiceOmnibus implements IServiceOmnibus{
         }
 		return dto;
 	}
+
+	@Override
+	public ResultadoOperacion<?> calcularPorcentajeAsignados() {
+		int totalOmnibus = (int) omnibusRepository.count();
+		int omnibusAsignados = 0;
+		int omnibusSinAsignar = 0;
+		List<Omnibus> omnibus = (List<Omnibus>) omnibusRepository.findAll();
+		List<Omnibus> conViajes = viajeRepository.obtenerOmnibusAsignados();
+							
+		List<Omnibus> sinAsignar = omnibus.stream()
+			    .filter(bus -> !conViajes.contains(bus))
+			    .collect(Collectors.toList());
+		
+		if(conViajes.size()>0)
+			omnibusAsignados = conViajes.size();
+		if(sinAsignar.size() > 0)
+			omnibusSinAsignar = sinAsignar.size();
+		DtPorcentajeOmnibusAsignados dtResultado = crearDtOmnibusAsignados(totalOmnibus, omnibusAsignados, omnibusSinAsignar);
+		if(dtResultado != null)
+			return new ResultadoOperacion(true, "Estadistica obtenida correctamente", dtResultado);
+		else 
+			return new ResultadoOperacion(false, "No hay datos disponibles para esta estadística", null);
+	}
+
+	private DtPorcentajeOmnibusAsignados crearDtOmnibusAsignados(int totalOmnibus, int omnibusAsignados,
+			int omnibusSinAsignar) {
+		DtPorcentajeOmnibusAsignados dtAsignados = new DtPorcentajeOmnibusAsignados();
+		dtAsignados.setAsignados(omnibusAsignados);
+		dtAsignados.setNoAsignados(omnibusSinAsignar);
+		dtAsignados.setTotalOmnibus(totalOmnibus);
+		dtAsignados.setPorcentajeAsignados(calcularPorcentaje(totalOmnibus, omnibusAsignados));
+		dtAsignados.setPorcentajeNoAsignados(100 - dtAsignados.getPorcentajeAsignados());
+		return dtAsignados;
+	}
+
+	private int calcularPorcentaje(int totalOmnibus, int omnibusAsignados) {
+		double porcentaje = 0;
+		porcentaje = (omnibusAsignados * 100) / totalOmnibus;
+		return (int) Math.round(porcentaje);
+	}
+	
+	
 }
