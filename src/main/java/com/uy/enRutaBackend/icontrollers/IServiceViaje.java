@@ -11,4 +11,5 @@ public interface IServiceViaje {
 	ResultadoOperacion<?> reasignarOmnibus(int idViaje, int idOmnibus);
 	ResultadoOperacion<?> calcularCantidadViajesLocalidad(int anio, int mes);
 	ResultadoOperacion<?> calcularCantidadViajesPorMesAlAnio(int anio);
+	ResultadoOperacion<?> listarViajesPorOmnibus(int idOmnibus);
 }

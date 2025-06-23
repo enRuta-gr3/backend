@@ -72,4 +72,8 @@ public class VendedorController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
+//	
+//	@GetMapping("/porcentajeOcupacionOmnibus")
+//	@Operation(summary = "Devuelve el porcentaje de ocupacion de ómnibus")
+//	
 }

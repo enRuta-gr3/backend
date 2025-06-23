@@ -356,4 +356,21 @@ public class ServiceViaje implements IServiceViaje {
 		return viajesMes;
 	}
 
+	@Override
+	public ResultadoOperacion<?> listarViajesPorOmnibus(int idOmnibus) {
+		List<DtViaje> viajesDt = new ArrayList<DtViaje>();
+		Omnibus omnibus = omnibusRepository.findById(idOmnibus).get();
+		List<Viaje> viajes = vRepository.findByOmnibus(omnibus);
+		if(viajes.size() > 0) {
+			viajesDt = viajes.stream()
+				    .map(this::entityToDt)
+				    .toList();
+		}
+		if(viajesDt.size() > 0) {
+			return new ResultadoOperacion(true, OK_MESSAGE, viajesDt);			
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+	}
+
 }

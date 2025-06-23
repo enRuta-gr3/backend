@@ -395,9 +395,9 @@ public class ServiceUsuario implements IServiceUsuario {
 		else
 			solicitante = repository.findByCi(request.getEmail());
 
-		if(solicitante.isEliminado()) {
-			throw new UsuarioNoExisteException("El usuario ha sido eliminado.");
-		}
+//		if(solicitante.isEliminado()) {
+//			throw new UsuarioNoExisteException("El usuario ha sido eliminado.");
+//		}
 		
 		if (solicitante != null && passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
 			String tok = jwtManager.generateToken(solicitante);

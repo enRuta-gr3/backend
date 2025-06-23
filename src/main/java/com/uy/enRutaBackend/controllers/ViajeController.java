@@ -71,8 +71,23 @@ public class ViajeController {
 	public ResponseEntity<?> reasignarOmnibus(@RequestParam int idViaje, @RequestParam int idOmnibus) {
 		ResultadoOperacion<?> resultado = serviceViaje.reasignarOmnibus(idViaje, idOmnibus);
 		if (resultado.isSuccess()) {
+			System.out.println("*REASIGNAR VIAJE* - " + resultado.getMessage());
 			return ResponseEntity.ok(resultado);
 		} else {
+			System.out.println("*REASIGNAR VIAJE* - " + resultado.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+		}
+	}
+	
+	@GetMapping("/listarPorOmnibus")
+	@Operation(summary = "Lista los viajes asignados al omnibus indicado")
+	public ResponseEntity<?> listarViajesPorOmnibus(@RequestParam int idOmnibus) {
+		ResultadoOperacion<?> resultado = serviceViaje.listarViajesPorOmnibus(idOmnibus);
+		if (resultado.isSuccess()) {
+			System.out.println("*VIAJES DE UN OMNIBUS* - " + resultado.getMessage());
+			return ResponseEntity.ok(resultado);
+		} else {
+			System.out.println("*VIAJES DE UN OMNIBUS* - " + resultado.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
 		}
 	}
