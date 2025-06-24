@@ -35,7 +35,7 @@ public class ViajeController {
 		ResultadoOperacion<?> res = serviceViaje.RegistrarViaje(viaje);
 		if(res.isSuccess()) {
 			System.out.println("*VIAJES* " + res.getMessage());
-			System.out.println("*VIAJES* " + res.getData());
+//			System.out.println("*VIAJES* " + res.getData());
 			return ResponseEntity.status(HttpStatus.CREATED).body(res);
 		} else {
 			if(res.getErrorCode() == ErrorCode.ERROR_DE_CREACION) {

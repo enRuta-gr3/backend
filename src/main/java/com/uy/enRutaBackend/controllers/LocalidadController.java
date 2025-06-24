@@ -34,7 +34,7 @@ public class LocalidadController {
 		ResultadoOperacion<?> res = localidadService.RegistrarLocalidad(localidad);
 		if(res.isSuccess()) {
 			System.out.println("*LOCALIDADES* " + res.getMessage());
-			System.out.println("*LOCALIDADES* " + res.getData());
+//			System.out.println("*LOCALIDADES* " + res.getData());
 			return ResponseEntity.status(HttpStatus.CREATED).body(res);
 		} else {
 			if(res.getErrorCode() == ErrorCode.ERROR_DE_CREACION) {

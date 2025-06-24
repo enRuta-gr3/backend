@@ -162,10 +162,14 @@ public class TareaProgramadaService implements ITareaProgramadaService {
         	    Timestamp.valueOf(ahora),
         	    Timestamp.valueOf(enMediaHora)
         	);
+        
+        
 
         // Agrupar por viaje
         Map<Viaje, List<Pasaje>> agrupadosPorViaje = pasajes.stream()
             .collect(Collectors.groupingBy(Pasaje::getViaje));
+        
+        System.out.println("Viajes a cerrar: " + agrupadosPorViaje.size());
 
         for (Map.Entry<Viaje, List<Pasaje>> entry : agrupadosPorViaje.entrySet()) {
             Viaje viaje = entry.getKey();
@@ -173,6 +177,8 @@ public class TareaProgramadaService implements ITareaProgramadaService {
 
             viaje.setEstado(EstadoViaje.CERRADO);
             viajeRepository.save(viaje);
+            
+            System.out.println("Se cierra el viaje a: " + viaje.getLocalidadDestino().getNombre());
 
             Set<UUID> usuariosNotificados = new HashSet<>();
 
