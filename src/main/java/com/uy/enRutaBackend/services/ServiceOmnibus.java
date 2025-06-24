@@ -2,9 +2,12 @@ package com.uy.enRutaBackend.services;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,6 +20,7 @@ import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtOmnibusPorEstadoPorMes;
 import com.uy.enRutaBackend.datatypes.DtPorcentajeOmnibusAsignados;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtViaje;
@@ -469,6 +473,38 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		porcentaje = (omnibusAsignados * 100) / totalOmnibus;
 		return (int) Math.round(porcentaje);
 	}
-	
-	
+
+	@Override
+	public ResultadoOperacion<?> omnibusPorEstadoPorMes() {	
+		List<Historico_estado> estado = historicoEstadoRepository.findByActivo(false);
+		Map<YearMonth, Long> cambioPorMes = estado.stream()
+				.collect(Collectors.groupingBy(
+						e -> YearMonth.from(((java.sql.Date) e.getFechaInicio()).toLocalDate()), 
+						Collectors.counting()
+						));	
+		
+		List<DtOmnibusPorEstadoPorMes> listadoPorMes = cambioPorMes.entrySet().stream()
+				.map(est -> completarDt(est.getKey(), est.getValue()))
+				.collect(Collectors.toList());
+		return agregar fecha de creacion a omnibus
+	}
+
+	private DtOmnibusPorEstadoPorMes completarDt(YearMonth mesAnio, Long cantidad) {
+		DtOmnibusPorEstadoPorMes estadistica = new DtOmnibusPorEstadoPorMes();
+		String[] separarAnioMes = mesAnio.toString().split("-");
+		String anio = separarAnioMes[0];
+		int anioActual = LocalDate.now().getYear();
+		
+		if(anio.equals(String.valueOf(anioActual))) {
+			LocalDate fechaLimite = mesAnio.atDay(1);
+		
+			List<Omnibus> omnibus = (List<Omnibus>)omnibusRepository.findByFechaCreacionAnterior(fechaLimite);
+			estadistica.setAnio(anio);
+			estadistica.setMes(separarAnioMes[1]);
+			estadistica.setCantidadInactivos(String.valueOf(cantidad));
+			int cantidadInactivos = omnibus.size() - cantidad.intValue();
+			estadistica.setCantidadActivos(String.valueOf(cantidadInactivos));
+		}
+		return estadistica;
+	}
 }

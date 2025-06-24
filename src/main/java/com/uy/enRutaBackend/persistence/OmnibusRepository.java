@@ -1,5 +1,6 @@
 package com.uy.enRutaBackend.persistence;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -21,5 +22,8 @@ public interface OmnibusRepository extends CrudRepository<Omnibus, Integer>{
 			and o.localidad_actual = :localidad
 			 """)
 	List<Omnibus> omnibusSinViajeAsignado(@Param("localidad") Localidad localidad);
+
+	@Query("SELECT h FROM Historico_estado h WHERE h.fecha < :fechaLimite")
+	List<Omnibus> findByFechaCreacionAnterior(@Param("fechaLimite") LocalDate fechaLimite);
 	
 }

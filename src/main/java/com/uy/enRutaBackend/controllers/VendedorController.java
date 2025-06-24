@@ -89,4 +89,16 @@ public class VendedorController {
 		}
 	}
 	
+	@GetMapping("/estadoOmnibusPorMes")
+	@Operation(summary = "Devuelve comparativa de estados de los omnibus por mes, en el ultimo año")
+	public ResponseEntity<?> omnibusPorEstadoPorMes() {
+		ResultadoOperacion<?> res = serviceOmnibus.omnibusPorEstadoPorMes();
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Omnibus por estado, por mes* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Omnibus por estado, por mes* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
 }

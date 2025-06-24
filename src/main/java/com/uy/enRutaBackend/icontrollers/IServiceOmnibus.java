@@ -16,5 +16,6 @@ public interface IServiceOmnibus {
 	DtResultadoCargaMasiva procesarOmnibus(List<DtOmnibusCargaMasiva> leidosCsv);
 	ResultadoOperacion<?> buscarOmnibusDisponibles(int idViaje);
 	ResultadoOperacion<?> calcularPorcentajeAsignados();
+	ResultadoOperacion<?> omnibusPorEstadoPorMes();
 	
 }
