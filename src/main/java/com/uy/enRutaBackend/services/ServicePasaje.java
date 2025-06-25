@@ -1,7 +1,12 @@
 package com.uy.enRutaBackend.services;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -9,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.uy.enRutaBackend.datatypes.DtAsiento;
 import com.uy.enRutaBackend.datatypes.DtCliente;
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
+import com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtPasaje;
@@ -204,7 +210,6 @@ public class ServicePasaje implements IServicePasaje {
 		}
 	}
 
-
 	/**
 	 * @param pasajes
 	 * @return
@@ -217,5 +222,52 @@ public class ServicePasaje implements IServicePasaje {
 			pasajesDt.add(pasajeDt);
 		}
 		return pasajesDt;
+	}
+	
+	@Override
+	public ResultadoOperacion<?> pasajesVendidosPorMes() {
+		int anio = LocalDate.now(ZoneId.of("America/Montevideo")).getYear();
+		List<Pasaje> pasajesAnio = pasajeRepository.obtenerVendidosPorAnio(anio);
+
+		if (pasajesAnio.size() > 0) {
+			Map<YearMonth, Long> pasajesPorMes = pasajesAnio.stream().collect(Collectors
+					.groupingBy(pasaje -> YearMonth.from(pasaje.getFechaVenta().toLocalDate()), Collectors.counting()));
+			
+			List<DtEstadisticaViajesMes> estadisticaPorMes = pasajesPorMes.entrySet().stream()
+					.map(est -> crearDtPorMes(est.getKey(), est.getValue())).collect(Collectors.toList());
+
+			return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticaPorMes);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+
+	}
+	
+	@Override
+	public ResultadoOperacion<?> pasajesDevueltosPorMes() {
+		int anio = LocalDate.now(ZoneId.of("America/Montevideo")).getYear();
+		List<Pasaje> pasajesDevueltosAnio = pasajeRepository.obtenerDevueltosPorAnio(anio);
+
+		if (pasajesDevueltosAnio.size() > 0) {
+			Map<YearMonth, Long> pasajesPorMes = pasajesDevueltosAnio.stream().collect(Collectors
+					.groupingBy(pasaje -> YearMonth.from(pasaje.getFechaDevolucion().toLocalDate()), Collectors.counting()));
+			
+			List<DtEstadisticaViajesMes> estadisticaPorMes = pasajesPorMes.entrySet().stream()
+					.map(est -> crearDtPorMes(est.getKey(), est.getValue())).collect(Collectors.toList());
+
+			return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticaPorMes);
+		} else {
+			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+		}
+
+	}
+
+	private DtEstadisticaViajesMes crearDtPorMes(YearMonth mes, Long cantidad) {
+		DtEstadisticaViajesMes pasajesMes = new DtEstadisticaViajesMes();
+		String[] separaAnioMes = mes.toString().split("-");
+		pasajesMes.setMes(separaAnioMes[1]);
+		pasajesMes.setAnio(separaAnioMes[0]);
+		pasajesMes.setCantidad(cantidad.intValue());
+		return pasajesMes;
 	}
 }

@@ -192,26 +192,14 @@ public class TareaProgramadaService implements ITareaProgramadaService {
                         viaje.getHora_partida().toString() + ". Recuerde que el viaje parte en 30 minutos.";
 
                 Buzon_notificacion buzon = notificacionesHelper.obtenerBuzon(usuario);
-//                Buzon_notificacion buzon = usuario.getNotificaciones();
                 if (buzon == null) {
-//                    System.out.println("⚠️ Usuario sin buzón: " + usuario.getUuidAuth());
                     continue;
                 }
                 
                 notificacionesHelper.generarNotificacion(buzon, mensaje, usuario.getTipoUsuario());
                 
                 notificacionesHelper.enviarNotificacionEmail(usuario, AsuntoEmail.CIERRE_VENTA.getAsunto(), mensaje);
-//
-//                Notificacion noti = new Notificacion();
-//                noti.setMensaje("🚍 Se cerraron las ventas para su viaje del " +
-//                                viaje.getFecha_partida() + " a las " +
-//                                viaje.getHora_partida() + ". Recuerde que el viaje parte en 30 minutos.");
-//                noti.setFiltro_destinatario("CLIENTE");
-//                noti.setFechaEnvio(new Date());
-//                noti.setLeido(false);
-//                noti.setBuzon_notificacion(buzon);
-//
-//                notificacionRepository.save(noti);
+
             }
         }
     }

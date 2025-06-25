@@ -17,5 +17,4 @@ public interface IServiceOmnibus {
 	ResultadoOperacion<?> buscarOmnibusDisponibles(int idViaje);
 	ResultadoOperacion<?> calcularPorcentajeAsignados();
 	ResultadoOperacion<?> omnibusPorEstadoPorMes();
-	
 }
