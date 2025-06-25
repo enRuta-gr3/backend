@@ -43,6 +43,8 @@ public class DtUsuario {
     
     private List<Buzon_notificacion> notificaciones;
     
+    private String pushToken;
+    
     
     public DtUsuario() {}
     
@@ -215,5 +217,13 @@ public class DtUsuario {
 
 	public void setEsJubilado(boolean esJubilado) {
 		this.esJubilado = esJubilado;
+	}
+
+	public String getPushToken() {
+		return pushToken;
+	}
+
+	public void setPushToken(String pushToken) {
+		this.pushToken = pushToken;
 	}
 }

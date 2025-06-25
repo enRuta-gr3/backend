@@ -815,4 +815,20 @@ public class ServiceUsuario implements IServiceUsuario {
 		notiDt.setMensaje(noti.getMensaje());
 		return notiDt;		
 	}
+
+	@Override
+	public ResultadoOperacion<?> guardarPushToken(DtUsuario usuario) {
+		try {
+			Cliente cliente = clienteRepository.findByUuidAuth(usuario.getUuidAuth());
+			if(cliente != null) {
+				cliente.setPushToken(usuario.getPushToken());
+				clienteRepository.save(cliente);
+				return new ResultadoOperacion(true, "Push Token guardado correctamente.", usuario.getUuidAuth());
+			} else {
+				return new ResultadoOperacion(false, "No se encontro al usuario.", ErrorCode.OPERACION_INVALIDA);
+			}
+		} catch (Exception e){
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.OPERACION_INVALIDA);
+		}
+	}
 }

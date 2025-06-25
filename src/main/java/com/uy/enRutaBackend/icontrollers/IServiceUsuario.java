@@ -27,4 +27,5 @@ public interface IServiceUsuario {
 	DtResultadoCargaMasiva procesarUsuarios(List<DtUsuarioCargaMasiva> leidosCsv) throws Exception;
 	ResultadoOperacion<?> listarNotificaciones(DtUsuario usuario);
 	ResultadoOperacion<?> verificarDescuento(DtUsuario usuario);
+	ResultadoOperacion<?> guardarPushToken(DtUsuario usuario);
 }

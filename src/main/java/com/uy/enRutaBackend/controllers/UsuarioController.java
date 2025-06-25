@@ -146,4 +146,16 @@ public class UsuarioController {
 		}
 	}
 	
+	@PostMapping("/guardarPushToken")
+	@Operation(summary = "Permite a mobile enviar el token para notificaciones push para guardarlo en base")
+	public ResponseEntity<?> guardarToken(@RequestBody DtUsuario usuario) {
+		ResultadoOperacion<?> res = serviceUsuario.guardarPushToken(usuario);
+		if (res.isSuccess()) {
+			System.out.println("*PUSH TOKEN* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*PUSH TOKEN* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
 }

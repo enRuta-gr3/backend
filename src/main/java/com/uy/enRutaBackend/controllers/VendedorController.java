@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtPasaje;
-import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 import com.uy.enRutaBackend.icontrollers.IServiceVendedor;
@@ -91,6 +90,7 @@ public class VendedorController {
 	
 	@GetMapping("/estadoOmnibusPorMes")
 	@Operation(summary = "Devuelve comparativa de estados de los omnibus por mes, en el ultimo año")
+	@Hidden
 	public ResponseEntity<?> omnibusPorEstadoPorMes() {
 		ResultadoOperacion<?> res = serviceOmnibus.omnibusPorEstadoPorMes();
 		if (res != null && res.isSuccess()) {

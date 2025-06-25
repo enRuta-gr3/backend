@@ -2,19 +2,12 @@ package com.uy.enRutaBackend.datatypes;
 
 public class DtOmnibusPorEstadoPorMes {
 
-	private String idOmnibus;
 	private String mes;
 	private String anio;
 	private String cantidadActivos;
 	private String cantidadInactivos;
 	
 	
-	public String getIdOmnibus() {
-		return idOmnibus;
-	}
-	public void setIdOmnibus(String idOmnibus) {
-		this.idOmnibus = idOmnibus;
-	}
 	public String getMes() {
 		return mes;
 	}

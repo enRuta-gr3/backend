@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -475,18 +476,32 @@ public class ServiceOmnibus implements IServiceOmnibus{
 	}
 
 	@Override
-	public ResultadoOperacion<?> omnibusPorEstadoPorMes() {	
-		List<Historico_estado> estado = historicoEstadoRepository.findByActivo(false);
-		Map<YearMonth, Long> cambioPorMes = estado.stream()
-				.collect(Collectors.groupingBy(
-						e -> YearMonth.from(((java.sql.Date) e.getFechaInicio()).toLocalDate()), 
-						Collectors.counting()
-						));	
-		
-		List<DtOmnibusPorEstadoPorMes> listadoPorMes = cambioPorMes.entrySet().stream()
-				.map(est -> completarDt(est.getKey(), est.getValue()))
-				.collect(Collectors.toList());
-		return agregar fecha de creacion a omnibus
+	public ResultadoOperacion<?> omnibusPorEstadoPorMes() {
+		try {
+			List<Historico_estado> estado = historicoEstadoRepository.findByActivo(false);
+			Map<YearMonth, Long> cambioPorMes = estado.stream()
+				    .collect(Collectors.groupingBy(
+				        e -> YearMonth.from(e.getFechaInicio()
+				                              .toInstant()
+				                              .atZone(ZoneId.systemDefault())
+				                              .toLocalDate()),
+				        Collectors.counting()
+				    ));
+			
+			List<DtOmnibusPorEstadoPorMes> listadoPorMes = cambioPorMes.entrySet().stream()
+					.map(est -> completarDt(est.getKey(), est.getValue()))
+					.collect(Collectors.toList());
+			
+			//falta agregar omnibus activos para resto del año
+			
+			if(listadoPorMes.size() > 0) {
+				return new ResultadoOperacion(true, "Estadistica obtenida correctamente", listadoPorMes);
+			} else {
+				return new ResultadoOperacion(false, "No hay datos disponibles para esta estadística", null);
+			}
+		} catch (Exception e) {
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.OPERACION_INVALIDA);
+		}
 	}
 
 	private DtOmnibusPorEstadoPorMes completarDt(YearMonth mesAnio, Long cantidad) {
@@ -496,14 +511,16 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		int anioActual = LocalDate.now().getYear();
 		
 		if(anio.equals(String.valueOf(anioActual))) {
-			LocalDate fechaLimite = mesAnio.atDay(1);
-		
+			
+			LocalDate limite = mesAnio.atDay(30);
+			Date fechaLimite = Date.from(limite.atStartOfDay(ZoneId.systemDefault()).toInstant());
+			
 			List<Omnibus> omnibus = (List<Omnibus>)omnibusRepository.findByFechaCreacionAnterior(fechaLimite);
 			estadistica.setAnio(anio);
 			estadistica.setMes(separarAnioMes[1]);
 			estadistica.setCantidadInactivos(String.valueOf(cantidad));
-			int cantidadInactivos = omnibus.size() - cantidad.intValue();
-			estadistica.setCantidadActivos(String.valueOf(cantidadInactivos));
+			int cantidadActivos = omnibus.size() - cantidad.intValue();
+			estadistica.setCantidadActivos(String.valueOf(cantidadActivos));
 		}
 		return estadistica;
 	}
