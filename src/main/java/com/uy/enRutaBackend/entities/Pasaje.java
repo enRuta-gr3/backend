@@ -1,5 +1,9 @@
 package com.uy.enRutaBackend.entities;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,6 +44,12 @@ public class Pasaje {
     @Column(name="estado_pasaje")
     private EstadoPasaje estadoPasaje;
     
+    @Column(name = "fecha_venta")
+    private Date fechaVenta;
+    
+    @Column(name = "fecha_devolucion")
+    private Date fechaDevolucion;
+    
     public Pasaje() {}
     
     public Pasaje(double precio, Viaje viaje, Asiento asiento, Venta_Compra venta_compra, EstadoPasaje estadoPasaje) {
@@ -48,6 +58,7 @@ public class Pasaje {
         this.asiento = asiento;
         this.ventaCompra = venta_compra;
         this.estadoPasaje = estadoPasaje;
+        this.fechaVenta = Date.valueOf(LocalDate.now(ZoneId.of("America/Montevideo")));
     }
 
     
@@ -98,6 +109,22 @@ public class Pasaje {
 
 	public void setEstadoPasaje(EstadoPasaje estadoPasaje) {
 		this.estadoPasaje = estadoPasaje;
+	}
+
+	public Date getFechaVenta() {
+		return fechaVenta;
+	}
+
+	public void setFechaVenta(Date fechaVenta) {
+		this.fechaVenta = fechaVenta;
+	}
+
+	public Date getFechaDevolucion() {
+		return fechaDevolucion;
+	}
+
+	public void setFechaDevolucion(Date fechaDevolucion) {
+		this.fechaDevolucion = fechaDevolucion;
 	}
     
     

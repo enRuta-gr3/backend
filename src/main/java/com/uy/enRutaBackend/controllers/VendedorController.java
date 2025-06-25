@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.uy.enRutaBackend.datatypes.DtPasaje;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
+import com.uy.enRutaBackend.icontrollers.IServicePasaje;
 import com.uy.enRutaBackend.icontrollers.IServiceVendedor;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 
@@ -28,12 +29,15 @@ public class VendedorController {
 	private final IServiceViaje serviceViaje;
 	private final IServiceVendedor serviceVendedor;
 	private final IServiceOmnibus serviceOmnibus;
+	private final IServicePasaje servicePasaje;
 
 	@Autowired
-	public VendedorController(IServiceViaje serviceViaje, IServiceVendedor serviceVendedor, IServiceOmnibus serviceOmnibus) {
+	public VendedorController(IServiceViaje serviceViaje, IServiceVendedor serviceVendedor, 
+			IServiceOmnibus serviceOmnibus, IServicePasaje servicePasaje) {
 		this.serviceViaje = serviceViaje;
 		this.serviceVendedor = serviceVendedor;
 		this.serviceOmnibus = serviceOmnibus;
+		this.servicePasaje = servicePasaje;
 	}
 	
 	@PostMapping("/devolverPasajes")
@@ -98,6 +102,32 @@ public class VendedorController {
 			return ResponseEntity.ok(res);
 		} else {
 			System.out.println("*ESTADISTICAS - Omnibus por estado, por mes* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/pasajesVendidosPorMes")
+	@Operation(summary = "Muestra estadistica de pasajes vendidos por mes.")
+	public ResponseEntity<?> pasajesVendidosPorMes() {
+		ResultadoOperacion<?> res = servicePasaje.pasajesVendidosPorMes();
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Pasajes vendidos por mes* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Pasajes vendidos por mes* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/pasajesDevueltosPorMes")
+	@Operation(summary = "Muestra estadistica de pasajes devueltos por mes.")
+	public ResponseEntity<?> pasajesDevueltosPorMes() {
+		ResultadoOperacion<?> res = servicePasaje.pasajesDevueltosPorMes();
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Pasajes vendidos por mes* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Pasajes vendidos por mes* " + res.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}

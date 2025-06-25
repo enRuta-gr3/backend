@@ -37,5 +37,11 @@ public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 	
 	
 	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(Venta_Compra compra, EstadoPasaje estado);
+	
+	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaVenta) = :anio AND p.fechaDevolucion is null")
+	List<Pasaje> obtenerVendidosPorAnio(@Param("anio")int anio);
+	
+	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaDevolucion) = :anio")
+	List<Pasaje> obtenerDevueltosPorAnio(int anio);
 
 }

@@ -17,4 +17,6 @@ public interface IServicePasaje {
 	public ResultadoOperacion<?> solicitarHistorial(List<Venta_Compra> comprasUsuario);
 	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt);
 	public ResultadoOperacion<?> listarPasajesPorVenta(Venta_Compra venta);
+	ResultadoOperacion<?> pasajesVendidosPorMes();
+	ResultadoOperacion<?> pasajesDevueltosPorMes();
 }

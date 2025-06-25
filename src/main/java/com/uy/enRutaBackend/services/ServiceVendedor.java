@@ -4,7 +4,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +123,7 @@ public class ServiceVendedor implements IServiceVendedor {
 	
 	private void marcarPasajeDevuelto(Pasaje pasaje) {
 		pasaje.setEstadoPasaje(EstadoPasaje.DEVUELTO);
+		pasaje.setFechaDevolucion(java.sql.Date.valueOf(LocalDate.now(ZoneId.of("America/Montevideo"))));
 		pasajeRepository.save(pasaje);
 	}
 	
