@@ -53,7 +53,7 @@ public class LocalidadController {
 		ResultadoOperacion<?> res = localidadService.listarLocalidades();
 		if (res != null && res.isSuccess()) {
 			System.out.println("*LOCALIDADES* " + res.getMessage());
-			System.out.println("*LOCALIDADES* " + res.getData());
+//			System.out.println("*LOCALIDADES* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {
