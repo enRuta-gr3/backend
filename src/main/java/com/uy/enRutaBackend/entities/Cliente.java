@@ -23,6 +23,9 @@ public class Cliente extends Usuario {
     
     @Column(name = "estado_descuento")
     private boolean estado_descuento;
+    
+    @Column(name = "push_token")
+    private String pushToken;
 	
 	public Cliente() {}
 
@@ -71,6 +74,14 @@ public class Cliente extends Usuario {
 
 	public void setEstado_descuento(boolean estado_descuento) {
 		this.estado_descuento = estado_descuento;
+	}
+
+	public String getPushToken() {
+		return pushToken;
+	}
+
+	public void setPushToken(String pushToken) {
+		this.pushToken = pushToken;
 	}
     
     

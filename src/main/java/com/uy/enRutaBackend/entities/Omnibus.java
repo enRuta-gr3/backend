@@ -44,6 +44,10 @@ public class Omnibus {
     @Column(name = "fecha_fin")
     private Date fecha_fin;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_creacion")
+    private Date fechaCreacion;
+    
     @OneToMany(mappedBy = "id_asiento", cascade = CascadeType.REMOVE, orphanRemoval = true)    
     private List<Asiento> asientos;
 
@@ -62,6 +66,7 @@ public class Omnibus {
         this.activo = activo;
         this.fecha_fin = fecha_fin;
         this.localidad_actual = localidad_actual;
+        this.fechaCreacion = new Date();
     }
 
     public Omnibus(int i, int j, boolean b, Date valueOf, DtLocalidad loc1) {

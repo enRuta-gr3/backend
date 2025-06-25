@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtPasaje;
-import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
+import com.uy.enRutaBackend.icontrollers.IServiceOmnibus;
 import com.uy.enRutaBackend.icontrollers.IServiceVendedor;
 import com.uy.enRutaBackend.icontrollers.IServiceViaje;
 
@@ -27,11 +27,13 @@ public class VendedorController {
 
 	private final IServiceViaje serviceViaje;
 	private final IServiceVendedor serviceVendedor;
+	private final IServiceOmnibus serviceOmnibus;
 
 	@Autowired
-	public VendedorController(IServiceViaje serviceViaje, IServiceVendedor serviceVendedor) {
+	public VendedorController(IServiceViaje serviceViaje, IServiceVendedor serviceVendedor, IServiceOmnibus serviceOmnibus) {
 		this.serviceViaje = serviceViaje;
 		this.serviceVendedor = serviceVendedor;
+		this.serviceOmnibus = serviceOmnibus;
 	}
 	
 	@PostMapping("/devolverPasajes")
@@ -72,8 +74,31 @@ public class VendedorController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}
-//	
-//	@GetMapping("/porcentajeOcupacionOmnibus")
-//	@Operation(summary = "Devuelve el porcentaje de ocupacion de ómnibus")
-//	
+	
+	@GetMapping("/porcentajeOmnibusAsignados")
+	@Operation(summary = "Devuelve el porcentaje de ómnibus asignados sobre el total de la flota")
+	public ResponseEntity<?> porcentajeAsignados(){
+		ResultadoOperacion<?> res = serviceOmnibus.calcularPorcentajeAsignados();
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Porcentaje de asignacion de omnibus* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Porcentaje de asignacion de omnibus* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@GetMapping("/estadoOmnibusPorMes")
+	@Operation(summary = "Devuelve comparativa de estados de los omnibus por mes, en el ultimo año")
+	@Hidden
+	public ResponseEntity<?> omnibusPorEstadoPorMes() {
+		ResultadoOperacion<?> res = serviceOmnibus.omnibusPorEstadoPorMes();
+		if (res != null && res.isSuccess()) {
+			System.out.println("*ESTADISTICAS - Omnibus por estado, por mes* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*ESTADISTICAS - Omnibus por estado, por mes* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
 }

@@ -91,4 +91,7 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 
 	@Query("SELECT v FROM Viaje v WHERE EXTRACT(YEAR FROM v.fecha_partida) = :anio")
 	List<Viaje> obtenerViajesPorAnio(@Param("anio") int anio);
+
+	@Query("select v.omnibus from Viaje v group by omnibus")
+	List<Omnibus> obtenerOmnibusAsignados();
 }
