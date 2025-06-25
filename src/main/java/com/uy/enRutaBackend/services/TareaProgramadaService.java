@@ -2,6 +2,7 @@ package com.uy.enRutaBackend.services;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -154,7 +155,7 @@ public class TareaProgramadaService implements ITareaProgramadaService {
     @Scheduled(fixedRate = 60000) // Cada minuto
     @Transactional
     public void cerrarVentasDeViajesProximos() {
-        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime ahora = LocalDateTime.now(ZoneId.of("America/Montevideo"));
         LocalDateTime enMediaHora = ahora.plusMinutes(30);
 
         List<Pasaje> pasajes = pasajeRepository.findPasajesDeViajesCercanos(
