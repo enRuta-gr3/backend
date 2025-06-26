@@ -173,6 +173,7 @@ public class ServiceAsiento implements IServiceAsiento {
 				aCambiar.setIdBloqueo(asiento.getIdBloqueo());
 				aCambiar.setFechaBloqueo(new Date());
 			}
+			aCambiar.setFechaActualizacion(new Date());
 			asientoViajeRepository.save(aCambiar);
 		}		
 	}
@@ -208,6 +209,7 @@ public class ServiceAsiento implements IServiceAsiento {
 				asientoBloqueado.setEstado(EstadoAsiento.LIBRE);
 				asientoBloqueado.setFechaBloqueo(null);
 				asientoBloqueado.setIdBloqueo(null);
+				asientoBloqueado.setFechaActualizacion(new Date());
 				asientoViajeRepository.save(asientoBloqueado);
 			}
 			System.out.println("Se desbloqueo el asiento con idAsientoViaje: " + asientoBloqueado.getId_disAsiento());
@@ -252,16 +254,19 @@ public class ServiceAsiento implements IServiceAsiento {
 			bloqueado.setFechaBloqueo(null);
 			bloqueado.setIdBloqueo(null);
 		}
+		bloqueado.setFechaActualizacion(new Date());
 		asientoViajeRepository.save(bloqueado);
 	}
 
 	@Override
 	public void marcarReasignado(DisAsiento_Viaje asiento) {
-		List<DtDisAsiento> aLibre = new ArrayList<DtDisAsiento>();
-		DtDisAsiento libreDt = toDt(asiento);
-		aLibre.add(libreDt);
-		cambiarEstadoAsientos(aLibre, EstadoAsiento.REASIGNADO);
-	}
-	
+		if(asiento.getEstado().equals(EstadoAsiento.BLOQUEADO) && asiento.getIdBloqueo() != null) {
+			asiento.setIdBloqueo(null);
+		}
+		asiento.setEstado(EstadoAsiento.REASIGNADO);
+		asiento.setFechaActualizacion(new Date());
+		
+		asientoViajeRepository.save(asiento);
+	}	
 	
 }
