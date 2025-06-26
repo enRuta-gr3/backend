@@ -7,11 +7,14 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.uy.enRutaBackend.datatypes.ClaveAgrupacionLocalidad;
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
@@ -81,7 +84,7 @@ public class ServiceViaje implements IServiceViaje {
 				Viaje creado = vRepository.save(aCrear);
 				if (creado != null) {
 					DtViaje creadoDt = entityToDt(creado);
-					cargarTablaControlDisponibilidad(creado);
+					cargarTablaControlDisponibilidad(creado, EstadoAsiento.LIBRE);
 					System.out.println("Viaje registrado y persistido correctamente.");
 					return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
 				} else {
@@ -121,19 +124,22 @@ public class ServiceViaje implements IServiceViaje {
 		
 	}
 
-	private void cargarTablaControlDisponibilidad(Viaje viaje) {
+	private List<DisAsiento_Viaje> cargarTablaControlDisponibilidad(Viaje viaje, EstadoAsiento estado) {
 		List<DisAsiento_Viaje> asientosDisponibles = new ArrayList<DisAsiento_Viaje>();
 		Omnibus omnibus = (omnibusRepository.findById(viaje.getOmnibus().getId_omnibus())).get();
 		for(Asiento asiento : asientoRepository.findByOmnibus(omnibus)) {
 			DisAsiento_Viaje disponibilidad = new DisAsiento_Viaje();
 			disponibilidad.setAsiento(asiento);
 			disponibilidad.setViaje(viaje);
-			disponibilidad.setEstado(EstadoAsiento.LIBRE);
+			disponibilidad.setEstado(estado); //estado que reciba
+			disponibilidad.setFechaActualizacion(new java.util.Date());
 			asientosDisponibles.add(disponibilidad);
+			System.out.println(disponibilidad.toString());
 			disAsientosRepository.save(disponibilidad);
 		}
 		viaje.setDisponibilidad(asientosDisponibles);
 		vRepository.save(viaje);
+		return asientosDisponibles;
 	}
 
 
@@ -259,24 +265,46 @@ public class ServiceViaje implements IServiceViaje {
 		return localidad;
 	}
 	
+	@Transactional
 	@Override
 	public ResultadoOperacion<?> reasignarOmnibus(int idViaje, int idOmnibus) {
-		Viaje aReasignar = vRepository.findById(idViaje).get();
-		Omnibus anterior = aReasignar.getOmnibus();
-		//Reasigno nuevo omnibus
-		Viaje reasignado = reasignar(aReasignar, idOmnibus);
-		//Creo los asientos para el viaje
-		cargarTablaControlDisponibilidad(reasignado);
-		//busco los asientos ocupados y asigno los nuevos
-		List<DisAsiento_Viaje> vendidos = tienePasajesVendidos(reasignado, anterior);
-		if(!vendidos.isEmpty()) {
-			asignarNuevosAsientos(vendidos, reasignado);
+		try {			
+			Viaje aReasignar = vRepository.findById(idViaje).get();
+			Omnibus anterior = aReasignar.getOmnibus();
+			List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
+			//Reasigno nuevo omnibus
+			Viaje reasignado = reasignar(aReasignar, idOmnibus);
+			//Creo los asientos para el viaje
+			List<DisAsiento_Viaje> asientosDisponibles = cargarTablaControlDisponibilidad(reasignado, EstadoAsiento.PENDIENTE);
+			
+			List<Asiento> asientosOmnibusNuevo = asientoRepository.findByOmnibus(reasignado.getOmnibus());
+			
+			//busco asientos libres
+			List<DisAsiento_Viaje> libres = asientosLibres(reasignado, asientosOmnibusAnterior, asientosDisponibles);
+			if(!libres.isEmpty()) {
+				reasignarAsientosLibres(libres, reasignado, asientosOmnibusNuevo);
+			}
+			
+			//busco asientos bloqueados
+			List<DisAsiento_Viaje> bloqueados = tieneAsientosBloqueados(reasignado, asientosOmnibusAnterior);
+			if(!bloqueados.isEmpty()) {
+				reasignarAsientosBloqueados(bloqueados, reasignado, asientosOmnibusNuevo);
+			}
+			
+			//busco los asientos ocupados y asigno los nuevos
+			List<DisAsiento_Viaje> vendidos = tienePasajesVendidos(reasignado, asientosOmnibusAnterior);
+			if(!vendidos.isEmpty()) {
+				reasignarAsientosVendidos(vendidos, reasignado, asientosOmnibusNuevo);
+			}
+			
+			return new ResultadoOperacion(true, OK_MESSAGE, "Reasignacion completada correctamente.");
+		} catch (Exception e) {
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+	        return new ResultadoOperacion<>(false, "Ocurrió un error durante la reasignacion", e.getMessage());
+
 		}
-		//deshabilito los asientos anteriores
-		deshabilitarAsientosAnteriores(reasignado, anterior);
-		
-		return new ResultadoOperacion(true, OK_MESSAGE, "Reasignacion completada correctamente.");
 	}
+
 
 	/**
 	 * @param idViaje
@@ -289,45 +317,138 @@ public class ServiceViaje implements IServiceViaje {
 		Viaje reasignado = vRepository.save(viaje);
 		return reasignado;
 	}
-	
-	private List<DisAsiento_Viaje> tienePasajesVendidos(Viaje reasignado, Omnibus anterior) {
-		List<DisAsiento_Viaje> asientosVendidos = new ArrayList<DisAsiento_Viaje>();
-		List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
+
+	private List<DisAsiento_Viaje> asientosLibres(Viaje reasignado, List<Asiento> asientosOmnibusAnterior, List<DisAsiento_Viaje> nuevosDisponibles) {
+		List<DisAsiento_Viaje> asientosLibres = new ArrayList<DisAsiento_Viaje>();
+		
+		List<Asiento> asientosNuevos = nuevosDisponibles.stream()
+			    .map(DisAsiento_Viaje::getAsiento)
+			    .collect(Collectors.toList());
+
+		//Me fijo si hay numeros de asiento que no esten en el omnibus anterior (omnibus nuevo mayor capacidad)
+		Set<Integer> numerosAsientosAnterior = asientosOmnibusAnterior.stream()
+			    .map(Asiento::getNumeroAsiento)
+			    .collect(Collectors.toSet());
+
+			List<Asiento> nuevosDisponiblesNoEnAnterior = asientosNuevos.stream()
+			    .filter(asiento -> !numerosAsientosAnterior.contains(asiento.getNumeroAsiento()))
+			    .collect(Collectors.toList());
+		//Si hay mas asientos, los agrego a la lista de asientos libres.
+		if(nuevosDisponiblesNoEnAnterior.size() > 0) {
+			asientosLibres = nuevosDisponibles.stream()
+					.filter(disponible -> nuevosDisponiblesNoEnAnterior.contains(disponible.getAsiento()))
+					.collect(Collectors.toList());
+		}
+		
+		//recorro los asientos del omnibus anterior en estado libre y los guardo en la lista.
 		for(Asiento asiento : asientosOmnibusAnterior) {
-			DisAsiento_Viaje ocupado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
-			if(ocupado.getEstado().equals(EstadoAsiento.OCUPADO)){
+			DisAsiento_Viaje libre = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(asiento, reasignado, EstadoAsiento.LIBRE);
+			if(libre != null){
+				asientosLibres.add(libre);
+			}
+		}
+		return asientosLibres;
+	}
+
+	private void reasignarAsientosLibres(List<DisAsiento_Viaje> libres, Viaje reasignado,
+			List<Asiento> asientosOmnibusNuevo) {
+		try {
+			for (DisAsiento_Viaje asientoLibre : libres) {
+				int nroAsientoLibre = asientoLibre.getAsiento().getNumeroAsiento();
+				serviceAsiento.marcarReasignado(asientoLibre); // reasigno el asiento anterior
+
+				for (Asiento nuevoAsiento : asientosOmnibusNuevo) {
+					if (nuevoAsiento.getNumeroAsiento() == nroAsientoLibre) {
+						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository
+								.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE); // fecha
+																													// reciente
+						asientoReasignar.setEstado(EstadoAsiento.LIBRE);
+						asientoReasignar.setFechaActualizacion(new java.util.Date());
+						disAsientosRepository.save(asientoReasignar);
+					}
+				}
+			}
+		} catch (Exception e) {
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			throw e;
+		}
+	}
+	
+	private List<DisAsiento_Viaje> tieneAsientosBloqueados(Viaje reasignado, List<Asiento> asientosOmnibusAnterior) {
+		List<DisAsiento_Viaje> asientosBloqueados = new ArrayList<DisAsiento_Viaje>();		
+		for(Asiento asiento : asientosOmnibusAnterior) {
+			DisAsiento_Viaje bloqueado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(asiento, reasignado, EstadoAsiento.BLOQUEADO);
+			if(bloqueado != null){
+				asientosBloqueados.add(bloqueado);
+			}
+		}
+		return asientosBloqueados;	
+	}
+	
+	private void reasignarAsientosBloqueados(List<DisAsiento_Viaje> bloqueados, Viaje reasignado, List<Asiento> asientosOmnibusNuevo) {
+		try {	
+			
+			for(DisAsiento_Viaje asientoBloqueado : bloqueados) {
+				int nroAsientoBloqueado = asientoBloqueado.getAsiento().getNumeroAsiento();
+				String idBloqueo = asientoBloqueado.getIdBloqueo();
+				java.util.Date fechaBloqueo = asientoBloqueado.getFechaBloqueo();
+				
+				serviceAsiento.marcarReasignado(asientoBloqueado); //reasigno el asiento anterior
+				
+				for(Asiento nuevoAsiento : asientosOmnibusNuevo) {
+					if(nuevoAsiento.getNumeroAsiento() == nroAsientoBloqueado) {				
+						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE); //fecha reciente
+						asientoReasignar.setIdBloqueo(idBloqueo);
+						asientoReasignar.setFechaBloqueo(fechaBloqueo);
+						asientoReasignar.setEstado(EstadoAsiento.BLOQUEADO);
+						asientoReasignar.setFechaActualizacion(new java.util.Date());
+						disAsientosRepository.save(asientoReasignar);
+					}
+				}
+			}			
+		} catch (Exception e) {
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			throw e;
+		}
+	}
+	
+	private List<DisAsiento_Viaje> tienePasajesVendidos(Viaje reasignado, List<Asiento> asientosOmnibusAnterior) {
+		List<DisAsiento_Viaje> asientosVendidos = new ArrayList<DisAsiento_Viaje>();		
+		for(Asiento asiento : asientosOmnibusAnterior) {
+			DisAsiento_Viaje ocupado = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(asiento, reasignado, EstadoAsiento.OCUPADO);
+			if(ocupado != null){
 				asientosVendidos.add(ocupado);
 			}
 		}
 		return asientosVendidos;
 	}
 	
-	private void asignarNuevosAsientos(List<DisAsiento_Viaje> vendidos, Viaje reasignado) {
-		List<Asiento> nuevos = asientoRepository.findByOmnibus(reasignado.getOmnibus());
-		
-		for(DisAsiento_Viaje asientoVendido : vendidos) {
-			int nroAsientoVendido = asientoVendido.getAsiento().getNumeroAsiento();
-			String idBloqueo = asientoVendido.getIdBloqueo();
-			for(Asiento nuevoAsiento : nuevos) {
-				if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {					
-					DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(nuevoAsiento, reasignado);
-					asientoReasignar.setIdBloqueo(idBloqueo);
-					asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
-					disAsientosRepository.save(asientoReasignar);
+	private void reasignarAsientosVendidos(List<DisAsiento_Viaje> vendidos, Viaje reasignado, List<Asiento> asientosOmnibusNuevo) {
+		try {
+			
+			for(DisAsiento_Viaje asientoVendido : vendidos) {
+				int nroAsientoVendido = asientoVendido.getAsiento().getNumeroAsiento();
+				String idBloqueo = asientoVendido.getIdBloqueo();
+				
+				serviceAsiento.marcarReasignado(asientoVendido); //reasigno el asiento anterior
+				
+				for(Asiento nuevoAsiento : asientosOmnibusNuevo) {
+					if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {				
+						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE);
+						asientoReasignar.setIdBloqueo(idBloqueo);
+						asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
+						asientoReasignar.setFechaActualizacion(new java.util.Date());
+						disAsientosRepository.save(asientoReasignar);
+					}
 				}
-			}
+			}			
+		} catch (Exception e) {
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			throw e;
 		}
-		
 	}
-
-	private void deshabilitarAsientosAnteriores(Viaje reasignado, Omnibus anterior) {
-		List<Asiento> asientosOmnibusAnterior = asientoRepository.findByOmnibus(anterior);
-		for(Asiento asiento : asientosOmnibusAnterior) {
-			DisAsiento_Viaje aReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViaje(asiento, reasignado);
-			serviceAsiento.marcarReasignado(aReasignar);
-		}			
-	}
-
+	
+	
 	@Override
 	public ResultadoOperacion<?> calcularCantidadViajesPorMesAlAnio(int anio) {
 		List<Viaje> viajesEnAnio = vRepository.obtenerViajesPorAnio(anio);

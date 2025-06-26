@@ -37,6 +37,9 @@ public class DisAsiento_Viaje {
 	
 	@Column(name = "fecha_bloqueo", nullable = true)
 	private Date fechaBloqueo;
+	
+	@Column(name = "fecha_actualizacion", nullable = true)
+	private Date fechaActualizacion;
 
 	public int getId_disAsiento() {
 		return id_disAsiento;
@@ -85,4 +88,21 @@ public class DisAsiento_Viaje {
 	public void setFechaBloqueo(Date fechaBloqueo) {
 		this.fechaBloqueo = fechaBloqueo;
 	}
+
+	public Date getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(Date fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
+	}
+
+	@Override
+	public String toString() {
+		return "DisAsiento_Viaje [id_disAsiento=" + id_disAsiento + ", asiento=" + asiento + ", viaje=" + viaje
+				+ ", estado=" + estado + ", idBloqueo=" + idBloqueo + ", fechaBloqueo=" + fechaBloqueo
+				+ ", fechaActualizacion=" + fechaActualizacion + "]";
+	}
+	
+	
 }
