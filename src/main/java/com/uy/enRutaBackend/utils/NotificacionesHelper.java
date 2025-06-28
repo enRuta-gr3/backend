@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Notificacion;
 import com.uy.enRutaBackend.entities.Usuario;
+import com.uy.enRutaBackend.icontrollers.IServicePushNotifications;
 import com.uy.enRutaBackend.persistence.BuzonNotificacionRepository;
 import com.uy.enRutaBackend.persistence.NotificacionRepository;
 import com.uy.enRutaBackend.persistence.UsuarioRepository;
@@ -24,6 +25,8 @@ public class NotificacionesHelper {
     private UsuarioRepository usuarioRepository;
 	@Autowired
 	private EmailService mailService;
+	@Autowired
+	private IServicePushNotifications pushService;
 	
 	public Buzon_notificacion obtenerBuzon(Usuario usuario) {
 		Buzon_notificacion buzon = usuario.getNotificaciones();
@@ -69,7 +72,7 @@ public class NotificacionesHelper {
 		}
 	}
 
-	public void enviarNotificacionPush(Usuario usuario) {
-		// TODO Auto-generated method stub		
+	public void enviarNotificacionPush(Usuario usuario, String titulo, String mensaje) {
+		pushService.enviarNotificacionPush(usuario, titulo, mensaje);
 	}
 }

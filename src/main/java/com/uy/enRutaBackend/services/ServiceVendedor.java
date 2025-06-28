@@ -168,7 +168,7 @@ public class ServiceVendedor implements IServiceVendedor {
 		
 		notificacionesHelper.enviarNotificacionEmail(venta_compra.getCliente(), AsuntoEmail.DEVOLUCION.getAsunto(), mensaje);
 		
-		notificacionesHelper.enviarNotificacionPush(venta_compra.getCliente());
+		notificacionesHelper.enviarNotificacionPush(venta_compra.getCliente(), AsuntoEmail.DEVOLUCION.getAsunto(), mensaje);
 	}
 
 }
