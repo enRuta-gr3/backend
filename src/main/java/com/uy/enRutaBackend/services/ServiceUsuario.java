@@ -831,4 +831,20 @@ public class ServiceUsuario implements IServiceUsuario {
 			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.OPERACION_INVALIDA);
 		}
 	}
+
+	@Override
+	public ResultadoOperacion<?> marcarNotificacionLeida(int idNotificacion) {
+		try {
+			Notificacion notificacion = notificacionRepository.findById(idNotificacion).get();
+			if(!notificacion.isLeido()) {
+				notificacion.setLeido(true);
+				notificacionRepository.save(notificacion);
+				return new ResultadoOperacion(true, "Notificacion marcada como leida correctamente.", crearDtNotificacion(notificacion));
+			} else {
+				return new ResultadoOperacion(true, "Notificacion ya fue leida.", crearDtNotificacion(notificacion));
+			}
+		} catch (Exception e) {
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
 }

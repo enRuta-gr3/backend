@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtUsuario;
@@ -155,6 +156,19 @@ public class UsuarioController {
 			return ResponseEntity.ok(res);
 		} else {
 			System.out.println("*PUSH TOKEN* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@PostMapping("/marcarNotificacionLeida")
+	@Operation(summary = "Permite marcar notificaciones como leidas")
+	public ResponseEntity<?> marcarNotificacionLeida(@RequestParam int idNotificacion) {
+		ResultadoOperacion<?> res = serviceUsuario.marcarNotificacionLeida(idNotificacion);
+		if (res.isSuccess()) {
+			System.out.println("*NOTIFICACIONES LEIDAS " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*NOTIFICACIONES LEIDAS* " + res.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}

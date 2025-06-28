@@ -28,4 +28,5 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> listarNotificaciones(DtUsuario usuario);
 	ResultadoOperacion<?> verificarDescuento(DtUsuario usuario);
 	ResultadoOperacion<?> guardarPushToken(DtUsuario usuario);
+	ResultadoOperacion<?> marcarNotificacionLeida(int idNotificacion);
 }
