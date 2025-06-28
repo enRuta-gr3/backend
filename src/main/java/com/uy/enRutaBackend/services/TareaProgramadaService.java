@@ -164,9 +164,6 @@ public class TareaProgramadaService implements ITareaProgramadaService {
         	    Timestamp.valueOf(enMediaHora)
         	);
         
-        System.out.println("Ahora: " + ahora.toString());
-        System.out.println("Media hora: " + enMediaHora.toString());
-        
 
         // Agrupar por viaje
         Map<Viaje, List<Pasaje>> agrupadosPorViaje = pasajes.stream()
