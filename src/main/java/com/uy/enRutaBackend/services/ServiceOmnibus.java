@@ -7,17 +7,22 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes;
+import com.uy.enRutaBackend.datatypes.CantidadesPorMes;
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtLocalidad;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
@@ -79,7 +84,11 @@ public class ServiceOmnibus implements IServiceOmnibus{
 
     @Autowired
     private ModelMapper modelMapper;
-
+    
+    @Value("${spring.jackson.time-zone}")
+    private ZoneId zona;
+    
+    
     public ResultadoOperacion<DtOmnibus> registrarOmnibus(DtOmnibus dtOmnibus) {
         try {
         	// Verificar si existe registrado el num de coche
@@ -142,6 +151,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
         omnibus.setNro_coche(dto.getNro_coche());
         omnibus.setActivo(dto.isActivo());
         omnibus.setFecha_fin(dto.getFecha_fin());
+        omnibus.setFechaCreacion(new Date());
         // Localidad se busca desde el repositorio
         return omnibus;
     }
@@ -480,6 +490,24 @@ public class ServiceOmnibus implements IServiceOmnibus{
 	public ResultadoOperacion<?> omnibusPorEstadoPorMes() {
 		try {
 			List<Historico_estado> estado = historicoEstadoRepository.findByActivo(false);
+			List<Omnibus> omnibus = (List<Omnibus>) omnibusRepository.findAll();
+			
+			YearMonth hoy = YearMonth.now();
+	        List<YearMonth> mesesDelAño = IntStream.rangeClosed(1, hoy.getMonthValue())
+	            .mapToObj(m -> YearMonth.of(hoy.getYear(), m))
+	            .collect(Collectors.toList());
+
+	        Map<YearMonth, Long> creadosAlMes = mesesDelAño.stream()
+	            .collect(Collectors.toMap(
+	                ym -> ym,
+	                ym -> omnibus.stream()
+	                    .filter(r -> !r.getFechaCreacion().toInstant().atZone(zona).toLocalDate().isAfter(ym.atEndOfMonth()))
+	                    .count(),
+	                (a, b) -> b,
+	                LinkedHashMap::new
+	            ));
+
+			
 			Map<YearMonth, Long> cambioPorMes = estado.stream()
 				    .collect(Collectors.groupingBy(
 				        e -> YearMonth.from(e.getFechaInicio()
@@ -489,12 +517,23 @@ public class ServiceOmnibus implements IServiceOmnibus{
 				        Collectors.counting()
 				    ));
 			
-			List<DtOmnibusPorEstadoPorMes> listadoPorMes = cambioPorMes.entrySet().stream()
-					.map(est -> completarDt(est.getKey(), est.getValue()))
+			Set<YearMonth> todosLosMeses = new TreeSet<>();
+			todosLosMeses.addAll(creadosAlMes.keySet());
+			todosLosMeses.addAll(cambioPorMes.keySet());
+			
+			List<CantidadesPorMes> cantPorMes = todosLosMeses.stream()
+				    .map(mes -> new CantidadesPorMes(
+				        mes,
+				        creadosAlMes.getOrDefault(mes, 0L),
+				        cambioPorMes.getOrDefault(mes, 0L)
+				    ))
+				    .collect(Collectors.toList());
+
+			
+			List<DtOmnibusPorEstadoPorMes> listadoPorMes = cantPorMes.stream()
+					.map(est -> completarDt(est.mes(), est.cantidadActivos(), est.cantidadInactivos()))
 					.collect(Collectors.toList());
-			
-			//falta agregar omnibus activos para resto del año
-			
+
 			if(listadoPorMes.size() > 0) {
 				return new ResultadoOperacion(true, "Estadistica obtenida correctamente", listadoPorMes);
 			} else {
@@ -505,7 +544,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		}
 	}
 
-	private DtOmnibusPorEstadoPorMes completarDt(YearMonth mesAnio, Long cantidad) {
+	private DtOmnibusPorEstadoPorMes completarDt(YearMonth mesAnio, Long cantidadActivos, Long cantidadInactivos) {
 		DtOmnibusPorEstadoPorMes estadistica = new DtOmnibusPorEstadoPorMes();
 		String[] separarAnioMes = mesAnio.toString().split("-");
 		String anio = separarAnioMes[0];
@@ -513,15 +552,14 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		
 		if(anio.equals(String.valueOf(anioActual))) {
 			
-			LocalDate limite = mesAnio.atDay(30);
-			Date fechaLimite = Date.from(limite.atStartOfDay(ZoneId.systemDefault()).toInstant());
-			
-			List<Omnibus> omnibus = (List<Omnibus>)omnibusRepository.findByFechaCreacionAnterior(fechaLimite);
+//			LocalDate limite = mesAnio.atDay(30);
+//			Date fechaLimite = Date.from(limite.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//			
+//			List<Omnibus> omnibus = (List<Omnibus>)omnibusRepository.findByFechaCreacionAnterior(fechaLimite);
 			estadistica.setAnio(anio);
 			estadistica.setMes(separarAnioMes[1]);
-			estadistica.setCantidadInactivos(String.valueOf(cantidad));
-			int cantidadActivos = omnibus.size() - cantidad.intValue();
-			estadistica.setCantidadActivos(String.valueOf(cantidadActivos));
+			estadistica.setCantidadInactivos(String.valueOf(cantidadInactivos));
+			estadistica.setCantidadActivos(String.valueOf(cantidadActivos-cantidadInactivos));
 		}
 		return estadistica;
 	}

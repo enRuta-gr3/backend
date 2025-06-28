@@ -94,7 +94,6 @@ public class VendedorController {
 	
 	@GetMapping("/estadoOmnibusPorMes")
 	@Operation(summary = "Devuelve comparativa de estados de los omnibus por mes, en el ultimo año")
-	@Hidden
 	public ResponseEntity<?> omnibusPorEstadoPorMes() {
 		ResultadoOperacion<?> res = serviceOmnibus.omnibusPorEstadoPorMes();
 		if (res != null && res.isSuccess()) {

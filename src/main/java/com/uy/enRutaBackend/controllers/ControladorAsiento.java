@@ -33,7 +33,7 @@ public class ControladorAsiento {
     	ResultadoOperacion<?> res = serviceAsiento.listarAsientosDeOmnibus(viaje);
     	if (res != null && res.isSuccess()) {
 			System.out.println("*ASIENTOS - listar por omnibus* " + res.getMessage());
-			System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
+//			System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else {
 			if (res.getErrorCode() == ErrorCode.LISTA_VACIA) {

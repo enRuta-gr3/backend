@@ -60,13 +60,13 @@ public class Omnibus {
 
     public Omnibus() {}
 
-    public Omnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, Localidad localidad_actual) {
+    public Omnibus(int capacidad, int nro_coche, boolean activo, Date fecha_fin, Localidad localidad_actual, Date fechaCreacion) {
         this.capacidad = capacidad;
         this.nroCoche = nro_coche;
         this.activo = activo;
         this.fecha_fin = fecha_fin;
         this.localidad_actual = localidad_actual;
-        this.fechaCreacion = new Date();
+        this.fechaCreacion = fechaCreacion;
     }
 
     public Omnibus(int i, int j, boolean b, Date valueOf, DtLocalidad loc1) {
@@ -144,4 +144,20 @@ public class Omnibus {
     public void setHistorico_estado(List<Historico_estado> historico_estado) {
         this.historico_estado = historico_estado;
     }
+
+	public int getNroCoche() {
+		return nroCoche;
+	}
+
+	public void setNroCoche(int nroCoche) {
+		this.nroCoche = nroCoche;
+	}
+
+	public Date getFechaCreacion() {
+		return fechaCreacion;
+	}
+
+	public void setFechaCreacion(Date fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
 }
