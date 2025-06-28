@@ -52,7 +52,7 @@ public class ControladorAsiento {
     	ResultadoOperacion<?> res = serviceAsiento.cambiarEstadoDisponibilidad(asientos);
     	if (res != null && res.isSuccess()) {
 			System.out.println("*ASIENTOS - bloquear/desbloquear* " + res.getMessage());
-			System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
+			//System.out.println("*ASIENTOS - listar por omnibus* " + res.getData());
 			return ResponseEntity.ok(res);
 		} else if(res.getErrorCode().equals("Algunos asientos están ocupados.")){
 			System.out.println("*ASIENTOS - bloquear/desbloquear* " + res.getMessage());

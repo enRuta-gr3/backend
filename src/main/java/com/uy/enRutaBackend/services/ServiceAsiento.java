@@ -58,10 +58,13 @@ public class ServiceAsiento implements IServiceAsiento {
 			Omnibus bus = obtenido.get().getOmnibus();
 			List<Asiento> asientos = asientoRepository.findByOmnibus(bus);
 			List<DtDisAsiento> asientosDisponibles = new ArrayList<DtDisAsiento>();
-
+			List<EstadoAsiento> estados = new ArrayList<EstadoAsiento>();
+			estados.add(EstadoAsiento.OCUPADO);
+			estados.add(EstadoAsiento.BLOQUEADO);
+			estados.add(EstadoAsiento.LIBRE);
 			for (Asiento asiento : asientos) {
 				DisAsiento_Viaje disponibilidad = (DisAsiento_Viaje) asientoViajeRepository
-						.findByAsientoAndViaje(asiento, obtenido.get());
+						.findByAsientoAndViajeAndEstadoIn(asiento, obtenido.get(), estados);
 				if (disponibilidad != null) {
 					DtDisAsiento disponibilidadDt = toDt(disponibilidad);
 					asientosDisponibles.add(disponibilidadDt);
@@ -76,7 +79,7 @@ public class ServiceAsiento implements IServiceAsiento {
 				return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
 			}
 		} catch (Exception e) {
-			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e.getLocalizedMessage());
+			return new ResultadoOperacion(false, e.getLocalizedMessage(), ErrorCode.REQUEST_INVALIDO);
 		}
 	}
     

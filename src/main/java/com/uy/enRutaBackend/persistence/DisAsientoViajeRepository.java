@@ -12,13 +12,13 @@ import com.uy.enRutaBackend.entities.Viaje;
 
 @Repository
 public interface DisAsientoViajeRepository extends CrudRepository<DisAsiento_Viaje, Integer>{
-	Object findByAsientoAndViaje(Asiento asiento, Viaje viaje);
+	DisAsiento_Viaje findByAsientoAndViajeAndEstadoIn(Asiento asiento, Viaje viaje, List<EstadoAsiento> estados);
 	int countByViajeAndEstado(Viaje viaje, EstadoAsiento libre);
 	List<DisAsiento_Viaje> findByViajeAndIdBloqueoAndEstado(Viaje viaje, String idBloqueo, EstadoAsiento libre);
 	List<DisAsiento_Viaje> findByViaje(Viaje viaje);
 	List<DisAsiento_Viaje> findByViajeAndEstadoIn(Viaje viaje, List<EstadoAsiento> estados);
 	List<DisAsiento_Viaje> findByEstado(EstadoAsiento estado);
 	List<DisAsiento_Viaje> findByEstadoAndIdBloqueo(EstadoAsiento estado, String idBloqueo);
-	DisAsiento_Viaje findByAsientoAndViajeAndEstado(Asiento asiento, Viaje reasignado, EstadoAsiento ocupado);
-
+	DisAsiento_Viaje findByAsientoAndViajeAndEstado(Asiento asiento, Viaje viaje, EstadoAsiento estado);
+	
 }

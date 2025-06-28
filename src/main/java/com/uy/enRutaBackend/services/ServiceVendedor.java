@@ -114,7 +114,9 @@ public class ServiceVendedor implements IServiceVendedor {
 	}
 
 	private void liberarAsiento(Pasaje pasaje) {
-		DisAsiento_Viaje disAsiento = (DisAsiento_Viaje) asientoViajeRepository.findByAsientoAndViaje(pasaje.getAsiento(), pasaje.getViaje());
+		List<EstadoAsiento> estados = new ArrayList<EstadoAsiento>();
+		estados.add(EstadoAsiento.OCUPADO);
+		DisAsiento_Viaje disAsiento = (DisAsiento_Viaje) asientoViajeRepository.findByAsientoAndViajeAndEstadoIn(pasaje.getAsiento(), pasaje.getViaje(), estados);
 		disAsiento.setEstado(EstadoAsiento.LIBRE);
 		disAsiento.setFechaBloqueo(null);
 		disAsiento.setIdBloqueo(null);
