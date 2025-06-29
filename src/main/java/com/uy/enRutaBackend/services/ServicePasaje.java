@@ -168,7 +168,8 @@ public class ServicePasaje implements IServicePasaje {
 		for(Venta_Compra compra : comprasUsuario) {
 			List<Pasaje> pasajes = pasajeRepository.findAllByVentaCompra(compra);
 			for(Pasaje pasaje : pasajes) {
-				historialPasajes.add(entityToDt(pasaje));
+				if(!pasaje.getEstadoPasaje().equals(EstadoPasaje.DEVUELTO))
+					historialPasajes.add(entityToDt(pasaje));
 			}
 		}
 		return historialPasajes;

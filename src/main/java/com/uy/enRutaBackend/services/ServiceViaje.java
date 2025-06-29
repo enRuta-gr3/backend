@@ -113,7 +113,9 @@ public class ServiceViaje implements IServiceViaje {
 		Time horaLlegada = Time.valueOf(viajeDt.getHora_llegada());
 		Time horaPartida = Time.valueOf(viajeDt.getHora_partida());
 		
-		if(viajeDt.getFecha_llegada().equals(viajeDt.getFecha_partida())  
+		if(fechaSalida.before(Date.valueOf(LocalDate.now())) || fechaLlegada.before(Date.valueOf(LocalDate.now()))) {
+			throw new Exception("Las fechas no pueden ser menores a la actual.");
+		} else if(viajeDt.getFecha_llegada().equals(viajeDt.getFecha_partida())  
 				&& viajeDt.getHora_llegada().equals(viajeDt.getHora_partida())) {
 			throw new Exception("La fecha de llegada no puede ser igual a la de salida.");
 		} else if(fechaSalida.after(fechaLlegada)) {
