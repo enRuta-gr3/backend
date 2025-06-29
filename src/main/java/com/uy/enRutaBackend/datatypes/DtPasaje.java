@@ -21,6 +21,8 @@ public class DtPasaje {
 	private String ciCliente;
 	
 	private String montoPago;
+	
+	private String valorPasaje;
 
 	public DtPasaje() {
 	}
@@ -87,5 +89,13 @@ public class DtPasaje {
 
 	public void setMontoPago(String montoPago) {
 		this.montoPago = montoPago;
+	}
+
+	public String getValorPasaje() {
+		return valorPasaje;
+	}
+
+	public void setValorPasaje(String valorPasaje) {
+		this.valorPasaje = valorPasaje;
 	}
 }

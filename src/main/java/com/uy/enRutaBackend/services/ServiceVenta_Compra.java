@@ -277,10 +277,20 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 			DtPasaje pasajeDt = servicePasaje.entityToDt(pasaje);
 			pasajeDt.setCiCliente(venta.getCliente().getCi());
 			pasajeDt.setMontoPago(String.valueOf(venta.getPago().getMonto()));
+			pasajeDt.setValorPasaje(calcularMontoPasajeConDescuento(venta, pasajesCreados));
 			pasajes.add(pasajeDt);
 		}
 		
 		return pasajes;
+	}
+
+	/**
+	 * @param venta
+	 * @param pasajesCreados
+	 * @return
+	 */
+	private String calcularMontoPasajeConDescuento(Venta_Compra venta, List<Pasaje> pasajesCreados) {
+		return String.valueOf(venta.getPago().getMonto()/pasajesCreados.size());
 	}
 
 	@Override
