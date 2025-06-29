@@ -134,7 +134,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	    		System.out.println(responseBody);
 	        	return "OK";
 	        } else {
-	            throw new RuntimeException("Error capturando pago");
+	            throw new RuntimeException("Ocurrio un error al confirmar el pago.");
 	        }
 	    }
 	}

@@ -106,7 +106,15 @@ public class ServicePasaje implements IServicePasaje {
 		pasajeDt.setViaje(crearDtViaje(pasaje.getViaje()));
 		pasajeDt.setAsiento(crearDtAsiento(pasaje.getAsiento()));
 		pasajeDt.setPrecio(pasaje.getPrecio());
+		pasajeDt.setVenta_compra(ventaCompraDt(pasaje.getVenta_compra()));
 		return pasajeDt;
+	}
+
+
+	private DtVenta_Compra ventaCompraDt(Venta_Compra venta_compra) {
+		DtVenta_Compra venta = new DtVenta_Compra();
+		venta.setId_venta(venta_compra.getId_venta());
+		return venta;
 	}
 
 

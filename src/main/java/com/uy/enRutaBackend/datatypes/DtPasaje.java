@@ -19,6 +19,8 @@ public class DtPasaje {
 	private UUID uuidAuth;
 
 	private String ciCliente;
+	
+	private String montoPago;
 
 	public DtPasaje() {
 	}
@@ -77,5 +79,13 @@ public class DtPasaje {
 
 	public void setCiCliente(String ciCliente) {
 		this.ciCliente = ciCliente;
+	}
+
+	public String getMontoPago() {
+		return montoPago;
+	}
+
+	public void setMontoPago(String montoPago) {
+		this.montoPago = montoPago;
 	}
 }

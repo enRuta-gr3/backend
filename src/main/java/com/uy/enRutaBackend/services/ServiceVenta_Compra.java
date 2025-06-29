@@ -137,7 +137,7 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
     	
     	Venta_Compra compra = new Venta_Compra();
     	
-    	Descuento desc = repositoryDescuento.findByTipo(tipoDescuento); 
+    	Descuento desc = repositoryDescuento.findByTipo(tipoDescuento.toUpperCase()); 
     	 	
     	compra.setVendedor(vendedor);
     	compra.setCliente(cliente);
@@ -276,6 +276,7 @@ public class ServiceVenta_Compra implements IServiceVenta_Compra {
 		for(Pasaje pasaje : pasajesCreados) {
 			DtPasaje pasajeDt = servicePasaje.entityToDt(pasaje);
 			pasajeDt.setCiCliente(venta.getCliente().getCi());
+			pasajeDt.setMontoPago(String.valueOf(venta.getPago().getMonto()));
 			pasajes.add(pasajeDt);
 		}
 		
