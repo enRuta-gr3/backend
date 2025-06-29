@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -94,4 +95,10 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 
 	@Query("select v.omnibus from Viaje v group by omnibus")
 	List<Omnibus> obtenerOmnibusAsignados();
+	
+	@Modifying
+	@Query("UPDATE Viaje v SET v.estado = :estado WHERE v.id_viaje = :id")
+	void actualizarEstadoViaje(@Param("id") int id, @Param("estado") EstadoViaje estado);
+
+
 }

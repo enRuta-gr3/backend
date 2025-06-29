@@ -40,6 +40,9 @@ public class Usuario {
     @Column(name = "apellidos")
     private String apellidos;
         
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DatosEliminados datosEliminados;
+        
     @Column(name = "email", unique = true)
     private String email;
     
@@ -175,6 +178,14 @@ public class Usuario {
         this.ultimo_inicio_sesion = ultimo_inicio_sesion;
     }
 
+    public DatosEliminados getDatosEliminados() {
+		return datosEliminados;
+	}
+
+	public void setDatosEliminados(DatosEliminados datosEliminados) {
+		this.datosEliminados = datosEliminados;
+	}
+
     public Date getFecha_creacion() {
         return fecha_creacion;
     }
@@ -183,5 +194,14 @@ public class Usuario {
         this.fecha_creacion = fecha_creacion;
     }
     
+	public Buzon_notificacion getBuzonNotificacion() {
+		return buzonNotificacion;
+	}
     
+	public void setBuzonNotificacion(Buzon_notificacion buzonNotificacion) {
+		this.buzonNotificacion = buzonNotificacion;
+	}
+
+
+		
 }

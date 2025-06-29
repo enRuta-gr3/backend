@@ -29,6 +29,7 @@ import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
 import com.uy.enRutaBackend.entities.Administrador;
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.DatosEliminados;
 import com.uy.enRutaBackend.entities.Notificacion;
 import com.uy.enRutaBackend.entities.PasswordResetToken;
 import com.uy.enRutaBackend.entities.Sesion;
@@ -577,7 +578,7 @@ public class ServiceUsuario implements IServiceUsuario {
 			return new ResultadoOperacion<>(false, "Sesión inválida o expirada", ErrorCode.TOKEN_INVALIDO);
 		}
 
-		Usuario usuarioSesion = sesion.getUsuario(); // usuario que tiene la sesión activa
+		Usuario usuarioSesion = sesion.getUsuario();
 
 		// Determinar qué identificador vino (email o ci)
 		String identificador = datos.getEmail() != null ? datos.getEmail() : datos.getCi();
@@ -587,14 +588,15 @@ public class ServiceUsuario implements IServiceUsuario {
 					ErrorCode.DATOS_INSUFICIENTES);
 		}
 
-		Usuario userAEliminar = identificador.contains("@") ? repository.findByEmail(identificador)
+		Usuario userAEliminar = identificador.contains("@")
+			? repository.findByEmail(identificador)
 				: repository.findByCi(identificador);
 
 		if (userAEliminar == null) {
 			return new ResultadoOperacion<>(false, "Usuario no encontrado", ErrorCode.SIN_RESULTADOS);
 		}
 
-		// Verificar si el usuario autenticado es el mismo que el que quiere eliminar
+		// Verificar si es su propia cuenta
 		if (!usuarioSesion.getUuidAuth().equals(userAEliminar.getUuidAuth())) {
 			return new ResultadoOperacion<>(false, "No tiene permisos para eliminar este usuario",
 					ErrorCode.NO_AUTORIZADO);
@@ -604,13 +606,27 @@ public class ServiceUsuario implements IServiceUsuario {
 			return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
 		}
 
+		// ✅ Guardar datos previos en DatosEliminados
+		DatosEliminados datosEliminados = new DatosEliminados();
+		datosEliminados.setCorreo(userAEliminar.getEmail());
+		datosEliminados.setCedula(userAEliminar.getCi());
+		datosEliminados.setUsuario(userAEliminar);
+
+		userAEliminar.setDatosEliminados(datosEliminados); // set con la relación bidireccional
+
 		try {
 			eliminarDeSupabase(userAEliminar);
 		} catch (Exception e) {
 			return new ResultadoOperacion<>(false, "Error al eliminar el usuario de Supabase", e.getMessage());
 		}
 
-		eliminarUsuario(userAEliminar);
+		// ✅ Marcar como eliminado
+		userAEliminar.setEliminado(true);
+		userAEliminar.setEmail(null);
+		userAEliminar.setCi(null);
+
+		repository.save(userAEliminar); 
+
 		return new ResultadoOperacion<>(true, "Usuario eliminado correctamente", null);
 	}
 
@@ -625,18 +641,6 @@ public class ServiceUsuario implements IServiceUsuario {
 				throw e;
 			}
 		}
-	}
-
-	/**
-	 * @param userAEliminar
-	 */
-	private void eliminarUsuario(Usuario userAEliminar) {
-		// Marcar como eliminado
-		userAEliminar.setEliminado(true);
-		userAEliminar.setEmail(null);
-		userAEliminar.setCi(null);
-
-		repository.save(userAEliminar);
 	}
 
 	@Override

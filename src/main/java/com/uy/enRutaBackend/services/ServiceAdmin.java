@@ -18,6 +18,7 @@ import com.uy.enRutaBackend.datatypes.DtEstadisticaUsuarios;
 import com.uy.enRutaBackend.datatypes.DtPromedioClienteDTO;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.entities.Administrador;
+import com.uy.enRutaBackend.entities.DatosEliminados;
 import com.uy.enRutaBackend.entities.Sesion;
 import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.errors.ErrorCode;
@@ -84,7 +85,10 @@ public class ServiceAdmin  implements IServiceAdmin{
 	        return new ResultadoOperacion<>(false, "El usuario ya está eliminado", ErrorCode.USUARIO_YA_ELIMINADO);
 	    }
 
-	    // ✅ Si tenía cuenta en Supabase, borrarla
+	    if (usuarioSesion.getUuidAuth().equals(userAEliminar.getUuidAuth())) {
+	        return new ResultadoOperacion<>(false, "No puede eliminar su propia cuenta", ErrorCode.NO_AUTORIZADO);
+	    }
+
 	    if (userAEliminar.getEmail() != null) {
 	        try {
 	            iserviceSupabase.eliminarUsuarioPorEmailSQL(userAEliminar.getEmail());
@@ -93,12 +97,21 @@ public class ServiceAdmin  implements IServiceAdmin{
 	        }
 	    }
 
+	    // ✅ Guardar datos en la tabla DatosEliminados
+	    DatosEliminados datosEliminados = new DatosEliminados();
+	    datosEliminados.setCorreo(userAEliminar.getEmail());
+	    datosEliminados.setCedula(userAEliminar.getCi());
+	    datosEliminados.setUsuario(userAEliminar); 
+
+	    userAEliminar.setDatosEliminados(datosEliminados); // Esto los vincula (si el cascade está bien configurado)
+
 	    // ✅ Marcar como eliminado en la base
 	    userAEliminar.setEliminado(true);
 	    userAEliminar.setEmail(null);
 	    userAEliminar.setCi(null);
 
-	    repository.save(userAEliminar);
+	    repository.save(userAEliminar); // Gracias al cascade, también guarda DatosEliminados
+
 	    return new ResultadoOperacion<>(true, "Usuario eliminado correctamente por administrador", null);
 	}
 
@@ -136,8 +149,4 @@ public class ServiceAdmin  implements IServiceAdmin{
 	        ))
 	        .toList();
 	}
-
-
-
-
 }
