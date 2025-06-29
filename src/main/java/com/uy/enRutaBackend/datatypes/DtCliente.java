@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DtCliente extends DtUsuario {
 	
-	
-    private List<DtVenta_Compra> compras;
+	private List<DtVenta_Compra> compras;
 	
     private List<DtPasaje> pasajesComprados;
 	
@@ -18,6 +17,8 @@ public class DtCliente extends DtUsuario {
     
     private boolean estado_descuento;
 	
+    private String tipoDescuentoCliente;
+    
 	public DtCliente() {
 		super();
 	}
@@ -60,6 +61,21 @@ public class DtCliente extends DtUsuario {
 
 	public void setEstado_descuento(boolean estado_descuento) {
 		this.estado_descuento = estado_descuento;
+	}
+
+	public String getTipoDescuentoCliente() {
+		return tipoDescuentoCliente;
+	}
+
+	public void setTipoDescuentoCliente() {
+		String tipoDescuentoCliente;
+		if(isEsEstudiante() && isEstado_descuento())
+			tipoDescuentoCliente = "Estudiante";
+		else if(isEsJubilado() && isEstado_descuento())
+			tipoDescuentoCliente = "Jubilado";
+		else
+			tipoDescuentoCliente = null;
+		this.tipoDescuentoCliente = tipoDescuentoCliente;
 	}
     
     

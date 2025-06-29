@@ -45,6 +45,8 @@ public class DtUsuario {
     
     private String pushToken;
     
+    private String tipoDescuentoCliente;
+    
     
     public DtUsuario() {}
     
@@ -225,5 +227,13 @@ public class DtUsuario {
 
 	public void setPushToken(String pushToken) {
 		this.pushToken = pushToken;
+	}
+
+	public String getTipoDescuentoCliente() {
+		return tipoDescuentoCliente;
+	}
+
+	public void setTipoDescuentoCliente(String tipoDescuentoCliente) {
+		this.tipoDescuentoCliente = tipoDescuentoCliente;
 	}
 }

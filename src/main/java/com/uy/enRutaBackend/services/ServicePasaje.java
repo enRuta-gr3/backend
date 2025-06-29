@@ -58,7 +58,6 @@ public class ServicePasaje implements IServicePasaje {
         this.pasajeRepository = pasajeRepository;
     }
     
-    
     public List<Pasaje> CrearPasajes(List<DtOmnibus> omnibusDTOs, Venta_Compra venta_compra) {
         List<Pasaje> listaPasajes = new ArrayList<>();
 
@@ -85,7 +84,6 @@ public class ServicePasaje implements IServicePasaje {
         return listaPasajes;
     }
 
-
     @Override
     public void RegistrarPasajes(List<Pasaje> pasajes) {
         for (Pasaje pasaje : pasajes) {
@@ -97,7 +95,6 @@ public class ServicePasaje implements IServicePasaje {
             }
         }
     }
-
 
 	@Override
 	public DtPasaje entityToDt(Pasaje pasaje) {
@@ -114,9 +111,21 @@ public class ServicePasaje implements IServicePasaje {
 	private DtVenta_Compra ventaCompraDt(Venta_Compra venta_compra) {
 		DtVenta_Compra venta = new DtVenta_Compra();
 		venta.setId_venta(venta_compra.getId_venta());
+		venta.setCliente(crearDtCliente(venta_compra.getCliente()));
 		return venta;
 	}
 
+	private DtCliente crearDtCliente(Cliente cliente) {
+		DtCliente clienteDt = new DtCliente();
+		clienteDt.setNombres(cliente.getNombres());
+		clienteDt.setApellidos(cliente.getApellidos());
+		clienteDt.setCi(cliente.getCi());
+		clienteDt.setEsEstudiante(cliente.isEsEstudiante());
+		clienteDt.setEsJubilado(cliente.isEsJubilado());
+		clienteDt.setEstado_descuento(cliente.isEstado_descuento());
+		clienteDt.setTipoDescuentoCliente();
+		return clienteDt;
+	}
 
 	private DtAsiento crearDtAsiento(Asiento asiento) {
 		DtAsiento asientoDt = new DtAsiento();
@@ -124,7 +133,6 @@ public class ServicePasaje implements IServicePasaje {
 		
 		return asientoDt;
 	}
-
 
 	private DtViaje crearDtViaje(Viaje viaje) {
 		DtViaje viajeDt = new DtViaje();
@@ -180,6 +188,7 @@ public class ServicePasaje implements IServicePasaje {
 	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt) {
 		Viaje viaje = mapper.map(viajeDt, Viaje.class);
 		List<Pasaje> pasajes = pasajeRepository.findByViaje(viaje);
+		
 		List<DtPasaje> pasajesDt = toDtList(pasajes);
 		if(!pasajesDt.isEmpty()) {
 			return new ResultadoOperacion(true, "Listado de pasajes obtenido correctamente", pasajesDt);
@@ -226,9 +235,11 @@ public class ServicePasaje implements IServicePasaje {
 	private List<DtPasaje> toDtList(List<Pasaje> pasajes) {
 		List<DtPasaje> pasajesDt = new ArrayList<DtPasaje>();
 		for(Pasaje pasaje : pasajes) {
-			DtPasaje pasajeDt = new DtPasaje();
-			pasajeDt = entityToDt(pasaje);
-			pasajesDt.add(pasajeDt);
+			if(!pasaje.getEstadoPasaje().equals(EstadoPasaje.DEVUELTO)) {
+				DtPasaje pasajeDt = new DtPasaje();
+				pasajeDt = entityToDt(pasaje);
+				pasajesDt.add(pasajeDt);				
+			}
 		}
 		return pasajesDt;
 	}

@@ -102,7 +102,7 @@ public class ServiceAsiento implements IServiceAsiento {
     			return new ResultadoOperacion(false, "Algunos asientos están ocupados.", aMostrar);
     		}
     	} catch (Exception e) {
-			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e.getLocalizedMessage());
+			return new ResultadoOperacion(false, e.getLocalizedMessage(), ErrorCode.REQUEST_INVALIDO);
 		} 
     }
 

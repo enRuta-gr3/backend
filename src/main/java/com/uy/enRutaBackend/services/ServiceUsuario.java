@@ -38,7 +38,6 @@ import com.uy.enRutaBackend.entities.Vendedor;
 import com.uy.enRutaBackend.errors.ErrorCode;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
-import com.uy.enRutaBackend.exceptions.UsuarioNoExisteException;
 import com.uy.enRutaBackend.icontrollers.IServiceSesion;
 import com.uy.enRutaBackend.icontrollers.IServiceSupabase;
 import com.uy.enRutaBackend.icontrollers.IServiceUsuario;
@@ -488,9 +487,14 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	private DtUsuario entityToDtPerfil(Usuario usuario) {
-		return new DtUsuario(definirTipoUsuario(usuario), usuario.getUuidAuth(), usuario.getCi(), usuario.getNombres(),
+		DtUsuario usuDt = new DtUsuario(definirTipoUsuario(usuario), usuario.getUuidAuth(), usuario.getCi(), usuario.getNombres(),
 				usuario.getApellidos(), usuario.getEmail(), usuario.getFecha_nacimiento());
-
+		Cliente c = (Cliente) usuario;
+		if(c.isEsEstudiante() && c.isEstado_descuento())
+			usuDt.setTipoDescuentoCliente("Estudiante");
+		else if(c.isEsJubilado() && c.isEstado_descuento())
+			usuDt.setTipoDescuentoCliente("Jubilado");
+		return usuDt;
 	}
 
 	@Override
