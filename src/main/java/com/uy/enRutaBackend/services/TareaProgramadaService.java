@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.entities.Buzon_notificacion;
 import com.uy.enRutaBackend.entities.EstadoPasaje;
+import com.uy.enRutaBackend.entities.EstadoVenta;
 import com.uy.enRutaBackend.entities.EstadoViaje;
 import com.uy.enRutaBackend.entities.Historico_estado;
 import com.uy.enRutaBackend.entities.Omnibus;
@@ -177,8 +178,8 @@ public class TareaProgramadaService implements ITareaProgramadaService {
 			System.out.println("    Estado actual: " + viaje.getEstado());
 
 			List<Pasaje> pasajes = pasajeRepository
-					.findByViaje(viaje).stream().filter(p -> p.getEstadoPasaje() == EstadoPasaje.VIGENTE
-							&& p.getVenta_compra() != null && "COMPLETADA".equals(p.getVenta_compra().getEstado()))
+					.findByViaje(viaje).stream().filter(p -> p.getEstadoPasaje().equals(EstadoPasaje.VIGENTE)
+							&& p.getVenta_compra() != null && p.getVenta_compra().getEstado().equals(EstadoVenta.COMPLETADA))
 					.toList();
 
 			System.out.println("    Pasajes vigentes y completados encontrados: " + pasajes.size());
@@ -230,33 +231,31 @@ public class TareaProgramadaService implements ITareaProgramadaService {
 			// 🕓 Programar cambio de localidad al final del viaje
 			Omnibus omnibus = viaje.getOmnibus();
 			if (omnibus != null) {
-				LocalDate fecha = viaje.getFecha_partida().toLocalDate();
-				LocalTime hora = viaje.getHora_partida().toLocalTime();
+			    LocalDateTime fechaEjecucion = viaje.getFecha_llegada()
+			        .toLocalDate()
+			        .atTime(viaje.getHora_llegada().toLocalTime());
 
-				java.sql.Time horaLlegada = viaje.getHora_llegada();
-				LocalTime localHoraLlegada = horaLlegada.toLocalTime();
-				long minutos = localHoraLlegada.getHour() * 60 + localHoraLlegada.getMinute();
+			    Instant startInstant = fechaEjecucion
+			        .atZone(ZoneId.of("America/Montevideo"))
+			        .toInstant();
 
-				LocalDateTime fechaEjecucion = fecha.atTime(hora).plusMinutes(minutos);
-				Instant startInstant = fechaEjecucion.atZone(ZoneId.of("America/Montevideo")).toInstant();
+			    System.out.println("    Programando tarea para actualizar localidad de ómnibus.");
+			    System.out.println("    Fecha ejecución: " + fechaEjecucion + " (instant: " + startInstant + ")");
 
-				System.out.println("    Programando tarea para actualizar localidad de ómnibus.");
-				System.out.println("    Fecha ejecución: " + fechaEjecucion + " (instant: " + startInstant + ")");
+			    taskScheduler.schedule(() -> {
+			        Omnibus ombi = omnibusRepo.findById(omnibus.getId_omnibus()).orElse(null);
+			        Viaje vj = viajeRepository.findById(viaje.getId_viaje()).orElse(null);
 
-				taskScheduler.schedule(() -> {
-					Omnibus ombi = omnibusRepo.findById(omnibus.getId_omnibus()).orElse(null);
-					Viaje vj = viajeRepository.findById(viaje.getId_viaje()).orElse(null);
-
-					if (ombi != null && vj != null) {
-						ombi.setLocalidad_actual(vj.getLocalidadDestino());
-						omnibusRepo.save(ombi);
-						System.out.println("🚍 Localidad del ómnibus actualizada al destino del viaje finalizado.");
-					} else {
-						System.out.println("    Omnibus o viaje no encontrados al ejecutar tarea programada.");
-					}
-				}, startInstant);
+			        if (ombi != null && vj != null) {
+			            ombi.setLocalidad_actual(vj.getLocalidadDestino());
+			            omnibusRepo.save(ombi);
+			            System.out.println("🚍 Localidad del ómnibus actualizada al destino del viaje finalizado.");
+			        } else {
+			            System.out.println("    Omnibus o viaje no encontrados al ejecutar tarea programada.");
+			        }
+			    }, startInstant);
 			} else {
-				System.out.println("    Viaje sin ómnibus asignado, no se programa actualización de localidad.");
+			    System.out.println("    Viaje sin ómnibus asignado, no se programa actualización de localidad.");
 			}
 		}
 	}
