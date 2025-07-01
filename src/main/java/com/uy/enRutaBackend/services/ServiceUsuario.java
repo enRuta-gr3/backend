@@ -161,14 +161,14 @@ public class ServiceUsuario implements IServiceUsuario {
 			if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && !emailVacio) {
 				usuRegistro = registrarUsuarioSupabase(usuario);
 				
-				agregarContraseña(usuRegistro);
-				Usuario usuarioset = dtToEntity(usuRegistro);
-				
-			    Buzon_notificacion buzon = new Buzon_notificacion();
-			    buzon.setUsuario(usuarioset);
-			    usuarioset.setNotificaciones(buzon);
-			    agregarContraseña(usuario);
-			    repository.save(usuarioset);
+//				agregarContraseña(usuRegistro);
+//				Usuario usuarioset = dtToEntity(usuRegistro);
+//				
+//			    Buzon_notificacion buzon = new Buzon_notificacion();
+//			    buzon.setUsuario(usuarioset);
+//			    usuarioset.setNotificaciones(buzon);
+//			    agregarContraseña(usuario);
+//			    repository.save(usuarioset);
 			    
 			} else {
 				usuRegistro = registrarUsuarioSinVerificacion(usuario);
@@ -246,10 +246,6 @@ public class ServiceUsuario implements IServiceUsuario {
 			JSONObject user = respuestaJson.getJSONObject("user_metadata");
 			usuario.setUuidAuth(UUID.fromString(user.getString("sub")));
 			return usuario;
-//			JSONObject user = respuestaJson.getJSONObject("user");
-//			Usuario registrado = repository.findById(UUID.fromString(user.getString("id"))).orElse(null);
-//			Usuario registrado = repository.findById(UUID.fromString(user.getString("sub"))).orElse(null);
-//			return entityToDtAMostrar(registrado);
 
 		} else if (respuestaJson.has("msg") && respuestaJson.getString("msg").contains("already registered")) {
 			UUID idExistente = buscarUUIDPorEmail(usuario.getEmail());
@@ -351,40 +347,17 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	public ResultadoOperacion<?> iniciarSesion(DtUsuario request) {
-		/*JSONObject json = new JSONObject();
-
-		if (request.getEmail().contains("@") && repository.findByEmail(request.getEmail()) instanceof Cliente) {
-			try {
-				HttpResponse<String> response = iniciarSesionSupabase(request.getEmail(), request.getContraseña());
-				if (response.statusCode() == 200) {
-					json = new JSONObject(response.body());
-					Usuario solicitante = repository.findByEmail(request.getEmail());
-					String tok = json.getString("access_token");
-					DtSesion sesion = sesionService.crearSesion(entityToDtRegistroLogin(solicitante), tok);
-
-					log.info(sesion.toString());
-					return new ResultadoOperacion(true, "Usuario logueado correctamente", sesion);
-				} else {
-					log.error("Error en login: " + json);
-					return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), json);
-				}
-			} catch (Exception e) {
-				log.error("Error en login: " + e.getMessage());
-				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), e);
-			}
-		} else {*/
-			DtSesion sesion;
-			try {
-				sesion = authenticate(request);
-				if (sesion.getAccess_token() == null || sesion.getAccess_token().isEmpty())
-					return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(),
-							"Usuario o contraseña incorrectos");
-				else
-					return new ResultadoOperacion(true, "Usuario logueado correctamente", sesion);
-			} catch (Exception e) {
-				return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(), e.getMessage());
-			}
-		//}
+		DtSesion sesion;
+		try {
+			sesion = authenticate(request);
+			if (sesion.getAccess_token() == null || sesion.getAccess_token().isEmpty())
+				return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(),
+						"Usuario o contraseña incorrectos");
+			else
+				return new ResultadoOperacion(true, "Usuario logueado correctamente", sesion);
+		} catch (Exception e) {
+			return new ResultadoOperacion(false, ErrorCode.CREDENCIALES_INVALIDAS.getMsg(), e.getMessage());
+		}
 	}
 
 	private DtSesion authenticate(DtUsuario request) throws Exception {
@@ -394,10 +367,6 @@ public class ServiceUsuario implements IServiceUsuario {
 			solicitante = repository.findByEmail(request.getEmail());
 		else
 			solicitante = repository.findByCi(request.getEmail());
-
-//		if(solicitante.isEliminado()) {
-//			throw new UsuarioNoExisteException("El usuario ha sido eliminado.");
-//		}
 		
 		if (solicitante != null && passwordEncoder.matches(request.getContraseña(), solicitante.getContraseña())) {
 			String tok = jwtManager.generateToken(solicitante);
