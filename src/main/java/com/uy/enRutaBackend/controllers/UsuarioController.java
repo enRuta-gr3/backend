@@ -1,6 +1,7 @@
 package com.uy.enRutaBackend.controllers;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -165,10 +166,23 @@ public class UsuarioController {
 	public ResponseEntity<?> marcarNotificacionLeida(@RequestParam int idNotificacion) {
 		ResultadoOperacion<?> res = serviceUsuario.marcarNotificacionLeida(idNotificacion);
 		if (res.isSuccess()) {
-			System.out.println("*NOTIFICACIONES LEIDAS " + res.getMessage());
+			System.out.println("*NOTIFICACIONES LEIDAS* " + res.getMessage());
 			return ResponseEntity.ok(res);
 		} else {
 			System.out.println("*NOTIFICACIONES LEIDAS* " + res.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+		}
+	}
+	
+	@PostMapping("/cerrarSesion")
+	@Operation(summary = "Permite cerrar la sesion del usuario")
+	public ResponseEntity<?> cerrarSesion(@RequestParam UUID uuidAuth, @RequestParam String token) {
+		ResultadoOperacion<?> res = serviceUsuario.cerrarSesion(uuidAuth, token);
+		if (res.isSuccess()) {
+			System.out.println("*CERRAR SESION* " + res.getMessage());
+			return ResponseEntity.ok(res);
+		} else {
+			System.out.println("*CERRAR SESION* " + res.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
 		}
 	}

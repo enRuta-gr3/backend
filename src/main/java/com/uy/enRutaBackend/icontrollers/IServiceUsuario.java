@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtUsuario;
 import com.uy.enRutaBackend.datatypes.DtUsuarioCargaMasiva;
-import com.uy.enRutaBackend.entities.Usuario;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 import com.uy.enRutaBackend.exceptions.UsuarioExistenteException;
 
@@ -29,4 +28,5 @@ public interface IServiceUsuario {
 	ResultadoOperacion<?> verificarDescuento(DtUsuario usuario);
 	ResultadoOperacion<?> guardarPushToken(DtUsuario usuario);
 	ResultadoOperacion<?> marcarNotificacionLeida(int idNotificacion);
+	ResultadoOperacion<?> cerrarSesion(UUID uuidAuth, String token);
 }

@@ -81,4 +81,15 @@ public class ServiceSesion implements IServiceSesion{
 		return existe;
 	}
 
+	public String cerrar(Usuario usu, String token) {
+		Sesion sesion = sesionRepository.findByUsuarioAndAccessToken(usu, token);
+		if(sesion != null && sesion.isActivo()) {
+			sesion.setActivo(false);
+			sesionRepository.save(sesion);
+			return "Sesión cerrada correctamente";
+		} else {
+			return "La sesión ya fue cerrada";
+		}
+	}
+
 }

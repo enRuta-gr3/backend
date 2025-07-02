@@ -60,6 +60,8 @@ import lombok.Setter;
 @Service
 public class ServiceUsuario implements IServiceUsuario {
 
+    private final ServiceSesion serviceSesion;
+
     private final UtilsClass utilsClass;
 
 	private final ClienteRepository clienteRepository;
@@ -89,7 +91,7 @@ public class ServiceUsuario implements IServiceUsuario {
 			PasswordResetTokenRepository resetTokenRepository, EmailService emailService,
 			IServiceSupabase iserviceSupabase, SesionRepository sesionRepository, 
 			UtilsClass utilsClass, BuzonNotificacionRepository buzonRepository,
-			NotificacionRepository notificacionRepository) {
+			NotificacionRepository notificacionRepository, ServiceSesion serviceSesion) {
 		this.repository = repository;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
@@ -105,6 +107,7 @@ public class ServiceUsuario implements IServiceUsuario {
 		this.utilsClass = utilsClass;
 		this.buzonRepository = buzonRepository;
 		this.notificacionRepository = notificacionRepository;
+		this.serviceSesion = serviceSesion;
 	}
 
 	public void correrValidaciones(DtUsuario usuario) throws UsuarioExistenteException {
@@ -820,6 +823,17 @@ public class ServiceUsuario implements IServiceUsuario {
 			} else {
 				return new ResultadoOperacion(true, "Notificacion ya fue leida.", crearDtNotificacion(notificacion));
 			}
+		} catch (Exception e) {
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
+		}
+	}
+
+	@Override
+	public ResultadoOperacion<?> cerrarSesion(UUID uuidAuth, String token) {
+		try {
+			Usuario usu = repository.findById(uuidAuth).get();
+			String resultado = serviceSesion.cerrar(usu, token);
+			return new ResultadoOperacion(true, "Sesión cerrada correctamente", resultado);
 		} catch (Exception e) {
 			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
 		}

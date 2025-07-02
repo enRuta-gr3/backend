@@ -9,5 +9,6 @@ public interface SesionRepository extends CrudRepository<Sesion, Integer>{
 
 	Sesion findByAccessToken(String token);
 	Sesion findByUsuario(Usuario usuario);
+	Sesion findByUsuarioAndAccessToken(Usuario usu, String token);
 
 }
