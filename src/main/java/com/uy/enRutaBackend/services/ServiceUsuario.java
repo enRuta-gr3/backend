@@ -163,15 +163,6 @@ public class ServiceUsuario implements IServiceUsuario {
 
 			if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE") && !emailVacio) {
 				usuRegistro = registrarUsuarioSupabase(usuario);
-				
-//				agregarContraseña(usuRegistro);
-//				Usuario usuarioset = dtToEntity(usuRegistro);
-//				
-//			    Buzon_notificacion buzon = new Buzon_notificacion();
-//			    buzon.setUsuario(usuarioset);
-//			    usuarioset.setNotificaciones(buzon);
-//			    agregarContraseña(usuario);
-//			    repository.save(usuarioset);
 			    
 			} else {
 				usuRegistro = registrarUsuarioSinVerificacion(usuario);
@@ -496,6 +487,10 @@ public class ServiceUsuario implements IServiceUsuario {
 			return new ResultadoOperacion<>(false, "Credenciales incorrectas", ErrorCode.CREDENCIALES_INVALIDAS);
 		}
 
+		if(datos.getContraseña_nueva().length() < 6) {
+			return new ResultadoOperacion<>(false, "La contraseña debe tener al menos 6 caracteres.", ErrorCode.CREDENCIALES_INVALIDAS);
+		}
+			
 		String nuevaPasswordHash = passwordEncoder.encode(datos.getContraseña_nueva());
 		user.setContraseña(nuevaPasswordHash);
 		repository.save(user);
