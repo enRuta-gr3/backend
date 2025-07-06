@@ -276,8 +276,10 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	private void verificarDescuentoRegistro(DtUsuario usuario) {
-		if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE"))
-			usuario.setEstado_descuento(true);
+		if (usuario.getTipo_usuario().equalsIgnoreCase("CLIENTE")) {
+			if(usuario.isEsEstudiante() || usuario.isEsJubilado())
+				usuario.setEstado_descuento(true);
+		}
 	}
 	
 	@Override

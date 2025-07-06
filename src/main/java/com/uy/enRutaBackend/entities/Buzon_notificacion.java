@@ -3,6 +3,7 @@ package com.uy.enRutaBackend.entities;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +23,7 @@ public class Buzon_notificacion {
     @Column(name = "id_buzon_notificacion")
     private int id_buzon_notificacion;
 
-    @OneToMany(mappedBy = "buzonNotificacion")
+    @OneToMany(mappedBy = "buzonNotificacion" , cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Notificacion> notificaciones;
 
     @OneToOne

@@ -12,9 +12,6 @@ public class Cliente extends Usuario {
 	@OneToMany(mappedBy = "id_venta")
     private List<Venta_Compra> compras;
 	
-	@OneToMany(mappedBy = "id_pasaje")
-    private List<Pasaje> pasajesComprados;
-	
     @Column(name = "es_estudiante")
     private boolean esEstudiante;
     
@@ -42,14 +39,6 @@ public class Cliente extends Usuario {
 
 	public void setCompras(List<Venta_Compra> compras) {
 		this.compras = compras;
-	}
-
-	public List<Pasaje> getPasajesComprados() {
-		return pasajesComprados;
-	}
-
-	public void setPasajesComprados(List<Pasaje> pasajesComprados) {
-		this.pasajesComprados = pasajesComprados;
 	}
 
 	public boolean isEsEstudiante() {
