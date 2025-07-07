@@ -74,8 +74,7 @@ public class ServiceViaje implements IServiceViaje {
 			validarInicioFin(viajeDt);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(),
-					ErrorCode.REQUEST_INVALIDO + e.getMessage());
+			return new ResultadoOperacion(false, e.getMessage(), ErrorCode.REQUEST_INVALIDO);
 		}
 		Viaje aCrear = dtToEntity(viajeDt);
 		if (!vRepository.mismoViaje(aCrear.getLocalidadOrigen().getId_localidad(), aCrear.getLocalidadDestino().getId_localidad(), aCrear.getFecha_partida(),
@@ -89,13 +88,11 @@ public class ServiceViaje implements IServiceViaje {
 					return new ResultadoOperacion(true, OK_MESSAGE, creadoDt);
 				} else {
 					System.out.println("Error al registrar viaje.");
-					return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(),
-							ErrorCode.ERROR_DE_CREACION);
+					return new ResultadoOperacion(false, ErrorCode.ERROR_DE_CREACION.getMsg(), ErrorCode.ERROR_DE_CREACION);
 				}
 			} catch (Exception e) {
 				System.out.println("Error al registrar viaje.");
-				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(),
-						ErrorCode.REQUEST_INVALIDO + e.getMessage());
+				return new ResultadoOperacion(false, ErrorCode.REQUEST_INVALIDO.getMsg(), ErrorCode.REQUEST_INVALIDO);
 			}
 		} else {
 			return new ResultadoOperacion(false, "Ya existe el viaje", ErrorCode.YA_EXISTE);
