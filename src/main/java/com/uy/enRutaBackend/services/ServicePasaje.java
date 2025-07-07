@@ -66,7 +66,11 @@ public class ServicePasaje implements IServicePasaje {
         for (DtOmnibus dtoOmnibus : omnibusDTOs) {
             int idViaje = dtoOmnibus.getViajes().get(0).getId_viaje();
             Viaje viaje = viajeRepository.findById(idViaje).orElseThrow();
-            double monto = viaje.getPrecio_viaje() - (viaje.getPrecio_viaje()*desc.getPorcentaje_descuento());
+            double monto = 0;
+            if(desc != null)
+            	monto = viaje.getPrecio_viaje() - (viaje.getPrecio_viaje()*desc.getPorcentaje_descuento());
+            else 
+            	monto = viaje.getPrecio_viaje();
 
             for (DtAsiento asientoDTO : dtoOmnibus.getAsientos()) {
                 int idAsiento = asientoDTO.getId_asiento();
