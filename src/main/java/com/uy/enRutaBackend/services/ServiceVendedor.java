@@ -147,8 +147,10 @@ public class ServiceVendedor implements IServiceVendedor {
 	        + " y Nro " + idPasajesDevueltos.get(idPasajesDevueltos.size() - 1);
 
 	
-			mensaje = String.format("Se devolvieron los pasajes Nro %s para el viaje hacia %s - %s, del día %s, hora %s. Por un monto total de $%s.",
+			mensaje = String.format("Se devolvieron los pasajes Nro %s para el viaje de %s, %s a %s, %s, del día %s, hora %s. Por un monto total de $%s.",
 					listaPasajes,
+					viaje.getLocalidadOrigen().getNombre(),
+					viaje.getLocalidadOrigen().getDepartamento().getNombre(),
 					viaje.getLocalidadDestino().getNombre(),
 					viaje.getLocalidadDestino().getDepartamento().getNombre(),
 					utils.dateToString(viaje.getFecha_partida()),
@@ -158,7 +160,7 @@ public class ServiceVendedor implements IServiceVendedor {
 			mensaje = String.format("Se devolvió el pasaje Nro %s, para el viaje de %s, %s a %s, %s, del día %s, hora %s. Por un monto total de $%s.",
 					idPasajesDevueltos.get(0),
 					viaje.getLocalidadOrigen().getNombre(),
-					viaje.getLocalidadOrigen().getDepartamento(),
+					viaje.getLocalidadOrigen().getDepartamento().getNombre(),
 					viaje.getLocalidadDestino().getNombre(),
 					viaje.getLocalidadDestino().getDepartamento().getNombre(),
 					utils.dateToString(viaje.getFecha_partida()),
