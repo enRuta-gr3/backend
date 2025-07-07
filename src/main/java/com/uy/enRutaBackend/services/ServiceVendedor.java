@@ -155,8 +155,10 @@ public class ServiceVendedor implements IServiceVendedor {
 					utils.timeToString(viaje.getHora_partida()),
 					montoDevolver);
 		} else {
-			mensaje = String.format("Se devolvió el pasaje Nro %s, para el viaje hacia %s - %s, del día %s, hora %s. Por un monto total de $%s.",
+			mensaje = String.format("Se devolvió el pasaje Nro %s, para el viaje de %s, %s a %s, %s, del día %s, hora %s. Por un monto total de $%s.",
 					idPasajesDevueltos.get(0),
+					viaje.getLocalidadOrigen().getNombre(),
+					viaje.getLocalidadOrigen().getDepartamento(),
 					viaje.getLocalidadDestino().getNombre(),
 					viaje.getLocalidadDestino().getDepartamento().getNombre(),
 					utils.dateToString(viaje.getFecha_partida()),

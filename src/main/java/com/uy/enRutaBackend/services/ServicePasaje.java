@@ -22,6 +22,7 @@ import com.uy.enRutaBackend.datatypes.DtVenta_Compra;
 import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.entities.Asiento;
 import com.uy.enRutaBackend.entities.Cliente;
+import com.uy.enRutaBackend.entities.Descuento;
 import com.uy.enRutaBackend.entities.EstadoPasaje;
 import com.uy.enRutaBackend.entities.Localidad;
 import com.uy.enRutaBackend.entities.Pasaje;
@@ -60,11 +61,12 @@ public class ServicePasaje implements IServicePasaje {
     
     public List<Pasaje> CrearPasajes(List<DtOmnibus> omnibusDTOs, Venta_Compra venta_compra) {
         List<Pasaje> listaPasajes = new ArrayList<>();
+        Descuento desc = venta_compra.getDescuento();
 
         for (DtOmnibus dtoOmnibus : omnibusDTOs) {
             int idViaje = dtoOmnibus.getViajes().get(0).getId_viaje();
             Viaje viaje = viajeRepository.findById(idViaje).orElseThrow();
-            double monto = viaje.getPrecio_viaje();
+            double monto = viaje.getPrecio_viaje() - (viaje.getPrecio_viaje()*desc.getPorcentaje_descuento());
 
             for (DtAsiento asientoDTO : dtoOmnibus.getAsientos()) {
                 int idAsiento = asientoDTO.getId_asiento();
