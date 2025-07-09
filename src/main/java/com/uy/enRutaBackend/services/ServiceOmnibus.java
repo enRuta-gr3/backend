@@ -157,7 +157,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
     }
 
     private DtOmnibus entityToDto(Omnibus omnibus) {
-        DtOmnibus dto = /*modelMapper.map(omnibus, DtOmnibus.class)*/ new DtOmnibus();
+        DtOmnibus dto = new DtOmnibus();
         dto.setActivo(omnibus.isActivo());
         dto.setCapacidad(omnibus.getCapacidad());
         dto.setId_omnibus(omnibus.getId_omnibus());
@@ -168,17 +168,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
             dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
         }
 
-        // Asientos
-//        List<Asiento> asientos = asientoRepository.findByOmnibus(omnibus);
-//        if (asientos != null && !asientos.isEmpty()) {
-//            List<DtAsiento> dtAsientos = asientos.stream()
-//                .map(a -> new DtAsiento(
-//                    a.getId_asiento(),
-//                    a.getNumeroAsiento(),
-//                    omnibus.getId_omnibus()))
-//                .toList();
-//            dto.setAsientos(dtAsientos);
-//        }
 
         // Viajes
         List<Viaje> viajes = viajeRepository.findByOmnibus(omnibus);
@@ -186,7 +175,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
             List<DtViaje> dtViajes = viajes.stream()
                 .map(v -> {
                     DtViaje dt = new DtViaje();
-                    //dt.setId_viaje(v.getId_viaje());
                     dt.setFecha_partida(utils.dateToString(v.getFecha_partida()));
                     dt.setHora_partida(utils.timeToString(v.getHora_partida()));
                     dt.setFecha_llegada(utils.dateToString(v.getFecha_llegada()));
@@ -195,7 +183,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
                     dt.setEstado(v.getEstado().toString());
                     dt.setLocalidadOrigen(modelMapper.map(v.getLocalidadOrigen(), DtLocalidad.class));
                     dt.setLocalidadDestino(modelMapper.map(v.getLocalidadDestino(), DtLocalidad.class));
-                   // dt.setOmnibus(modelMapper.map(v.getOmnibus(), DtOmnibus.class));
                     return dt; 
                 }).toList();
             dto.setViajes(dtViajes);
@@ -394,41 +381,69 @@ public class ServiceOmnibus implements IServiceOmnibus{
 	}
 
 	@Override
-	public ResultadoOperacion<?> buscarOmnibusDisponibles(int idViaje) {
+	public ResultadoOperacion<?> buscarOmnibusDisponibles(DtViaje dtViaje) {
 		List<Omnibus> omnibusDisponibles = new ArrayList<Omnibus>();
-		Viaje viajeEnviado = viajeRepository.findById(idViaje).get();
-		if(viajeEnviado != null) {
-			Localidad locOrigen = viajeEnviado.getLocalidadOrigen();
-			Localidad locDestino = viajeEnviado.getLocalidadDestino();
-			java.sql.Date fechaPartida = viajeEnviado.getFecha_partida();
-			Time horaPartida = viajeEnviado.getHora_partida();
-			int cantidadPasajes = disAsientosRepository.countByViajeAndEstado(viajeEnviado, EstadoAsiento.OCUPADO);
-			java.sql.Date fechaLlegada = viajeEnviado.getFecha_llegada();
-			Time horaLlegada = viajeEnviado.getHora_llegada();
-			List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida, fechaLlegada, horaLlegada, locOrigen, locDestino);
-			for(Omnibus o : omnibusSinViajesEnRango) {
-				if(!o.equals(viajeEnviado.getOmnibus()) 
-						&& o.getCapacidad() >= cantidadPasajes
-						&& o.isActivo()) {
+		if (dtViaje.getId_viaje() > 0) {
+			Viaje viajeEnviado = viajeRepository.findById(dtViaje.getId_viaje()).get();
+			if (viajeEnviado != null) {
+				Localidad locOrigen = viajeEnviado.getLocalidadOrigen();
+				Localidad locDestino = viajeEnviado.getLocalidadDestino();
+				java.sql.Date fechaPartida = viajeEnviado.getFecha_partida();
+				Time horaPartida = viajeEnviado.getHora_partida();
+				int cantidadPasajes = disAsientosRepository.countByViajeAndEstado(viajeEnviado, EstadoAsiento.OCUPADO);
+				java.sql.Date fechaLlegada = viajeEnviado.getFecha_llegada();
+				Time horaLlegada = viajeEnviado.getHora_llegada();
+				List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida,
+						fechaLlegada, horaLlegada, locOrigen, locDestino);
+				for (Omnibus o : omnibusSinViajesEnRango) {
+					if (!o.equals(viajeEnviado.getOmnibus()) && o.getCapacidad() >= cantidadPasajes && o.isActivo()) {
+						omnibusDisponibles.add(o);
+					}
+				}
+
+				List<Omnibus> omnibusSinViajesAsignados = omnibusRepository.omnibusSinViajeAsignado(locOrigen);
+				if (omnibusSinViajesAsignados != null && !omnibusSinViajesAsignados.isEmpty()) {
+					omnibusDisponibles.addAll(omnibusSinViajesAsignados);
+				}
+
+				List<DtOmnibus> aMostrar = omnibusDisponibles.stream().map(this::entityToDtoSinViajes).toList();
+
+				if (!aMostrar.isEmpty())
+					return new ResultadoOperacion<>(true, "Ómnibus disponibles ", aMostrar);
+				else
+					return new ResultadoOperacion<>(false, "No hay ómnibus disponibles.", ErrorCode.LISTA_VACIA);
+			} else {
+				return new ResultadoOperacion<>(false, "No existe viaje con ese ID.", ErrorCode.REQUEST_INVALIDO);
+			}
+		} else {
+			Localidad locOrigen = localidadRepository.findById(dtViaje.getLocalidadOrigen().getId_localidad()).get();
+			Localidad locDestino = localidadRepository.findById(dtViaje.getLocalidadDestino().getId_localidad()).get();
+			java.sql.Date fechaPartida = java.sql.Date.valueOf(dtViaje.getFecha_partida());
+			Time horaPartida = Time.valueOf(dtViaje.getHora_partida());
+			java.sql.Date fechaLlegada = java.sql.Date.valueOf(dtViaje.getFecha_llegada());
+			Time horaLlegada = Time.valueOf(dtViaje.getHora_llegada());
+			
+			List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida,
+					fechaLlegada, horaLlegada, locOrigen, locDestino);
+			
+			for (Omnibus o : omnibusSinViajesEnRango) {
+				if (o.isActivo()) {
 					omnibusDisponibles.add(o);
 				}
 			}
 			
 			List<Omnibus> omnibusSinViajesAsignados = omnibusRepository.omnibusSinViajeAsignado(locOrigen);
-			if(omnibusSinViajesAsignados != null && !omnibusSinViajesAsignados.isEmpty()) {
+			if (omnibusSinViajesAsignados != null && !omnibusSinViajesAsignados.isEmpty()) {
 				omnibusDisponibles.addAll(omnibusSinViajesAsignados);
 			}
-			
-			List<DtOmnibus> aMostrar = omnibusDisponibles.stream()
-                    .map(this::entityToDtoSinViajes)
-                    .toList();
-			
-			if(!aMostrar.isEmpty())
+
+			List<DtOmnibus> aMostrar = omnibusDisponibles.stream().map(this::entityToDtoSinViajes).toList();
+
+			if (!aMostrar.isEmpty())
 				return new ResultadoOperacion<>(true, "Ómnibus disponibles ", aMostrar);
 			else
 				return new ResultadoOperacion<>(false, "No hay ómnibus disponibles.", ErrorCode.LISTA_VACIA);
-		} else {
-			return new ResultadoOperacion<>(false, "No existe viaje con ese ID.", ErrorCode.REQUEST_INVALIDO);
+
 		}
 	}
 	
@@ -551,11 +566,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		int anioActual = LocalDate.now().getYear();
 		
 		if(anio.equals(String.valueOf(anioActual))) {
-			
-//			LocalDate limite = mesAnio.atDay(30);
-//			Date fechaLimite = Date.from(limite.atStartOfDay(ZoneId.systemDefault()).toInstant());
-//			
-//			List<Omnibus> omnibus = (List<Omnibus>)omnibusRepository.findByFechaCreacionAnterior(fechaLimite);
 			estadistica.setAnio(anio);
 			estadistica.setMes(separarAnioMes[1]);
 			estadistica.setCantidadInactivos(String.valueOf(cantidadInactivos));

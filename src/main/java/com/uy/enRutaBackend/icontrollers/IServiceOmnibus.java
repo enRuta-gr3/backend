@@ -6,6 +6,7 @@ import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
 import com.uy.enRutaBackend.datatypes.DtOmnibus;
 import com.uy.enRutaBackend.datatypes.DtOmnibusCargaMasiva;
 import com.uy.enRutaBackend.datatypes.DtResultadoCargaMasiva;
+import com.uy.enRutaBackend.datatypes.DtViaje;
 import com.uy.enRutaBackend.errors.ResultadoOperacion;
 
 public interface IServiceOmnibus {
@@ -14,7 +15,7 @@ public interface IServiceOmnibus {
 	ResultadoOperacion<List<DtOmnibus>> listarOmnibus();
 	public ResultadoOperacion<?> cambiarEstadoOmnibus(DtHistoricoEstado dto);
 	DtResultadoCargaMasiva procesarOmnibus(List<DtOmnibusCargaMasiva> leidosCsv);
-	ResultadoOperacion<?> buscarOmnibusDisponibles(int idViaje);
+	ResultadoOperacion<?> buscarOmnibusDisponibles(DtViaje dtViaje);
 	ResultadoOperacion<?> calcularPorcentajeAsignados();
 	ResultadoOperacion<?> omnibusPorEstadoPorMes();
 }
