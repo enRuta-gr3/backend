@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uy.enRutaBackend.datatypes.DtHistoricoEstado;
@@ -63,10 +64,10 @@ public class OmnibusController {
         return resultado.isSuccess() ? ResponseEntity.ok(resultado) : ResponseEntity.badRequest().body(resultado);
     }
 
-    @PostMapping("/listarOmibusDisponiblesViaje")
+    @GetMapping("/listarOmibusDisponiblesViaje")
 	@Operation(summary = "Lista los omnibus disponibles para un viaje en específico")
-	public ResponseEntity<?> listarOmibusDisponibles(@RequestBody DtViaje dtViaje) {
-    	ResultadoOperacion<?> resultado = omnibusService.buscarOmnibusDisponibles(dtViaje);
+	public ResponseEntity<?> listarOmibusDisponibles(@RequestParam int idViaje) {
+    	ResultadoOperacion<?> resultado = omnibusService.buscarOmnibusDisponibles(idViaje);
     	if(resultado.isSuccess()) {
     		return ResponseEntity.ok(resultado);
     	} else {
@@ -74,5 +75,15 @@ public class OmnibusController {
     	}
     }
 
+    @PostMapping("/listarOmibusDisponiblesCreacion")
+    @Operation(summary = "Lista los omnibus disponibles para un viaje a crear")
+	public ResponseEntity<?> listarOmibusDisponiblesCreacion(@RequestBody DtViaje dtViaje) {
+    	ResultadoOperacion<?> resultado = omnibusService.listarOmibusDisponiblesCreacion(dtViaje);
+    	if(resultado.isSuccess()) {
+    		return ResponseEntity.ok(resultado);
+    	} else {
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+    	}
+    }
    
 }
