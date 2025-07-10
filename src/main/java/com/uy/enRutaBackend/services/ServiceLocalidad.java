@@ -84,7 +84,7 @@ public class ServiceLocalidad implements IServiceLocalidad {
     	List<Localidad> localidadesDepto = repository.findByDepartamentoIdDepartamento(aCrear.getDepartamento().getId_departamento());
     	if(localidadesDepto != null && !localidadesDepto.isEmpty()) {
     		for(Localidad localidad : localidadesDepto) {
-    			if(aCrear.getNombre().equals(localidad.getNombre())) {
+    			if(aCrear.getNombre().equalsIgnoreCase(localidad.getNombre())) {
     				existe = true;    				
     			}
     		}

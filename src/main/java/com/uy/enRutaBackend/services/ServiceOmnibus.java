@@ -456,8 +456,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
 			return new ResultadoOperacion(false, "No hay datos disponibles para esta estadística", null);
 	}
 
-	private DtPorcentajeOmnibusAsignados crearDtOmnibusAsignados(int totalOmnibus, int omnibusAsignados,
-			int omnibusSinAsignar) {
+	private DtPorcentajeOmnibusAsignados crearDtOmnibusAsignados(int totalOmnibus, int omnibusAsignados, int omnibusSinAsignar) {
 		DtPorcentajeOmnibusAsignados dtAsignados = new DtPorcentajeOmnibusAsignados();
 		dtAsignados.setAsignados(omnibusAsignados);
 		dtAsignados.setNoAsignados(omnibusSinAsignar);
