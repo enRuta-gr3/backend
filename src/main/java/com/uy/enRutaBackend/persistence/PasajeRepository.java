@@ -17,6 +17,11 @@ import com.uy.enRutaBackend.entities.Viaje;
 public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 
 	List<Pasaje> findAllByVentaCompra(Venta_Compra compra);
+	
+	@Query("SELECT p FROM Pasaje p WHERE p.ventaCompra.id IN :ids")
+	List<Pasaje> findAllByVentaCompraIds(@Param("ids") List<Integer> ids);
+
+	
 	List<Pasaje> findByViaje(Viaje viaje);
 
 	@Query(value = """
