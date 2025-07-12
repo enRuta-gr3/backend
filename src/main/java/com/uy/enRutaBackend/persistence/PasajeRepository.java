@@ -18,6 +18,11 @@ import com.uy.enRutaBackend.entities.Viaje;
 public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 
 	List<Pasaje> findAllByVentaCompra(Venta_Compra compra);
+	
+	@Query("SELECT p FROM Pasaje p WHERE p.ventaCompra.id IN :ids order by p.viaje.fecha_partida desc")
+	List<Pasaje> findAllByVentaCompraIds(@Param("ids") List<Integer> ids);
+
+	
 	List<Pasaje> findByViaje(Viaje viaje);
 
 	@Query(value = """
@@ -38,7 +43,7 @@ public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 	
 	@Query("SELECT p FROM Pasaje p WHERE p.ventaCompra = :compra AND p.estadoPasaje = :estado order by p.viaje.fecha_partida DESC")
 	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(@Param("compra") Venta_Compra compra, @Param("estado") EstadoPasaje estado);
-
+	
 	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaVenta) = :anio AND p.fechaDevolucion is null")
 	List<Pasaje> obtenerVendidosPorAnio(@Param("anio")int anio);
 	

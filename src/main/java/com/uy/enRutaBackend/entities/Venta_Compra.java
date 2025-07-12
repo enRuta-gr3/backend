@@ -2,10 +2,12 @@ package com.uy.enRutaBackend.entities;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,27 +26,26 @@ public class Venta_Compra {
     @Column(name = "id_venta")
     private int id_venta;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = true)
     private Vendedor vendedor;
     
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
     
     @Enumerated(EnumType.STRING)
     private EstadoVenta estado;
     
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "descuento_id", nullable = true)
     private Descuento descuento;
     
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pago")
     private Pago pago;
     
-    @OneToMany
-    @JoinColumn(name = "pasaje")
+    @OneToMany(mappedBy = "ventaCompra", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Pasaje> pasajes;
 
 	public int getId_venta() {

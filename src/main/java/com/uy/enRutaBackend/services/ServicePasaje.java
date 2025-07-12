@@ -179,14 +179,19 @@ public class ServicePasaje implements IServicePasaje {
 	 * @return
 	 */
 	private List<DtPasaje> buscarPasajesEnCompras(List<Venta_Compra> comprasUsuario) {
-		List<DtPasaje> historialPasajes = new ArrayList<DtPasaje>();
-		for(Venta_Compra compra : comprasUsuario) {
-			List<Pasaje> pasajes = pasajeRepository.findAllByVentaCompra(compra);
+		List<DtPasaje> historialPasajes = new ArrayList<>();
+
+		List<Integer> ids = comprasUsuario.stream()
+			.map(Venta_Compra::getId_venta)
+			.toList();
+
+		List<Pasaje> pasajes = pasajeRepository.findAllByVentaCompraIds(ids);
+
 			for(Pasaje pasaje : pasajes) {
 				if(!pasaje.getEstadoPasaje().equals(EstadoPasaje.DEVUELTO))
 					historialPasajes.add(entityToDt(pasaje));
 			}
-		}
+		
 		return historialPasajes;
 	}
 

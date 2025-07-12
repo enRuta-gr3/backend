@@ -2,9 +2,11 @@ package com.uy.enRutaBackend.persistence;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.uy.enRutaBackend.entities.Cliente;
@@ -28,7 +30,11 @@ public interface VentaCompraRepository extends CrudRepository<Venta_Compra, Inte
 		List<Object[]> obtenerPromedioImportePorClienteRaw();
 
 
+		@Query("SELECT v FROM Venta_Compra v WHERE v.cliente.uuidAuth = :id")
+		List<Venta_Compra> findAllByClienteId(@Param("id") UUID id);
 
+		@Query("SELECT v FROM Venta_Compra v WHERE v.cliente.uuidAuth = :uuid")
+		List<Venta_Compra> findAllByClienteUuid(@Param("uuid") UUID uuid);
 
 
 }
