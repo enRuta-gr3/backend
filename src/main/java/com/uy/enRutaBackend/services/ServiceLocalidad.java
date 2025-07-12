@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtDepartamento;
@@ -67,7 +68,8 @@ public class ServiceLocalidad implements IServiceLocalidad {
 	@Override
 	public ResultadoOperacion<?> listarLocalidades() {
 		List<DtLocalidad> listLocalidadesDt = new ArrayList<DtLocalidad>();
-		List<Localidad> localidades = (List<Localidad>) repository.findAll();
+		Sort sort = Sort.by("nombre").ascending();
+		List<Localidad> localidades = (List<Localidad>) repository.findAll(sort);
 		for(Localidad localidad : localidades) {
 			DtLocalidad localidadDt = entityToDt(localidad);
 			listLocalidadesDt.add(localidadDt);

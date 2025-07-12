@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -146,11 +147,16 @@ public class ServiceViaje implements IServiceViaje {
 	@Override
     public ResultadoOperacion<?> listarViajes() throws NoExistenViajesException {
 		List<DtViaje> listViajesDt = new ArrayList<DtViaje>();
-		List<Viaje> viajes = (List<Viaje>) vRepository.findAll();
-		for(Viaje viaje : viajes) {
-			DtViaje viajeDt = entityToDt(viaje);
-			listViajesDt.add(viajeDt);
-		}
+		List<Viaje> viajes = (List<Viaje>) vRepository.findAllOrderedByFecha();
+		
+		listViajesDt = viajes.stream()
+                .map(this::entityToDt)
+                .toList();
+		
+//		for(Viaje viaje : viajes) {
+//			DtViaje viajeDt = entityToDt(viaje);
+//			listViajesDt.add(viajeDt);
+//		}
 		if(listViajesDt.size() > 0) {
 			return new ResultadoOperacion(true, OK_MESSAGE, listViajesDt);			
 		} else {
@@ -186,6 +192,7 @@ public class ServiceViaje implements IServiceViaje {
 			mapper.skip(DtOmnibus::setActivo);
 			mapper.skip(DtOmnibus::setFecha_fin);
 			mapper.skip(DtOmnibus::setViajes);
+			mapper.skip(DtOmnibus::setAsientos);
 			mapper.skip(DtOmnibus::setId_omnibus);
 		});
 		return modelMapper.map(omnibus, DtOmnibus.class);
@@ -479,8 +486,8 @@ public class ServiceViaje implements IServiceViaje {
 	@Override
 	public ResultadoOperacion<?> listarViajesPorOmnibus(int idOmnibus) {
 		List<DtViaje> viajesDt = new ArrayList<DtViaje>();
-		Omnibus omnibus = omnibusRepository.findById(idOmnibus).get();
-		List<Viaje> viajes = vRepository.findByOmnibus(omnibus);
+//		Omnibus omnibus = omnibusRepository.findById(idOmnibus).get();
+		List<Viaje> viajes = vRepository.findByOmnibusOrderedByFecha(idOmnibus);
 		if(viajes.size() > 0) {
 			viajesDt = viajes.stream()
 				    .map(this::entityToDt)

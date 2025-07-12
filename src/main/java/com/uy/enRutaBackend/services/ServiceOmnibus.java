@@ -3,6 +3,7 @@ package com.uy.enRutaBackend.services;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.stream.IntStream;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,7 +97,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
         	boolean existe = omnibusRepository.existsByNroCoche(dtOmnibus.getNro_coche());
            
         	if (existe) {
-                return new ResultadoOperacion<>(false, ErrorCode.YA_EXISTE.getMsg(), ErrorCode.YA_EXISTE);
+                return new ResultadoOperacion<>(false, "Ya existe un ómnibus con ese número de coche.", ErrorCode.YA_EXISTE);
             }
             
             // Convertir DTO a entidad y setear localidad
@@ -129,14 +131,15 @@ public class ServiceOmnibus implements IServiceOmnibus{
     @Transactional(readOnly = true)
     public ResultadoOperacion<List<DtOmnibus>> listarOmnibus() {
         try {
-            List<Omnibus> lista = (List<Omnibus>) omnibusRepository.findAll();
+        	Sort sort = Sort.by("nroCoche").ascending();
+            List<Omnibus> lista = (List<Omnibus>) omnibusRepository.findAll(sort);
 
             if (lista.isEmpty()) {
                 return new ResultadoOperacion<>(false, "No hay ómnibus registrados", ErrorCode.LISTA_VACIA);
             }
 
             List<DtOmnibus> dtLista = lista.stream()
-                    .map(this::entityToDto)
+                    .map(this::entityToDtoSinViajes)
                     .toList();
 
             return new ResultadoOperacion<>(true, "Ómnibus listados correctamente", dtLista);
@@ -167,7 +170,6 @@ public class ServiceOmnibus implements IServiceOmnibus{
         if (omnibus.getLocalidad_actual() != null) {
             dto.setId_localidad_actual(omnibus.getLocalidad_actual().getId_localidad());
         }
-
 
         // Viajes
         List<Viaje> viajes = viajeRepository.findByOmnibus(omnibus);
@@ -203,7 +205,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
                 }).toList();
             dto.setHistorico_estado(dtHistoricos);
         }
-        
+       
         return dto;
     }
 
@@ -392,7 +394,7 @@ public class ServiceOmnibus implements IServiceOmnibus{
 			int cantidadPasajes = disAsientosRepository.countByViajeAndEstado(viajeEnviado, EstadoAsiento.OCUPADO);
 			java.sql.Date fechaLlegada = viajeEnviado.getFecha_llegada();
 			Time horaLlegada = viajeEnviado.getHora_llegada();
-			List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida, fechaLlegada, horaLlegada, locOrigen, locDestino);
+			List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida, fechaLlegada, horaLlegada, locOrigen.getId_localidad());
 			for(Omnibus o : omnibusSinViajesEnRango) {
 				if(!o.equals(viajeEnviado.getOmnibus()) 
 						&& o.getCapacidad() >= cantidadPasajes
@@ -401,9 +403,26 @@ public class ServiceOmnibus implements IServiceOmnibus{
 				}
 			}
 			
+			List<Omnibus> noSalieronAun = omnibusRepository.omnibusNoHanSalido(locOrigen.getId_localidad());
+			if(!noSalieronAun.isEmpty()) {
+				for(Omnibus o : noSalieronAun) {
+					if(!o.equals(viajeEnviado.getOmnibus()) 
+							&& o.getCapacidad() >= cantidadPasajes
+							&& o.isActivo()) {
+						omnibusDisponibles.add(o);
+					}
+				}
+			}
+			
 			List<Omnibus> omnibusSinViajesAsignados = omnibusRepository.omnibusSinViajeAsignado(locOrigen);
 			if(omnibusSinViajesAsignados != null && !omnibusSinViajesAsignados.isEmpty()) {
-				omnibusDisponibles.addAll(omnibusSinViajesAsignados);
+				for(Omnibus o : noSalieronAun) {
+					if(!o.equals(viajeEnviado.getOmnibus()) 
+							&& o.getCapacidad() >= cantidadPasajes
+							&& o.isActivo()) {
+						omnibusDisponibles.add(o);
+					}
+				}
 			}
 			
 			List<DtOmnibus> aMostrar = omnibusDisponibles.stream()
@@ -554,15 +573,18 @@ public class ServiceOmnibus implements IServiceOmnibus{
 		Time horaPartida = Time.valueOf(dtViaje.getHora_partida());
 		java.sql.Date fechaLlegada = java.sql.Date.valueOf(dtViaje.getFecha_llegada());
 		Time horaLlegada = Time.valueOf(dtViaje.getHora_llegada());
-		
+				
 		List<Omnibus> omnibusSinViajesEnRango = viajeRepository.omnibusSinViajes(fechaPartida, horaPartida,
-				fechaLlegada, horaLlegada, locOrigen, locDestino);
-		
+				fechaLlegada, horaLlegada, locOrigen.getId_localidad());
 		for (Omnibus o : omnibusSinViajesEnRango) {
 			if (o.isActivo()) {
 				omnibusDisponibles.add(o);
 			}
 		}
+		
+		List<Omnibus> noSalieronAun = omnibusRepository.omnibusNoHanSalido(locOrigen.getId_localidad());
+		if(!noSalieronAun.isEmpty())
+			omnibusDisponibles.addAll(noSalieronAun);
 		
 		List<Omnibus> omnibusSinViajesAsignados = omnibusRepository.omnibusSinViajeAsignado(locOrigen);
 		if (omnibusSinViajesAsignados != null && !omnibusSinViajesAsignados.isEmpty()) {

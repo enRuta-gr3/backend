@@ -3,6 +3,7 @@ package com.uy.enRutaBackend.persistence;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,13 +36,16 @@ public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 		    @Param("hasta") Timestamp hasta
 		);
 	
-	
-	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(Venta_Compra compra, EstadoPasaje estado);
-	
+	@Query("SELECT p FROM Pasaje p WHERE p.ventaCompra = :compra AND p.estadoPasaje = :estado order by p.viaje.fecha_partida DESC")
+	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(@Param("compra") Venta_Compra compra, @Param("estado") EstadoPasaje estado);
+
 	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaVenta) = :anio AND p.fechaDevolucion is null")
 	List<Pasaje> obtenerVendidosPorAnio(@Param("anio")int anio);
 	
 	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaDevolucion) = :anio")
 	List<Pasaje> obtenerDevueltosPorAnio(int anio);
+	
+	@Query("SELECT p FROM Pasaje p WHERE p.viaje = :viaje order by p.viaje.fecha_partida desc")
+	List<Pasaje> findByViajeOrderedByFecha(@Param("viaje") Viaje viaje);
 
 }

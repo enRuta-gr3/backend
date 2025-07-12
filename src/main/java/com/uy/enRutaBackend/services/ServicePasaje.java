@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.uy.enRutaBackend.datatypes.DtAsiento;
@@ -167,7 +168,7 @@ public class ServicePasaje implements IServicePasaje {
 		if(!historialPasajes.isEmpty()) {
 			return new ResultadoOperacion(true, "Historial obtenido correctamente", historialPasajes);
 		} else {
-			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
+			return new ResultadoOperacion(false, "No tienes pasajes registrados", ErrorCode.LISTA_VACIA);
 		}
 		
 	}
@@ -193,7 +194,8 @@ public class ServicePasaje implements IServicePasaje {
 	@Override
 	public ResultadoOperacion<?> listarPasajesPorViaje(DtViaje viajeDt) {
 		Viaje viaje = mapper.map(viajeDt, Viaje.class);
-		List<Pasaje> pasajes = pasajeRepository.findByViaje(viaje);
+			
+		List<Pasaje> pasajes = pasajeRepository.findByViajeOrderedByFecha(viaje);
 		
 		List<DtPasaje> pasajesDt = toDtList(pasajes);
 		if(!pasajesDt.isEmpty()) {
