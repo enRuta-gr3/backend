@@ -260,39 +260,25 @@ public class ServicePasaje implements IServicePasaje {
 	@Override
 	public ResultadoOperacion<?> pasajesVendidosPorMes() {
 		int anio = LocalDate.now(ZoneId.of("America/Montevideo")).getYear();
-		List<Pasaje> pasajesAnio = pasajeRepository.obtenerVendidosPorAnio(anio);
+	    List<DtEstadisticaViajesMes> estadisticas = pasajeRepository.obtenerEstadisticaVendidosPorMes(anio);
 
-		if (pasajesAnio.size() > 0) {
-			Map<YearMonth, Long> pasajesPorMes = pasajesAnio.stream().collect(Collectors
-					.groupingBy(pasaje -> YearMonth.from(pasaje.getFechaVenta().toLocalDate()), Collectors.counting()));
-			
-			List<DtEstadisticaViajesMes> estadisticaPorMes = pasajesPorMes.entrySet().stream()
-					.map(est -> crearDtPorMes(est.getKey(), est.getValue())).collect(Collectors.toList());
-
-			return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticaPorMes);
-		} else {
+	    if (estadisticas.isEmpty()) {
 			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
 		}
 
+	    return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticas);
 	}
 	
 	@Override
 	public ResultadoOperacion<?> pasajesDevueltosPorMes() {
 		int anio = LocalDate.now(ZoneId.of("America/Montevideo")).getYear();
-		List<Pasaje> pasajesDevueltosAnio = pasajeRepository.obtenerDevueltosPorAnio(anio);
+	    List<DtEstadisticaViajesMes> estadisticas = pasajeRepository.obtenerEstadisticaDevueltosPorMes(anio);
 
-		if (pasajesDevueltosAnio.size() > 0) {
-			Map<YearMonth, Long> pasajesPorMes = pasajesDevueltosAnio.stream().collect(Collectors
-					.groupingBy(pasaje -> YearMonth.from(pasaje.getFechaDevolucion().toLocalDate()), Collectors.counting()));
-			
-			List<DtEstadisticaViajesMes> estadisticaPorMes = pasajesPorMes.entrySet().stream()
-					.map(est -> crearDtPorMes(est.getKey(), est.getValue())).collect(Collectors.toList());
-
-			return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticaPorMes);
-		} else {
+	    if (estadisticas.isEmpty()) {
 			return new ResultadoOperacion(false, ErrorCode.LISTA_VACIA.getMsg(), ErrorCode.LISTA_VACIA);
 		}
 
+	    return new ResultadoOperacion(true, "La estadistica se creo correctamente.", estadisticas);
 	}
 
 	private DtEstadisticaViajesMes crearDtPorMes(YearMonth mes, Long cantidad) {

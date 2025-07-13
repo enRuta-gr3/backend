@@ -683,7 +683,8 @@ public class ServiceUsuario implements IServiceUsuario {
 	public ResultadoOperacion<?> listarUsuarios() {
 		List<DtUsuario> usuariosDtList = new ArrayList<DtUsuario>();
 		Sort sort = Sort.by("nombres").ascending();
-		List<Usuario> usuariosList = repository.findAll(sort);
+		List<Usuario> usuariosList = repository.findAllByEliminadoFalse(sort);
+
 		
 		for(Usuario u : usuariosList) {
 			if(!u.isEliminado()) {

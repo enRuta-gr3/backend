@@ -6,6 +6,15 @@ public class DtEstadisticaViajesMes {
 	private Integer cantidad;
 	private String anio;
 	
+	public DtEstadisticaViajesMes() {
+	}
+
+	public DtEstadisticaViajesMes(Integer mes, Long cantidad, Integer anio) {
+	    this.anio = String.valueOf(anio);
+	    this.mes = (mes < 10 ? "0" : "") + mes;
+	    this.cantidad = cantidad.intValue();
+	}
+
 	public String getMes() {
 		return mes;
 	}

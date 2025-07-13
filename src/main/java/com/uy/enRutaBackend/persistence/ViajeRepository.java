@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -119,7 +120,12 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 	@Query("UPDATE Viaje v SET v.estado = :estado WHERE v.id_viaje = :id")
 	void actualizarEstadoViaje(@Param("id") int id, @Param("estado") EstadoViaje estado);
 
-	@Query("SELECT v FROM Viaje v order by v.fecha_partida DESC")
+	@EntityGraph(attributePaths = {
+		    "localidadOrigen", "localidadOrigen.departamento",
+		    "localidadDestino", "localidadDestino.departamento",
+		    "omnibus"
+		})
+		@Query("SELECT v FROM Viaje v ORDER BY v.fecha_partida ASC")
 	List<Viaje> findAllOrderedByFecha();
 
 	@Query("SELECT v FROM Viaje v where v.omnibus.id_omnibus = :idOmnibus order by v.fecha_partida DESC")

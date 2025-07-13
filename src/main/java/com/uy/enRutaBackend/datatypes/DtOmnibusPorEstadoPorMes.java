@@ -7,6 +7,16 @@ public class DtOmnibusPorEstadoPorMes {
 	private String cantidadActivos;
 	private String cantidadInactivos;
 	
+	public DtOmnibusPorEstadoPorMes() {
+	}
+
+	public DtOmnibusPorEstadoPorMes(String mes, Long cantidadActivos, Long cantidadInactivos) {
+		this.mes = mes;
+		this.anio = String.valueOf(java.time.Year.now().getValue());
+		this.cantidadActivos = String.valueOf(cantidadActivos);
+		this.cantidadInactivos = String.valueOf(cantidadInactivos);
+	}
+	
 	
 	public String getMes() {
 		return mes;

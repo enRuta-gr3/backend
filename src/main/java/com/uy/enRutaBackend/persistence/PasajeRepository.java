@@ -9,6 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes;
 import com.uy.enRutaBackend.entities.EstadoPasaje;
 import com.uy.enRutaBackend.entities.Pasaje;
 import com.uy.enRutaBackend.entities.Venta_Compra;
@@ -44,11 +45,21 @@ public interface PasajeRepository extends CrudRepository<Pasaje, Integer>{
 	@Query("SELECT p FROM Pasaje p WHERE p.ventaCompra = :compra AND p.estadoPasaje = :estado order by p.viaje.fecha_partida DESC")
 	List<Pasaje> findAllByVentaCompraAndEstadoPasaje(@Param("compra") Venta_Compra compra, @Param("estado") EstadoPasaje estado);
 	
-	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaVenta) = :anio AND p.fechaDevolucion is null")
-	List<Pasaje> obtenerVendidosPorAnio(@Param("anio")int anio);
+	@Query("SELECT new com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes(MONTH(p.fechaVenta), COUNT(p), YEAR(p.fechaVenta)) " +
+		       "FROM Pasaje p " +
+		       "WHERE p.fechaDevolucion IS NULL AND EXTRACT(YEAR FROM p.fechaVenta) = :anio " +
+		       "GROUP BY YEAR(p.fechaVenta), MONTH(p.fechaVenta) " +
+		       "ORDER BY YEAR(p.fechaVenta) DESC, MONTH(p.fechaVenta) DESC")
+		List<DtEstadisticaViajesMes> obtenerEstadisticaVendidosPorMes(@Param("anio") int anio);
+
 	
-	@Query("SELECT p FROM Pasaje p WHERE EXTRACT(YEAR FROM p.fechaDevolucion) = :anio")
-	List<Pasaje> obtenerDevueltosPorAnio(int anio);
+	@Query("SELECT new com.uy.enRutaBackend.datatypes.DtEstadisticaViajesMes(MONTH(p.fechaDevolucion), COUNT(p), YEAR(p.fechaDevolucion)) " +
+		       "FROM Pasaje p " +
+		       "WHERE p.fechaDevolucion IS NOT NULL AND EXTRACT(YEAR FROM p.fechaDevolucion) = :anio " +
+		       "GROUP BY YEAR(p.fechaDevolucion), MONTH(p.fechaDevolucion) " +
+		       "ORDER BY YEAR(p.fechaDevolucion) DESC, MONTH(p.fechaDevolucion) DESC")
+		List<DtEstadisticaViajesMes> obtenerEstadisticaDevueltosPorMes(@Param("anio") int anio);
+	
 	
 	@Query("SELECT p FROM Pasaje p WHERE p.viaje = :viaje order by p.viaje.fecha_partida desc")
 	List<Pasaje> findByViajeOrderedByFecha(@Param("viaje") Viaje viaje);
