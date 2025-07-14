@@ -80,7 +80,8 @@ public interface ViajeRepository extends CrudRepository<Viaje, Integer>{
 		    SELECT o
 			FROM Omnibus o
 			WHERE 
-			    EXISTS (
+			o.activo = true
+			 AND EXISTS (
 			        SELECT 1 
 			        FROM Viaje v_inicio
 			        WHERE v_inicio.omnibus.id_omnibus = o.id_omnibus
