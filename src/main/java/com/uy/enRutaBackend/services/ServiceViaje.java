@@ -366,11 +366,12 @@ public class ServiceViaje implements IServiceViaje {
 				for (Asiento nuevoAsiento : asientosOmnibusNuevo) {
 					if (nuevoAsiento.getNumeroAsiento() == nroAsientoLibre) {
 						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository
-								.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE); // fecha
-																													// reciente
-						asientoReasignar.setEstado(EstadoAsiento.LIBRE);
-						asientoReasignar.setFechaActualizacion(new java.util.Date());
-						disAsientosRepository.save(asientoReasignar);
+								.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE);
+						if(asientoReasignar != null) {
+							asientoReasignar.setEstado(EstadoAsiento.LIBRE);
+							asientoReasignar.setFechaActualizacion(new java.util.Date());
+							disAsientosRepository.save(asientoReasignar);							
+						}
 					}
 				}
 			}
@@ -403,12 +404,14 @@ public class ServiceViaje implements IServiceViaje {
 				
 				for(Asiento nuevoAsiento : asientosOmnibusNuevo) {
 					if(nuevoAsiento.getNumeroAsiento() == nroAsientoBloqueado) {				
-						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE); //fecha reciente
-						asientoReasignar.setIdBloqueo(idBloqueo);
-						asientoReasignar.setFechaBloqueo(fechaBloqueo);
-						asientoReasignar.setEstado(EstadoAsiento.BLOQUEADO);
-						asientoReasignar.setFechaActualizacion(new java.util.Date());
-						disAsientosRepository.save(asientoReasignar);
+						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE);
+						if(asientoReasignar != null) {
+							asientoReasignar.setIdBloqueo(idBloqueo);
+							asientoReasignar.setFechaBloqueo(fechaBloqueo);
+							asientoReasignar.setEstado(EstadoAsiento.BLOQUEADO);
+							asientoReasignar.setFechaActualizacion(new java.util.Date());
+							disAsientosRepository.save(asientoReasignar);							
+						}
 					}
 				}
 			}			
@@ -440,11 +443,14 @@ public class ServiceViaje implements IServiceViaje {
 				
 				for(Asiento nuevoAsiento : asientosOmnibusNuevo) {
 					if(nuevoAsiento.getNumeroAsiento() == nroAsientoVendido) {				
-						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE);
-						asientoReasignar.setIdBloqueo(idBloqueo);
-						asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
-						asientoReasignar.setFechaActualizacion(new java.util.Date());
-						disAsientosRepository.save(asientoReasignar);
+						DisAsiento_Viaje asientoReasignar = (DisAsiento_Viaje) disAsientosRepository
+								.findByAsientoAndViajeAndEstado(nuevoAsiento, reasignado, EstadoAsiento.PENDIENTE);
+						if (asientoReasignar != null) {
+							asientoReasignar.setIdBloqueo(idBloqueo);
+							asientoReasignar.setEstado(EstadoAsiento.OCUPADO);
+							asientoReasignar.setFechaActualizacion(new java.util.Date());
+							disAsientosRepository.save(asientoReasignar);
+						}
 					}
 				}
 			}			
