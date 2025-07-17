@@ -32,7 +32,7 @@ public class IntegracionPaypalService implements IServiceIntegracionPaypal {
 	@Value("${paypal.api.base-url}")
 	private String baseUrl;
 
-	public String obtenerTokenDeAcceso() throws IOException {
+	private String obtenerTokenDeAcceso() throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create("grant_type=client_credentials",
                 MediaType.get("application/x-www-form-urlencoded"));

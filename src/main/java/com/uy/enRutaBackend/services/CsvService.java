@@ -178,7 +178,7 @@ public class CsvService implements ICsvService {
 		return omnibus;
 	}
 
-	public void renombrarCsv(String archivo) {
+	private void renombrarCsv(String archivo) {
 		String nombreOriginal = archivo.substring(0,archivo.lastIndexOf("."));
 		String extension = archivo.substring(archivo.lastIndexOf("."));
 		LocalDateTime ahora = LocalDateTime.now();

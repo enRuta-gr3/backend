@@ -287,8 +287,13 @@ public class ServiceViaje implements IServiceViaje {
 			
 			//busco asientos libres
 			List<DisAsiento_Viaje> libres = asientosLibres(reasignado, asientosOmnibusAnterior, asientosDisponibles);
+			List<DisAsiento_Viaje> libresNuevo = getDisAsientoViajesNuevosNoAnterior(asientosOmnibusAnterior, asientosDisponibles);
 			if(!libres.isEmpty()) {
 				reasignarAsientosLibres(libres, reasignado, asientosOmnibusNuevo);
+			}
+
+			if(!libresNuevo.isEmpty()) {
+				marcarLibresAsientosNuevos(libresNuevo);
 			}
 			
 			//busco asientos bloqueados
@@ -311,10 +316,17 @@ public class ServiceViaje implements IServiceViaje {
 		}
 	}
 
+	private void marcarLibresAsientosNuevos(List<DisAsiento_Viaje> libresNuevo) {
+		for(DisAsiento_Viaje asientoReasignar : libresNuevo) {
+			if (asientoReasignar != null) {
+				asientoReasignar.setEstado(EstadoAsiento.LIBRE);
+				asientoReasignar.setFechaActualizacion(new java.util.Date());
+				disAsientosRepository.save(asientoReasignar);
+			}
+		}
+	}
 
 	/**
-	 * @param idViaje
-	 * @param idOmnibus
 	 * @return
 	 */
 	private Viaje reasignar(Viaje viaje, int idOmnibus) {		
@@ -326,35 +338,48 @@ public class ServiceViaje implements IServiceViaje {
 
 	private List<DisAsiento_Viaje> asientosLibres(Viaje reasignado, List<Asiento> asientosOmnibusAnterior, List<DisAsiento_Viaje> nuevosDisponibles) {
 		List<DisAsiento_Viaje> asientosLibres = new ArrayList<DisAsiento_Viaje>();
-		
-		List<Asiento> asientosNuevos = nuevosDisponibles.stream()
-			    .map(DisAsiento_Viaje::getAsiento)
-			    .collect(Collectors.toList());
 
-		//Me fijo si hay numeros de asiento que no esten en el omnibus anterior (omnibus nuevo mayor capacidad)
+		List<DisAsiento_Viaje> asientosLibresOmnibusAnterior = asientosLibresOmnibusAnterior(reasignado, asientosOmnibusAnterior);
+
+		asientosLibres.addAll(asientosLibresOmnibusAnterior);
+
+		return asientosLibres;
+	}
+
+	private static List<DisAsiento_Viaje> getDisAsientoViajesNuevosNoAnterior(List<Asiento> asientosOmnibusAnterior, List<DisAsiento_Viaje> nuevosDisponibles) {
+		List<DisAsiento_Viaje> asientosLibres = new ArrayList<>();
+		List<Asiento> asientosNuevos = nuevosDisponibles.stream()
+				.map(DisAsiento_Viaje::getAsiento)
+				.collect(Collectors.toList());
+
 		Set<Integer> numerosAsientosAnterior = asientosOmnibusAnterior.stream()
 			    .map(Asiento::getNumeroAsiento)
 			    .collect(Collectors.toSet());
 
-			List<Asiento> nuevosDisponiblesNoEnAnterior = asientosNuevos.stream()
-			    .filter(asiento -> !numerosAsientosAnterior.contains(asiento.getNumeroAsiento()))
-			    .collect(Collectors.toList());
+		List<Asiento> nuevosDisponiblesNoEnAnterior = asientosNuevos.stream()
+			.filter(asiento -> !numerosAsientosAnterior.contains(asiento.getNumeroAsiento()))
+			.collect(Collectors.toList());
 		//Si hay mas asientos, los agrego a la lista de asientos libres.
 		if(nuevosDisponiblesNoEnAnterior.size() > 0) {
 			asientosLibres = nuevosDisponibles.stream()
 					.filter(disponible -> nuevosDisponiblesNoEnAnterior.contains(disponible.getAsiento()))
 					.collect(Collectors.toList());
 		}
-		
+		return asientosLibres;
+	}
+
+	private List<DisAsiento_Viaje> asientosLibresOmnibusAnterior(Viaje reasignado, List<Asiento> asientosOmnibusAnterior) {
+		List<DisAsiento_Viaje> asientosLibresAnterior = new ArrayList<>();
 		//recorro los asientos del omnibus anterior en estado libre y los guardo en la lista.
 		for(Asiento asiento : asientosOmnibusAnterior) {
 			DisAsiento_Viaje libre = (DisAsiento_Viaje) disAsientosRepository.findByAsientoAndViajeAndEstado(asiento, reasignado, EstadoAsiento.LIBRE);
 			if(libre != null){
-				asientosLibres.add(libre);
+				asientosLibresAnterior.add(libre);
 			}
 		}
-		return asientosLibres;
+		return asientosLibresAnterior;
 	}
+
 
 	private void reasignarAsientosLibres(List<DisAsiento_Viaje> libres, Viaje reasignado,
 			List<Asiento> asientosOmnibusNuevo) {
