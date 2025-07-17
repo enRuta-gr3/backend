@@ -126,7 +126,7 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	@Transactional(readOnly = true)
-	private boolean verificarExistenciaCedula(String ci) {
+	public boolean verificarExistenciaCedula(String ci) {
 		if (repository.findByCi(ci) != null)
 			return true;
 		else
@@ -134,7 +134,7 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	@Transactional(readOnly = true)
-	private boolean verificarExistenciaCorreo(String email) {
+	public boolean verificarExistenciaCorreo(String email) {
 		if (repository.findByEmail(email) != null)
 			return true;
 		else
@@ -313,7 +313,7 @@ public class ServiceUsuario implements IServiceUsuario {
 	}
 
 	@Transactional(readOnly = true)
-	private Usuario buscarPorUUID(UUID uuidKey) {
+	public Usuario buscarPorUUID(UUID uuidKey) {
 		return repository.findById(uuidKey).orElse(null);
 	}
 
